@@ -1,0 +1,104 @@
+.admin-orders {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 80vh;
+}
+
+.admin-orders h1 {
+  margin-bottom: 2rem;
+}
+
+.orders-controls {
+  margin-bottom: 1.5rem;
+}
+
+.status-filter {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.orders-table-container {
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.orders-table th {
+  background: #e9f5ee;
+  color: #27ae60;
+}
+
+.status-badge {
+  padding: 0.3em 0.8em;
+  border-radius: 12px;
+  font-size: 0.95em;
+  color: #fff;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.pendiente { background: #f39c12; }
+.status-badge.preparacion { background: #2980b9; }
+.status-badge.enviado { background: #8e44ad; }
+.status-badge.entregado { background: #27ae60; }
+.status-badge.cancelado { background: #e74c3c; }
+
+.status-select {
+  margin-right: 0.5rem;
+  padding: 0.3em 0.7em;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.view-details-btn {
+  background: none;
+  border: none;
+  color: #2980b9;
+  cursor: pointer;
+  font-size: 1.2em;
+}
+
+.delete-order-btn {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0.3em 0.7em;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.delete-order-btn:hover {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .admin-orders {
+    padding: 1rem;
+  }
+  
+  .orders-table {
+    font-size: 0.875rem;
+  }
+  
+  .orders-table th,
+  .orders-table td {
+    padding: 0.75rem;
+  }
+}

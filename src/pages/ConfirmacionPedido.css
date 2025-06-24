@@ -1,0 +1,40 @@
+.confirmacion-pedido-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  background: #f8fafc;
+}
+
+.confirmacion-pedido-card {
+  background: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.confirmacion-pedido-card h2 {
+  color: #27ae60;
+  margin-bottom: 1rem;
+}
+
+.confirmacion-pedido-card p {
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.btn-volver-productos {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  background: #27ae60;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-volver-productos:hover {
+  background: #219150;
+}

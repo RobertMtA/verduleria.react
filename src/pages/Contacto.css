@@ -1,0 +1,265 @@
+/* Contactos.css */
+
+.contactos-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.contactos-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contactos-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+}
+
+.contactos-title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.contactos-subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.contactos-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.contactos-form-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contactos-info {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.contactos-info h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.contactos-info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.contactos-info-item i {
+  font-size: 1.2rem;
+  color: #4ca1af;
+  margin-right: 1rem;
+  width: 30px;
+  text-align: center;
+}
+
+.contactos-info-item p {
+  margin: 0;
+  color: #34495e;
+}
+
+.contactos-social {
+  margin-top: 3rem;
+}
+
+.contactos-social h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.social-icons {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #4ca1af;
+  color: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+  background: #2c3e50;
+  transform: translateY(-3px);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border 0.3s ease;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4ca1af;
+}
+
+.contactos-submit {
+  background: linear-gradient(135deg, #4ca1af 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.contactos-submit:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.contactos-submit:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.contactos-success {
+  text-align: center;
+  padding: 2rem;
+}
+
+.contactos-success h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.contactos-success p {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+}
+
+.contactos-new-message {
+  background: #4ca1af;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.contactos-new-message:hover {
+  background: #2c3e50;
+}
+
+/* src/pages/Contacto.css */
+.contacto-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 32px 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  text-align: center;
+}
+
+.contacto-contenido {
+  display: flex;
+  gap: 40px;
+  margin-top: 32px;
+  justify-content: center;
+}
+
+.contacto-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 260px;
+}
+
+.contacto-form input,
+.contacto-form textarea {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.contacto-form button {
+  background: #388e3c;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.contacto-info {
+  flex: 1;
+  text-align: left;
+  min-width: 220px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contactos-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .contactos-hero {
+    padding: 1rem 0;
+  }
+  
+  .contactos-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contactos-main {
+    padding: 1rem;
+  }
+}

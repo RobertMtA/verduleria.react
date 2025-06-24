@@ -1,0 +1,167 @@
+/* Estilos base */
+.about-page {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.about-page h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #2a7f62;
+  margin-bottom: 20px;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.about-page h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #2a7f62;
+}
+
+.about-page > p {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #555;
+  max-width: 800px;
+  margin: 0 auto 40px;
+}
+
+/* Sección Visión/Misión */
+.vision-mision {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin: 50px 0;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  color: #2a7f62;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.card h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 2px;
+  background-color: #2a7f62;
+}
+
+.card p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Sección Equipo */
+.equipo-section {
+  background-color: #f8f9fa;
+  padding: 60px 20px;
+  border-radius: 10px;
+  margin-top: 60px;
+  text-align: center;
+}
+
+.equipo-section h2 {
+  font-size: 2rem;
+  color: #2a7f62;
+  margin-bottom: 20px;
+}
+
+.equipo-section p {
+  color: #555;
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Efectos decorativos */
+.decorative-leaf {
+  position: absolute;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+.decorative-leaf-1 {
+  top: 10%;
+  left: 5%;
+  font-size: 8rem;
+  color: #2a7f62;
+}
+
+.decorative-leaf-2 {
+  bottom: 10%;
+  right: 5%;
+  font-size: 8rem;
+  color: #2a7f62;
+  transform: rotate(180deg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-page h1 {
+    font-size: 2rem;
+  }
+  
+  .about-page > p {
+    font-size: 1rem;
+  }
+  
+  .card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .card p {
+    font-size: 1rem;
+  }
+  
+  .equipo-section h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vision-mision {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-page {
+    padding: 30px 15px;
+  }
+  
+  .equipo-section {
+    padding: 40px 15px;
+    margin-top: 40px;
+  }
+}

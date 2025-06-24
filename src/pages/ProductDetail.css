@@ -1,0 +1,103 @@
+.product-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.product-image img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.categoria {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius);
+  text-transform: capitalize;
+}
+
+.precio {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.cantidad-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cantidad-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cantidad-controls button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  background: white;
+  cursor: pointer;
+}
+
+.cantidad-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cantidad-controls input {
+  width: 60px;
+  text-align: center;
+}
+
+.add-to-cart {
+  padding: 1rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.add-to-cart:hover {
+  background: var(--color-secondary);
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.back-button:hover {
+  background: var(--color-background);
+}
+
+.error-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .product-detail {
+    grid-template-columns: 1fr;
+  }
+}

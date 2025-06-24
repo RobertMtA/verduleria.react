@@ -1,0 +1,36 @@
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+}
+
+.empty-state-title {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-message {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-action {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.empty-state-action:hover {
+  background-color: #3e8e41;
+}
