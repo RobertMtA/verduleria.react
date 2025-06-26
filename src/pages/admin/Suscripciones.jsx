@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./Suscripciones.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Suscripciones = () => {
   // Estado de la lista de suscriptores
   const [listaSuscriptores, setListaSuscriptores] = useState([]);
@@ -22,13 +24,13 @@ const Suscripciones = () => {
     try {
       setCargando(true);
       setErrorGeneral(null);
-      const respuesta = await fetch("http://localhost/api/suscriptores.php");
+      const respuesta = await fetch(`${API_URL}/suscriptores`);
       if (!respuesta.ok) {
         const errorData = await respuesta.json();
         throw new Error(errorData.error || "Error al cargar suscriptores");
       }
       const data = await respuesta.json();
-      setListaSuscriptores(Array.isArray(data.data) ? data.data : []);
+      setListaSuscriptores(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);
       setErrorGeneral(err.message || "Error al obtener suscriptores");
@@ -51,7 +53,7 @@ const Suscripciones = () => {
     }
 
     try {
-      const respuesta = await fetch('http://localhost/api/suscriptores.php', {
+      const respuesta = await fetch(`${API_URL}/suscriptores`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailNuevo })
@@ -63,7 +65,9 @@ const Suscripciones = () => {
         throw new Error(data.error || "Error al suscribirse");
       }
 
-      if (data.data) {
+      if (data.suscriptor) {
+        setListaSuscriptores([data.suscriptor, ...listaSuscriptores]);
+      } else if (data.data) {
         setListaSuscriptores([data.data, ...listaSuscriptores]);
       }
       setEmailNuevo("");
@@ -90,11 +94,11 @@ const Suscripciones = () => {
     return new Date(dateString).toLocaleDateString('es-ES', options);
   };
 
-  // Manejar eliminación de suscriptor (debes implementar handleDelete)
+  // Manejar eliminación de suscriptor
   const manejarEliminarSuscriptor = async (id) => {
     if (!window.confirm("¿Seguro que quieres eliminar este suscriptor?")) return;
     try {
-      const respuesta = await fetch(`http://localhost/api/suscriptores.php?id=${id}`, {
+      const respuesta = await fetch(`${API_URL}/suscriptores/${id}`, {
         method: "DELETE"
       });
       const data = await respuesta.json();
@@ -102,7 +106,7 @@ const Suscripciones = () => {
         throw new Error(data.error || "No se pudo eliminar el suscriptor");
       }
       // Elimina el suscriptor de la lista localmente
-      setListaSuscriptores(listaSuscriptores.filter(s => s.id !== id));
+      setListaSuscriptores(listaSuscriptores.filter(s => s._id !== id));
     } catch (err) {
       alert(err.message || "Error al eliminar suscriptor");
     }
@@ -167,13 +171,13 @@ const Suscripciones = () => {
           </thead>
           <tbody>
             {suscriptoresFiltrados.map((s) => (
-              <tr key={s.id}>
+              <tr key={s._id}>
                 <td>{s.email}</td>
                 <td>{formatearFecha(s.fecha_suscripcion)}</td>
                 <td>
                   <button
                     className="delete-button"
-                    onClick={() => manejarEliminarSuscriptor(s.id)}
+                    onClick={() => manejarEliminarSuscriptor(s._id)}
                   >
                     Eliminar
                   </button>

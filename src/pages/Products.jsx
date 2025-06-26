@@ -8,6 +8,7 @@ const Products = () => {
   const { addToCart } = useCart();
   const { products, setProducts, loading, error, reloadProducts } = useProducts();
   const [cantidades, setCantidades] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (products.length > 0) {
@@ -44,6 +45,12 @@ const Products = () => {
     try {
       addToCart({ ...producto, cantidad });
       
+      // Resetear la cantidad a 1 después de agregar al carrito
+      setCantidades(prev => ({
+        ...prev,
+        [producto.id]: 1
+      }));
+      
       // Actualización optimista del stock
       setProducts(prev =>
         prev.map(p =>
@@ -64,7 +71,10 @@ const Products = () => {
     }
   };
 
-  console.log("Productos en Products.jsx:", products);
+  // Filtrar productos por búsqueda y activos
+  const filteredProducts = products
+    .filter(p => p.activo)
+    .filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
   if (loading) {
     return (
@@ -90,76 +100,99 @@ const Products = () => {
     <div className="products-page">
       <div className="products-header">
         <h1>Nuestros Productos</h1>
+        <form
+          className="products-search-form"
+          onSubmit={e => e.preventDefault()}
+          autoComplete="off"
+        >
+          <input
+            type="text"
+            className="products-search-input"
+            placeholder="Buscar productos..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            aria-label="Buscar productos"
+          />
+          <button type="submit" className="products-search-btn" aria-label="Buscar">
+            <i className="fas fa-search"></i>
+          </button>
+        </form>
       </div>
 
       <div className="products-grid">
-        {products.filter(p => p.activo).map(producto => {
-          const cantidad = cantidades[producto.id] || 1;
+        {filteredProducts.length === 0 ? (
+          <div className="no-products-message">
+            No se encontraron productos.
+          </div>
+        ) : (
+          filteredProducts.map(producto => {
+            const cantidad = cantidades[producto.id] || 1;
 
-          return (
-            <div className='card' key={producto.id}>
-              <Link to={`/productos/${producto.id}`} className="product-link">
-                <div className="product-image-container">
-                  <img 
-                    src={producto.imagen || '/default-product.png'} 
-                    alt={producto.nombre} 
-                    onError={(e) => {
-                      e.target.src = '/default-product.png';
-                    }}
-                  />
-                  {producto.stock === 0 && (
-                    <div className="out-of-stock-badge">Agotado</div>
-                  )}
+            return (
+              <div className='card' key={producto.id}>
+                <Link to={`/productos/${producto.id}`} className="product-link">
+                  <div className="product-image-container">
+                    <img 
+                      src={producto.imagen || '/default-product.png'} 
+                      alt={producto.nombre} 
+                      onError={(e) => {
+                        e.target.src = '/default-product.png';
+                      }}
+                    />
+                    {producto.stock === 0 && (
+                      <div className="out-of-stock-badge">Agotado</div>
+                    )}
+                  </div>
+                  <div className="product-info">
+                    <h3>{producto.nombre}</h3>
+                    <p className="product-description">{producto.descripcion}</p>
+                  </div>
+                </Link>
+
+                <div className="product-footer">
+                  <p className="price">${producto.precio.toLocaleString('es-AR')}</p>
+                  <p className={`stock ${producto.stock === 0 ? 'out-of-stock' : ''}`}>
+                    {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Agotado'}
+                  </p>
                 </div>
-                <div className="product-info">
-                  <h3>{producto.nombre}</h3>
-                  <p className="product-description">{producto.descripcion}</p>
+
+                <div className="cantidadContainer">
+                  <button 
+                    onClick={() => handleDecrease(producto.id)} 
+                    className="quantity-btn"
+                    disabled={cantidad <= 1}
+                    aria-label={`Disminuir cantidad de ${producto.nombre}`}
+                  >
+                    <i className="fas fa-minus"></i>
+                  </button>
+                  <span className="quantity">{cantidad}</span>
+                  <button 
+                    onClick={() => handleIncrease(producto.id, producto.stock)} 
+                    className="quantity-btn"
+                    disabled={cantidad >= producto.stock || producto.stock === 0}
+                    aria-label={`Aumentar cantidad de ${producto.nombre}`}
+                  >
+                    <i className="fas fa-plus"></i>
+                  </button>
                 </div>
-              </Link>
 
-              <div className="product-footer">
-                <p className="price">${producto.precio.toLocaleString('es-AR')}</p>
-                <p className={`stock ${producto.stock === 0 ? 'out-of-stock' : ''}`}>
-                  {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Agotado'}
-                </p>
-              </div>
-
-              <div className="cantidadContainer">
-                <button 
-                  onClick={() => handleDecrease(producto.id)} 
-                  className="quantity-btn"
-                  disabled={cantidad <= 1}
-                  aria-label={`Disminuir cantidad de ${producto.nombre}`}
+                <button
+                  className="add-to-cart-btn"
+                  disabled={producto.stock === 0}
+                  onClick={() => handleAddToCart(producto)}
+                  aria-label={`Agregar ${producto.nombre} al carrito`}
                 >
-                  <i className="fas fa-minus"></i>
+                  <i className="fas fa-shopping-cart"></i>
+                  {producto.stock > 0 ? ' Agregar al carrito' : ' Agotado'}
                 </button>
-                <span className="quantity">{cantidad}</span>
-                <button 
-                  onClick={() => handleIncrease(producto.id, producto.stock)} 
-                  className="quantity-btn"
-                  disabled={cantidad >= producto.stock || producto.stock === 0}
-                  aria-label={`Aumentar cantidad de ${producto.nombre}`}
-                >
-                  <i className="fas fa-plus"></i>
-                </button>
+
+                <Link to={`/productos/${producto.id}`} className="view-details-link">
+                  Ver detalles <i className="fas fa-chevron-right"></i>
+                </Link>
               </div>
-
-              <button
-                className="add-to-cart-btn"
-                disabled={producto.stock === 0}
-                onClick={() => handleAddToCart(producto)}
-                aria-label={`Agregar ${producto.nombre} al carrito`}
-              >
-                <i className="fas fa-shopping-cart"></i>
-                {producto.stock > 0 ? ' Agregar al carrito' : ' Agotado'}
-              </button>
-
-              <Link to={`/productos/${producto.id}`} className="view-details-link">
-                Ver detalles <i className="fas fa-chevron-right"></i>
-              </Link>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

@@ -1,27 +1,28 @@
-import bcrypt from 'bcrypt';
-import mysql from 'mysql2/promise';
+import bcrypt from "bcrypt";
+import { MongoClient } from "mongodb";
 
-// Configura tu conexión
-const dbConfig = {
-  host: "127.0.0.1", // ¡NO "localhost"!
-  user: "root",
-  password: "Verduleria2024!",
-  database: "verduleria",
-};
+const mongoUri =
+  "mongodb+srv://Verduleria:Prueba1234@cluster0.lzugghn.mongodb.net/verduleria?retryWrites=true&w=majority&appName=Cluster0";
+const dbName = "verduleria";
 
 async function actualizarPassword() {
   try {
-    const hash = await bcrypt.hash('Verduleria2024!', 10);
-    const connection = await mysql.createConnection(dbConfig);
+    const hash = await bcrypt.hash("Verduleria2024!", 10);
+    const client = new MongoClient(mongoUri);
+    await client.connect();
+    const collection = client.db(dbName).collection("usuarios");
 
-    // Usa parámetros para evitar inyección SQL
-    const [result] = await connection.execute(
-      `UPDATE usuarios SET password = ? WHERE email = ?`,
-      [hash, 'admin@admin.com']
+    const result = await collection.updateOne(
+      { email: "admin@admin.com" },
+      { $set: { password: hash } }
     );
 
-    await connection.end();
-    console.log('Password updated successfully');
+    await client.close();
+    if (result.modifiedCount > 0) {
+      console.log("Password updated successfully");
+    } else {
+      console.log("No user found or password not updated");
+    }
   } catch (error) {
     console.error(error);
   }

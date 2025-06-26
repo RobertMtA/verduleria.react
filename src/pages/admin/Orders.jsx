@@ -1,34 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import './Orders.css';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('todos');
 
   useEffect(() => {
-    fetch('http://localhost/api/pedidos.php')
+    fetch(`${API_URL}/pedidos`)
       .then(res => res.json())
-      .then(data => setOrders(data))
+      .then(data => setOrders(Array.isArray(data) ? data : []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [API_URL]);
 
   const handleUpdateStatus = (orderId, newStatus) => {
     // Actualiza en frontend
     setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, estado: newStatus } : order
+      (order._id === orderId ? { ...order, estado: newStatus } : order)
     ));
 
     // Actualiza en backend
-    fetch('http://localhost/api/actualizar_estado_pedido.php', {
-      method: 'POST',
+    fetch(`${API_URL}/pedidos/${orderId}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: orderId, estado: newStatus })
+      body: JSON.stringify({ estado: newStatus })
     })
       .then(res => res.json())
       .then(data => {
-        if (!data.success) {
+        if (!data.success && !data.ok) {
           alert('No se pudo actualizar el estado en la base de datos');
         }
       })
@@ -38,15 +40,13 @@ const Orders = () => {
   const handleDeleteOrder = (orderId) => {
     if (!window.confirm("¿Seguro que deseas eliminar este pedido?")) return;
 
-    fetch('http://localhost/api/eliminar_pedido.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: orderId })
+    fetch(`${API_URL}/pedidos/${orderId}`, {
+      method: 'DELETE'
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          setOrders(orders.filter(order => order.id !== orderId));
+        if (data.success || data.ok) {
+          setOrders(orders.filter(order => order._id !== orderId));
         } else {
           alert('No se pudo eliminar el pedido');
         }
@@ -93,10 +93,10 @@ const Orders = () => {
           </thead>
           <tbody>
             {filteredOrders.map(order => (
-              <tr key={order.id}>
-                <td>#{order.id}</td>
+              <tr key={order._id}>
+                <td>#{order._id}</td>
                 <td>{order.cliente}</td>
-                <td>{order.fecha && order.fecha !== "0000-00-00" ? new Date(order.fecha).toLocaleDateString() : "-"}</td>
+                <td>{order.fecha ? new Date(order.fecha).toLocaleDateString() : "-"}</td>
                 <td>${Number(order.total).toLocaleString('es-AR')}</td>
                 <td>
                   <span className={`status-badge ${order.estado}`}>
@@ -106,7 +106,7 @@ const Orders = () => {
                 <td>
                   <select
                     value={order.estado}
-                    onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                    onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
                     className="status-select"
                   >
                     <option value="pendiente">Pendiente</option>
@@ -117,13 +117,13 @@ const Orders = () => {
                   </select>
                   <button 
                     className="view-details-btn"
-                    onClick={() => console.log('Ver detalles', order.id)}
+                    onClick={() => console.log('Ver detalles', order._id)}
                   >
                     <i className="fas fa-eye"></i>
                   </button>
                   <button
                     className="delete-order-btn"
-                    onClick={() => handleDeleteOrder(order.id)}
+                    onClick={() => handleDeleteOrder(order._id)}
                     style={{ marginLeft: "0.5rem", color: "red" }}
                     title="Eliminar pedido"
                   >

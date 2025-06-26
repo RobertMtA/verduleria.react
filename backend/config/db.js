@@ -1,13 +1,18 @@
-import mysql from 'mysql2/promise';
+import { MongoClient } from "mongodb";
 
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '', // o tu contraseña si la tienes
-  database: 'verduleria',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const mongoUri = "mongodb+srv://Verduleria:Prueba1234@cluster0.lzugghn.mongodb.net/verduleria?retryWrites=true&w=majority&appName=Cluster0";
+const dbName = "verduleria";
 
-export default pool;
+let client;
+let db;
+
+export async function connectDB() {
+  if (!client) {
+    client = new MongoClient(mongoUri);
+    await client.connect();
+    db = client.db(dbName);
+  }
+  return db;
+}
+
+export default connectDB;

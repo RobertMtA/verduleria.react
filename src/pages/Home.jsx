@@ -8,9 +8,10 @@ import EmptyState from '../components/common/EmptyState';
 import { useAuth } from "../context/AuthContext";
 import './Home.css';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Home = () => {
   const { products, loading, error } = useProducts();
-  console.log("Productos desde useProducts:", products);
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -25,7 +26,7 @@ const Home = () => {
     }
   }, [products]);
 
-  // Filtrar productos por búsqueda con debounce
+  // Filtrar productos por búsqueda
   const filteredProducts = products.filter(
     p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -38,7 +39,7 @@ const Home = () => {
       return;
     }
     try {
-      const response = await fetch('http://localhost/api/suscriptores.php', {
+      const response = await fetch(`${API_URL}/suscriptores`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -58,9 +59,6 @@ const Home = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Si quieres búsqueda en tiempo real, puedes omitir showSearchResults y este handler
-    // Si quieres mostrar solo resultados al buscar, usa showSearchResults:
-    // setShowSearchResults(searchTerm.trim().length > 0);
   };
 
   if (loading) return <p>Cargando productos...</p>;

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./PedidosAdmin.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const PedidosAdmin = () => {
   const [pedidos, setPedidos] = useState([]);
   const [error, setError] = useState("");
@@ -18,19 +20,17 @@ const PedidosAdmin = () => {
 
   const navigate = useNavigate();
 
-  // Obtener pedidos
+  // Obtener pedidos desde backend Node/MongoDB
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost/api/pedidos_admin.php");
-        
+        const response = await fetch(`${API_URL}/pedidos`);
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }
-        
         const data = await response.json();
-        setPedidos(data);
+        setPedidos(Array.isArray(data) ? data : []);
       } catch (err) {
         setError("No se pudieron cargar los pedidos");
         console.error("Error:", err);
@@ -40,40 +40,32 @@ const PedidosAdmin = () => {
     };
 
     fetchPedidos();
-  }, []);
+  }, [API_URL]);
 
-  // Actualizar estado
+  // Actualizar estado del pedido
   const actualizarEstado = async (id, nuevoEstado) => {
     try {
       setError("");
       setSuccess("");
-      
-      const response = await fetch("http://localhost/api/actualizar_pedido.php", {
-        method: "POST",
+      const response = await fetch(`${API_URL}/pedidos/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, estado: nuevoEstado })
+        body: JSON.stringify({ estado: nuevoEstado })
       });
 
-      // Verificar si la respuesta es JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        throw new Error(text || "Respuesta no válida del servidor");
-      }
-
       const result = await response.json();
-      
-      if (!response.ok || !result.success) {
+
+      if (!response.ok || (!result.success && !result.ok)) {
         throw new Error(result.error || "Error al actualizar");
       }
 
       // Actualizar estado local
-      setPedidos(pedidos.map(pedido => 
-        pedido.id === id ? { ...pedido, estado: nuevoEstado } : pedido
+      setPedidos(pedidos.map(pedido =>
+        pedido._id === id ? { ...pedido, estado: nuevoEstado } : pedido
       ));
-      
+
       setSuccess(`Pedido #${id} actualizado`);
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -83,21 +75,21 @@ const PedidosAdmin = () => {
   };
 
   // Filtrar pedidos
-  const pedidosFiltrados = filter === "todos" 
-    ? pedidos 
+  const pedidosFiltrados = filter === "todos"
+    ? pedidos
     : pedidos.filter(pedido => pedido.estado === filter);
 
   return (
     <div className="pedidos-container">
       <h1>Panel de Pedidos</h1>
-      
+
       {error && (
         <div className="alert error">
           {error}
           <button onClick={() => setError("")}>×</button>
         </div>
       )}
-      
+
       {success && (
         <div className="alert success">
           {success}
@@ -135,27 +127,27 @@ const PedidosAdmin = () => {
           </thead>
           <tbody>
             {pedidosFiltrados.map(pedido => (
-              <tr key={pedido.id}>
-                <td>#{pedido.id}</td>
+              <tr key={pedido._id}>
+                <td>#{pedido._id}</td>
                 <td>{pedido.cliente}</td>
-                <td>{new Date(pedido.fecha).toLocaleDateString()}</td>
-                <td>${pedido.total.toLocaleString()}</td>
+                <td>{pedido.fecha ? new Date(pedido.fecha).toLocaleDateString() : "-"}</td>
+                <td>${Number(pedido.total).toLocaleString()}</td>
                 <td>
                   <select
                     value={pedido.estado}
-                    onChange={(e) => actualizarEstado(pedido.id, e.target.value)}
-                    name={`estado-${pedido.id}`}
-                    id={`estado-${pedido.id}`}
+                    onChange={(e) => actualizarEstado(pedido._id, e.target.value)}
+                    name={`estado-${pedido._id}`}
+                    id={`estado-${pedido._id}`}
                   >
                     {Object.entries(ESTADOS).map(([key, value]) => (
                       <option key={value} value={value}>
-                        {key}
+                        {key.replace("_", " ")}
                       </option>
                     ))}
                   </select>
                 </td>
                 <td>
-                  <button onClick={() => navigate(`/admin/editar-pedido/${pedido.id}`)}>
+                  <button onClick={() => navigate(`/admin/editar-pedido/${pedido._id}`)}>
                     Editar
                   </button>
                 </td>

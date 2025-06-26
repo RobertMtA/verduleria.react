@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import FormularioProducto from "../components/FormularioProducto";
 import './Admin.css';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Admin = () => {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,12 +24,13 @@ const Admin = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch("http://localhost/api/productos.php");
+            const response = await fetch(`${API_URL}/productos`);
             if (!response.ok) {
                 throw new Error('Error al cargar los productos');
             }
             const data = await response.json();
-            setProductos(data);
+            // MongoDB: los productos tienen _id, no id
+            setProductos(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("Error fetching data:", err);
             setError(err.message);
@@ -40,25 +43,32 @@ const Admin = () => {
         fetchProductos();
     }, []);
 
-    // Obtener estadísticas reales
+    // Obtener estadísticas reales (ajusta la ruta si tienes endpoint en Node)
     useEffect(() => {
         const fetchEstadisticas = async () => {
             try {
-                const response = await fetch("http://localhost/api/admin/estadisticas.php");
+                const response = await fetch(`${API_URL}/reportes`);
                 if (!response.ok) throw new Error("Error al cargar estadísticas");
                 const data = await response.json();
-                setEstadisticas(data);
+                // Ajusta según la estructura de tu endpoint de reportes
+                setEstadisticas({
+                    ventasTotales: data?.reduce?.((acc, r) => acc + (r.ventas || 0), 0) || 0,
+                    pedidosPendientes: 0, // Implementa si tienes endpoint de pedidos pendientes
+                    productosActivos: productos.length,
+                    clientesRegistrados: 0 // Implementa si tienes endpoint de usuarios
+                });
             } catch (err) {
                 console.error("Error estadísticas:", err);
             }
         };
         fetchEstadisticas();
-    }, []);
+        // eslint-disable-next-line
+    }, [productos.length]);
 
     // Manejar operaciones CRUD
     const handleAddProduct = async (producto) => {
         try {
-            const response = await fetch('http://localhost/api/productos.php', {
+            const response = await fetch(`${API_URL}/productos`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -73,7 +83,7 @@ const Admin = () => {
 
             setSuccessMessage('Producto agregado correctamente');
             setIsFormOpen(false);
-            await fetchProductos(); // <-- recarga productos desde el backend
+            await fetchProductos();
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {
             console.error(error.message);
@@ -83,7 +93,7 @@ const Admin = () => {
 
     const handleUpdateProduct = async (updatedProduct) => {
         try {
-            const response = await fetch(`http://localhost/api/productos.php/${updatedProduct.id}`, {
+            const response = await fetch(`${API_URL}/productos/${updatedProduct._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -98,7 +108,7 @@ const Admin = () => {
 
             setSuccessMessage('Producto actualizado correctamente');
             setEditingProduct(null);
-            await fetchProductos(); // <-- recarga productos desde el backend
+            await fetchProductos();
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {
             console.error(error.message);
@@ -110,7 +120,7 @@ const Admin = () => {
         if (!window.confirm('¿Estás seguro de eliminar este producto?')) return;
 
         try {
-            const response = await fetch(`http://localhost/api/productos.php/${productId}`, {
+            const response = await fetch(`${API_URL}/productos/${productId}`, {
                 method: 'DELETE'
             });
 
@@ -120,7 +130,7 @@ const Admin = () => {
             }
 
             setSuccessMessage('Producto eliminado correctamente');
-            await fetchProductos(); // <-- recarga productos desde el backend
+            await fetchProductos();
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {
             console.error(error.message);
@@ -133,7 +143,6 @@ const Admin = () => {
         setIsFormOpen(true);
     };
 
-    console.log(productos); // <-- Aquí, antes del return
     return (
         <div className="admin-container">
             <nav className="admin-nav">
@@ -205,16 +214,16 @@ const Admin = () => {
 
                     <ul className="admin-product-list">
                         {productos.map((product) => (
-                            <li key={product.id} className="admin-product-item">
+                            <li key={product._id} className="admin-product-item">
                                 <img
-                                    src={product.imagen}
+                                    src={product.image || "/images/no-image.jpg"}
                                     alt={product.nombre}
                                     className="admin-product-image"
                                     onError={e => { e.target.src = "/images/no-image.jpg"; }}
                                 />
                                 <div className="admin-product-info">
                                     <span className="admin-product-name">{product.nombre}</span>
-                                    <span className="admin-product-price">${product.precio.toFixed(2)}</span>
+                                    <span className="admin-product-price">${Number(product.precio).toFixed(2)}</span>
                                 </div>
                                 <div className="admin-product-actions">
                                     <button 
@@ -224,7 +233,7 @@ const Admin = () => {
                                         <i className="fa-solid fa-pen-to-square"></i> Editar
                                     </button>
                                     <button 
-                                        onClick={() => handleDeleteProduct(product.id)}
+                                        onClick={() => handleDeleteProduct(product._id)}
                                         className="admin-delete-button"
                                     >
                                         <i className="fa-solid fa-trash"></i> Eliminar

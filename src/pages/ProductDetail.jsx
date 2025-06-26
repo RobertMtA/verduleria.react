@@ -29,6 +29,8 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     addToCart({ ...producto, cantidad });
+    // Resetear la cantidad a 1 después de agregar al carrito
+    setCantidad(1);
     navigate("/carrito");
   };
 

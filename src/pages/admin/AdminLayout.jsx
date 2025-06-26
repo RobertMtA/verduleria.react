@@ -3,6 +3,14 @@ import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './AdminLayout.css';
 
+const adminLinks = [
+  { to: "/admin/productos", label: "Productos" },
+  { to: "/admin/pedidos", label: "Pedidos" },
+  { to: "/admin/usuarios", label: "Usuarios" },
+  { to: "/admin/reportes", label: "Reportes" },
+  { to: "/admin/suscripciones", label: "Suscripciones" }
+];
+
 const AdminLayout = () => {
   const { user, isAuthenticated } = useAuth();
 
@@ -16,11 +24,11 @@ const AdminLayout = () => {
       <nav className="admin-sidebar">
         <h2>Panel Admin</h2>
         <ul>
-          <li><Link to="/admin/productos">Productos</Link></li>
-          <li><Link to="/admin/pedidos">Pedidos</Link></li>
-          <li><Link to="/admin/usuarios">Usuarios</Link></li>
-          <li><Link to="/admin/reportes">Reportes</Link></li>
-          <li><Link to="/admin/suscripciones">Suscripciones</Link></li> {/* <-- Agregado */}
+          {adminLinks.map(link => (
+            <li key={link.to}>
+              <Link to={link.to}>{link.label}</Link>
+            </li>
+          ))}
         </ul>
       </nav>
       

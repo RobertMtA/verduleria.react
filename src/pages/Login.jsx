@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Login = () => {
   const { login, isAuthenticated, loading } = useAuth();
   const [email, setEmail] = useState("");
@@ -42,17 +44,31 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setErrors({});
     try {
-      const response = await fetch("http://localhost/api/login.php", {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      
       const text = await response.text();
-      console.log(text); // Para depuración
-      const data = JSON.parse(text);
+      
+      let data = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        setErrors({
+          form: "Respuesta inválida del servidor. Intente nuevamente.",
+        });
+        setIsLoading(false);
+        return;
+      }
       if (data.success) {
         login({
           id: data.user.id,
@@ -63,7 +79,7 @@ const Login = () => {
           role: data.user.role || "user",
         });
 
-        const redirectPath = location.state?.from?.pathname || 
+        const redirectPath = location.state?.from?.pathname ||
           (data.user.role === "admin" ? "/admin" : "/");
         navigate(redirectPath, { replace: true });
 
@@ -73,6 +89,7 @@ const Login = () => {
         });
       }
     } catch (error) {
+      console.error('Error en login:', error);
       setErrors({
         form: error.message || "Error al iniciar sesión. Intente nuevamente.",
       });

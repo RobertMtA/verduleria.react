@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext"; // Asegúrate de importar tu hook de autenticación
+import { useAuth } from "../context/AuthContext";
 import "./Checkout.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
-  const { user } = useAuth(); // <--- Agrega esta línea
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -20,7 +22,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Calculate total
+  // Calcular total
   const total = cartItems.reduce(
     (sum, item) => sum + (Number(item.precio ?? item.price ?? 0) * Number(item.cantidad ?? 1)),
     0
@@ -44,8 +46,6 @@ const Checkout = () => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
-    console.log("Método de pago seleccionado:", formData.metodoPago);
 
     if (formData.metodoPago === "mercadopago") {
       try {
@@ -99,14 +99,14 @@ const Checkout = () => {
 
     try {
       const pedidoData = {
-        usuario_id: user?.id || null, // <--- Incluye el ID de usuario
+        usuario_id: user?.id || null,
         cliente: formData.nombre,
         email: formData.email,
         telefono: formData.telefono,
         direccion: formData.direccion,
         ciudad: formData.ciudad,
         total: total,
-        metodo_pago: formData.metodoPago, // snake_case para el backend
+        metodo_pago: formData.metodoPago,
         items: cartItems.map(item => ({
           producto_id: item.id,
           nombre: item.nombre || item.name,
@@ -115,9 +115,7 @@ const Checkout = () => {
         }))
       };
 
-      console.log("Enviando datos:", pedidoData);
-
-      const response = await fetch("http://localhost/api/crear_pedido.php", {
+      const response = await fetch(`${API_URL}/crear_pedido.php`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,13 +124,11 @@ const Checkout = () => {
       });
 
       const responseData = await response.json();
-      console.log("Respuesta del backend:", responseData);
 
       if (!response.ok || !responseData.success) {
         throw new Error(responseData.error || "Error al procesar el pedido");
       }
 
-      // Limpiar carrito y redirigir
       clearCart();
       navigate("/confirmacion", { 
         state: { 
@@ -143,7 +139,6 @@ const Checkout = () => {
       });
 
     } catch (err) {
-      console.error("Checkout error:", err);
       setError(err.message || "Ocurrió un error al procesar tu pedido");
     } finally {
       setLoading(false);
@@ -154,7 +149,7 @@ const Checkout = () => {
     <div className="checkout-page">
       <div className="checkout-container">
         <form id="checkout-form" className="checkout-form" onSubmit={handleSubmit}>
-          {/* Customer Information Section */}
+          {/* Información de contacto */}
           <section className="checkout-section">
             <h2>Información de contacto</h2>
             
@@ -227,7 +222,7 @@ const Checkout = () => {
             </div>
           </section>
 
-          {/* Payment Method Section */}
+          {/* Método de pago */}
           <section className="checkout-section">
             <h2>Método de pago</h2>
             <div className="payment-methods">
@@ -254,7 +249,7 @@ const Checkout = () => {
           </section>
         </form>
 
-        {/* Order Summary Section */}
+        {/* Resumen del pedido */}
         <aside className="order-summary">
           <h2>Resumen del pedido</h2>
           
@@ -263,7 +258,7 @@ const Checkout = () => {
               <p className="empty-cart-message">Tu carrito está vacío</p>
             ) : (
               cartItems.map((item) => (
-                <div key={`${item.id}-${item.nombre}`} className="order-item">
+                <div key={`${item.id ?? item._id}-${item.nombre ?? item.name}`} className="order-item">
                   <div className="item-image">
                     <img 
                       src={item.imagen || item.image || '/images/default-product.jpg'} 
@@ -275,7 +270,7 @@ const Checkout = () => {
                     <span className="item-quantity">x{item.cantidad}</span>
                   </div>
                   <span className="item-price">
-                    {formatPrice((item.precio || item.price || 0) * item.cantidad)}
+                    {formatPrice((item.precio ?? item.price ?? 0) * item.cantidad)}
                   </span>
                 </div>
               ))

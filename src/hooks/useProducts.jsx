@@ -16,29 +16,25 @@ const useProducts = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(
-        `http://localhost/api/productos.php?page=${page}&limit=${limit}`
-      );
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+      // Si tu backend implementa paginación, puedes agregar ?page=...&limit=...
+      const response = await fetch(`${apiUrl}/productos`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        }
+      });
 
-      // Si la respuesta es 304, no hay cuerpo, así que no intentes leer JSON
-      if (response.status === 304) {
-        setLoading(false);
-        return;
-      }
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("La respuesta no es JSON");
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error || "Error al cargar productos");
-      }
-
-      const productosNumericos = Array.isArray(data.data)
-        ? data.data.map((p) => ({
+      // Si tu backend devuelve un array simple:
+      const productosNumericos = Array.isArray(data)
+        ? data.map((p) => ({
             ...p,
             precio: Number(p.precio),
             stock: Number(p.stock),
@@ -46,9 +42,13 @@ const useProducts = () => {
         : [];
 
       setProducts(productosNumericos);
-      setPagination(data.pagination || { total: 0, page, limit, totalPages: 1 });
+      setPagination(data.pagination || { 
+        total: 0, 
+        page, 
+        limit, 
+        totalPages: 1 
+      });
     } catch (err) {
-      setProducts([]); // <-- Siempre deja products como array
       setError(err.message || "Error de conexión");
       console.error("Error fetching products:", err);
     } finally {
@@ -62,10 +62,13 @@ const useProducts = () => {
 
   return {
     products,
+    setProducts,
     loading,
     error,
-    pagination, // <-- ¡devuelve pagination!
+    pagination,
     fetchProducts,
+    reloadProducts: fetchProducts, // Alias para mejor compatibilidad
+    refetch: fetchProducts // Alias para mejor semántica
   };
 };
 

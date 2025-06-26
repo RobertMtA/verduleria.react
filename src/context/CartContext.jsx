@@ -18,7 +18,7 @@ export const CartProvider = ({ children }) => {
       if (existe) {
         return prev.map((item) =>
           item.id === producto.id
-            ? { ...item, cantidad: item.cantidad + producto.cantidad }
+            ? { ...item, cantidad: item.cantidad + cantidad }
             : item
         );
       }
@@ -47,15 +47,19 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // NUEVO: función para finalizar compra y restar stock
   const checkout = async () => {
     try {
       for (const item of cartItems) {
-        await fetch("http://localhost:4001/api/productos/restar-stock", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: item.id, cantidad: item.cantidad }),
-        });
+        await fetch(
+          import.meta.env.VITE_API_URL
+            ? `${import.meta.env.VITE_API_URL}/productos/restar-stock`
+            : "http://localhost:4001/api/productos/restar-stock",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: item.id, cantidad: item.cantidad }),
+          }
+        );
       }
       clearCart();
       return { success: true };
@@ -73,7 +77,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         clearCart,
         calculateTotal,
-        checkout, // <-- exporta la función checkout
+        checkout,
       }}
     >
       {children}

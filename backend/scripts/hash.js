@@ -1,15 +1,24 @@
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
+import { MongoClient } from "mongodb";
 
-bcrypt.hash('Verduleria2024!', 10)
-  .then(hash => {
-    // Assuming you're using a database library that returns a promise
-    return db.query(`
-      UPDATE usuarios
-      SET password = '$2b$10$vXVP4xCJHbI1nk0pE9S9PuyyzDsSSUf4oIaeTntHRmkYd8l/8lcc.'
-      WHERE email = 'admin@admin.com';
-    `);
-  })
-  .then(result => {
-    console.log('Password updated successfully');
-  })
-  .catch(console.error);
+const mongoUri = "mongodb+srv://Verduleria:Prueba1234@cluster0.lzugghn.mongodb.net/verduleria?retryWrites=true&w=majority&appName=Cluster0";
+const dbName = "verduleria";
+
+async function updatePassword(email, plainPassword) {
+  const hash = await bcrypt.hash(plainPassword, 10);
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  const collection = client.db(dbName).collection("usuarios");
+  const result = await collection.updateOne(
+    { email },
+    { $set: { password: hash } }
+  );
+  await client.close();
+  if (result.modifiedCount > 0) {
+    console.log("Password updated successfully");
+  } else {
+    console.log("No user found or password not updated");
+  }
+}
+
+updatePassword("admin@admin.com", "Verduleria2024!").catch(console.error);

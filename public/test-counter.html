@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Contador - Verdulería</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .quantity-controls button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .quantity-controls button:hover:not(:disabled) {
+            background-color: #e0e0e0;
+        }
+        .quantity-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .quantity-controls span {
+            font-weight: bold;
+            font-size: 18px;
+            min-width: 30px;
+        }
+        .add-to-cart {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .add-to-cart:hover {
+            background: #219150;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prueba de Contador de Cantidad</h1>
+    <p>Esta página simula el comportamiento esperado: al agregar un producto al carrito, la cantidad debe volver a 1.</p>
+    
+    <div class="product-card">
+        <h3>Banana</h3>
+        <p>Bananas frescas (Por kilo)</p>
+        <p style="color: #27ae60; font-weight: bold;">$6.000</p>
+        <p>Stock: 7000</p>
+        
+        <div class="quantity-controls">
+            <button onclick="decreaseQuantity()" id="decreaseBtn">-</button>
+            <span id="quantity">1</span>
+            <button onclick="increaseQuantity()" id="increaseBtn">+</button>
+        </div>
+        
+        <button class="add-to-cart" onclick="addToCart()">Agregar al carrito</button>
+        
+        <div class="success-message" id="successMessage">
+            ✅ Producto agregado al carrito. La cantidad se ha reseteado a 1.
+        </div>
+    </div>
+
+    <div class="product-card">
+        <h3>Cebolla</h3>
+        <p>Cebollas frescas (Por kilo)</p>
+        <p style="color: #27ae60; font-weight: bold;">$3.800</p>
+        <p>Stock: 5000</p>
+        
+        <div class="quantity-controls">
+            <button onclick="decreaseQuantity2()" id="decreaseBtn2">-</button>
+            <span id="quantity2">1</span>
+            <button onclick="increaseQuantity2()" id="increaseBtn2">+</button>
+        </div>
+        
+        <button class="add-to-cart" onclick="addToCart2()">Agregar al carrito</button>
+        
+        <div class="success-message" id="successMessage2">
+            ✅ Producto agregado al carrito. La cantidad se ha reseteado a 1.
+        </div>
+    </div>
+
+    <script>
+        let quantity1 = 1;
+        let quantity2 = 1;
+        const maxStock = 7000;
+
+        function updateQuantityDisplay() {
+            document.getElementById('quantity').textContent = quantity1;
+            document.getElementById('decreaseBtn').disabled = quantity1 <= 1;
+            document.getElementById('increaseBtn').disabled = quantity1 >= maxStock;
+        }
+
+        function updateQuantityDisplay2() {
+            document.getElementById('quantity2').textContent = quantity2;
+            document.getElementById('decreaseBtn2').disabled = quantity2 <= 1;
+            document.getElementById('increaseBtn2').disabled = quantity2 >= 5000;
+        }
+
+        function increaseQuantity() {
+            if (quantity1 < maxStock) {
+                quantity1++;
+                updateQuantityDisplay();
+            }
+        }
+
+        function decreaseQuantity() {
+            if (quantity1 > 1) {
+                quantity1--;
+                updateQuantityDisplay();
+            }
+        }
+
+        function addToCart() {
+            // Simular agregar al carrito
+            console.log(`Agregando ${quantity1} banana(s) al carrito`);
+            
+            // Mostrar mensaje de éxito
+            const message = document.getElementById('successMessage');
+            message.style.display = 'block';
+            
+            // Resetear cantidad a 1
+            quantity1 = 1;
+            updateQuantityDisplay();
+            
+            // Ocultar mensaje después de 3 segundos
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        function increaseQuantity2() {
+            if (quantity2 < 5000) {
+                quantity2++;
+                updateQuantityDisplay2();
+            }
+        }
+
+        function decreaseQuantity2() {
+            if (quantity2 > 1) {
+                quantity2--;
+                updateQuantityDisplay2();
+            }
+        }
+
+        function addToCart2() {
+            // Simular agregar al carrito
+            console.log(`Agregando ${quantity2} cebolla(s) al carrito`);
+            
+            // Mostrar mensaje de éxito
+            const message = document.getElementById('successMessage2');
+            message.style.display = 'block';
+            
+            // Resetear cantidad a 1
+            quantity2 = 1;
+            updateQuantityDisplay2();
+            
+            // Ocultar mensaje después de 3 segundos
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        // Inicializar
+        updateQuantityDisplay();
+        updateQuantityDisplay2();
+    </script>
+</body>
+</html>

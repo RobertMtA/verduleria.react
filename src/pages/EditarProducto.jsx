@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./EditarProducto.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const EditarProducto = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,14 +13,28 @@ const EditarProducto = () => {
     stock: "",
     categoria: ""
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Obtener datos del producto por ID
-    fetch(`http://localhost:4000/api/productos/${id}`)
+    fetch(`${API_URL}/productos/${id}`)
       .then(res => res.json())
-      .then(data => setProducto(data))
-      .catch(() => alert("No se pudo cargar el producto"));
-  }, [id]);
+      .then(data => {
+        if (data && (data.data || data.producto)) {
+          setProducto(data.data || data.producto);
+        } else if (data && data.nombre) {
+          setProducto(data);
+        } else {
+          setError("No se pudo cargar el producto");
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("No se pudo cargar el producto");
+        setLoading(false);
+      });
+  }, [id, API_URL]);
 
   const handleChange = (e) => {
     setProducto({ ...producto, [e.target.name]: e.target.value });
@@ -26,25 +42,45 @@ const EditarProducto = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch(`http://localhost:4000/api/productos/${id}`, {
+    setError(null);
+    fetch(`${API_URL}/productos/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(producto)
     })
       .then(res => res.json())
-      .then(() => {
-        alert("Producto actualizado");
-        navigate("/admin/productos");
+      .then(data => {
+        if (data.success || data.ok) {
+          alert("Producto actualizado");
+          navigate("/admin/productos");
+        } else {
+          setError(data.error || "Error al actualizar producto");
+        }
       })
-      .catch(() => alert("Error al actualizar producto"));
+      .catch(() => setError("Error al actualizar producto"));
   };
+
+  if (loading) return <p className="loading-message">Cargando producto...</p>;
+  if (error) return <p className="error-message">{error}</p>;
 
   return (
     <form className="editar-producto-form" onSubmit={handleSubmit}>
-      <label>Nombre: <input name="nombre" value={producto.nombre} onChange={handleChange} /></label>
-      <label>Precio: <input name="precio" value={producto.precio} onChange={handleChange} /></label>
-      <label>Stock: <input name="stock" value={producto.stock} onChange={handleChange} /></label>
-      <label>Categoría: <input name="categoria" value={producto.categoria} onChange={handleChange} /></label>
+      <label>
+        Nombre:
+        <input name="nombre" value={producto.nombre} onChange={handleChange} required />
+      </label>
+      <label>
+        Precio:
+        <input name="precio" type="number" step="0.01" value={producto.precio} onChange={handleChange} required />
+      </label>
+      <label>
+        Stock:
+        <input name="stock" type="number" value={producto.stock} onChange={handleChange} required />
+      </label>
+      <label>
+        Categoría:
+        <input name="categoria" value={producto.categoria} onChange={handleChange} />
+      </label>
       <button type="submit">Guardar</button>
     </form>
   );

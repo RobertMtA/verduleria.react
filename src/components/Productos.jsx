@@ -28,6 +28,12 @@ const Productos = () => {
       cantidad: quantities[product.id] || 1,
       stock: product.stock || 0
     });
+    
+    // Resetear la cantidad a 1 después de agregar al carrito
+    setQuantities(prev => ({
+      ...prev,
+      [product.id]: 1
+    }));
   };
 
   const adjustQuantity = (productId, amount) => {

@@ -20,6 +20,8 @@ ChartJS.register(
   Title
 );
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Reportes = () => {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,15 +32,14 @@ const Reportes = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Cambia aquí la URL al endpoint PHP:
-        const response = await fetch(`http://localhost/api/reportes.php?rango=${timeRange}`);
+        const response = await fetch(`${API_URL}/reportes?rango=${timeRange}`);
         const data = await response.json();
 
         if (!response.ok) {
           throw new Error(data.error || "Error al cargar reportes");
         }
 
-        setReportData(data);
+        setReportData(Array.isArray(data) ? data : []);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -49,7 +50,7 @@ const Reportes = () => {
     };
 
     fetchData();
-  }, [timeRange]);
+  }, [timeRange, API_URL]);
 
   const chartData = {
     labels: reportData.map(r => r.mes),

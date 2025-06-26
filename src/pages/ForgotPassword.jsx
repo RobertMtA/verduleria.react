@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const StyledContainer = styled(Container)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -40,13 +42,12 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost/api/forgot_password.php", {
+      const response = await fetch(`${API_URL}/forgot_password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
-      // Manejo robusto de respuesta vacía o inválida
       const text = await response.text();
       let data = {};
       try {

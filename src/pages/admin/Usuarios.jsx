@@ -3,6 +3,8 @@ import './Usuarios.css';
 import FormularioNuevoUsuario from './FormularioNuevoUsuario';
 import { useAuth } from '../../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const Usuarios = () => {
   const { user } = useAuth() || {};
   const [usuarios, setUsuarios] = useState([]);
@@ -18,14 +20,12 @@ const Usuarios = () => {
     const fetchUsuarios = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost/api/usuarios_admin.php');
-        
+        const response = await fetch(`${API_URL}/usuarios`);
         if (!response.ok) {
           throw new Error('Error al cargar usuarios');
         }
-
         const data = await response.json();
-        setUsuarios(data);
+        setUsuarios(Array.isArray(data) ? data : []);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -36,10 +36,10 @@ const Usuarios = () => {
     };
 
     fetchUsuarios();
-  }, []);
+  }, [API_URL]);
 
   // Filtrar usuarios según término de búsqueda
-  const filteredUsers = usuarios.filter(u => u && u.nombre && u.nombre.includes(searchTerm));
+  const filteredUsers = usuarios.filter(u => u && u.nombre && u.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Paginación
   const indexOfLastUser = currentPage * usersPerPage;
@@ -49,16 +49,15 @@ const Usuarios = () => {
 
   const handleDelete = async (userId) => {
     if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
-    
     try {
-      const response = await fetch(`http://localhost/api/usuarios_admin.php?id=${userId}`, {
+      const response = await fetch(`${API_URL}/usuarios/${userId}`, {
         method: 'DELETE'
       });
-
-      if (response.ok) {
-        setUsuarios(usuarios.filter(user => user.id !== userId));
+      const data = await response.json();
+      if (response.ok && (data.success || data.ok)) {
+        setUsuarios(usuarios.filter(user => user._id !== userId));
       } else {
-        throw new Error('Error al eliminar usuario');
+        throw new Error(data.error || 'Error al eliminar usuario');
       }
     } catch (err) {
       setError(err.message);
@@ -76,14 +75,18 @@ const Usuarios = () => {
 
   const handleUpdateUser = async (updatedUser) => {
     try {
-      await fetch(`http://localhost/api/usuarios_admin.php?id=${updatedUser.id}`, {
+      const response = await fetch(`${API_URL}/usuarios/${updatedUser._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedUser)
       });
-
-      setUsuarios(usuarios.map(u => u.id === updatedUser.id ? updatedUser : u));
-      setEditUser(null);
+      const data = await response.json();
+      if (response.ok && (data.success || data.ok)) {
+        setUsuarios(usuarios.map(u => u._id === updatedUser._id ? updatedUser : u));
+        setEditUser(null);
+      } else {
+        throw new Error(data.error || 'Error al actualizar usuario');
+      }
     } catch (err) {
       setError('Error al actualizar usuario');
     }
@@ -147,7 +150,7 @@ const Usuarios = () => {
           <tbody>
             {currentUsers.length > 0 ? (
               currentUsers.map(user => (
-                <tr key={user.id}>
+                <tr key={user._id}>
                   <td>{user.nombre}</td>
                   <td>{user.email}</td>
                   <td>
@@ -165,7 +168,7 @@ const Usuarios = () => {
                     </button>
                     <button
                       className="delete-btn"
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => handleDelete(user._id)}
                     >
                       Eliminar
                     </button>

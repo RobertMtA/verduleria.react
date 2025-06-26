@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Register.css';
-import { register } from '../services/authService';
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Register = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -27,22 +29,30 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     const { nombre, email, telefono, direccion, password } = formData;
     try {
-      const response = await fetch("http://localhost/api/register.php", {
+      const response = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, email, password })
+        body: JSON.stringify({ nombre, email, telefono, direccion, password })
       });
-      const data = await response.json();
+      const text = await response.text();
+      let data = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        setError('Respuesta inválida del servidor.');
+        setLoading(false);
+        return;
+      }
 
       if (data.success) {
-        // Registro exitoso, puedes redirigir o mostrar mensaje
-        navigate('/login');
+        setSuccess('¡Usuario registrado correctamente! Redirigiendo al login...');
+        setTimeout(() => navigate('/login'), 2000);
       } else {
-        // Mostrar error
-        setError(data.message || 'Error al registrar usuario');
+        setError(data.error || data.message || 'Error al registrar usuario');
       }
     } catch (error) {
       if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource.') {
@@ -61,6 +71,7 @@ const Register = () => {
         <h1>Crear cuenta</h1>
         
         {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
 
         <form onSubmit={handleRegister} className="register-form">
           <div className="form-group">

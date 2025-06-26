@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import ProductFormDialog from "./ProductFormDialog";
-import useProducts from "../../hooks/useProducts"; // Asegúrate de importar el hook
+import useProducts from "../../hooks/useProducts";
 
 const ProductsAdmin = () => {
   // Usa el hook con paginación
@@ -33,6 +33,7 @@ const ProductsAdmin = () => {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [formLoading, setFormLoading] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -52,8 +53,8 @@ const ProductsAdmin = () => {
     if (!window.confirm("¿Estás seguro de eliminar este producto?")) return;
     
     try {
-      setLoading(true);
-      const response = await fetch(`/api/productos.php?id=${productId}`, {
+      setFormLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4001/api"}/productos/${productId}`, {
         method: "DELETE"
       });
       
@@ -64,30 +65,33 @@ const ProductsAdmin = () => {
       
       const result = await response.json();
       
-      if (!result.success) {
-        throw new Error(result.error);
+      if (!result.success && !result.ok) {
+        throw new Error(result.error || "Error al eliminar producto");
       }
       
-      // setProducts(products.filter(p => p.id !== productId));
-      enqueueSnackbar(result.message, { variant: "success" });
+      enqueueSnackbar(result.message || "Producto eliminado correctamente", { variant: "success" });
+      fetchProducts(pagination.page, itemsPerPage);
     } catch (err) {
       enqueueSnackbar(err.message, { variant: "error" });
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
   const handleSaveProduct = async (productData) => {
     try {
-      let url = "/api/productos.php";
+      setFormLoading(true);
+      let url = `${import.meta.env.VITE_API_URL || "http://localhost:4001/api"}/productos`;
       let method = "POST";
       let body = productData;
 
       if (selectedProduct) {
-        url += `?id=${selectedProduct.id}`;
+        url += `/${selectedProduct._id}`;
         method = "PUT";
-        body = { ...productData, id: selectedProduct.id };
+        body = { ...productData, _id: selectedProduct._id };
       }
+
+      console.log("Enviando datos:", { method, url, body }); // Para debug
 
       const response = await fetch(url, {
         method,
@@ -97,13 +101,14 @@ const ProductsAdmin = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al guardar producto");
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
+      console.log("Respuesta del servidor:", result); // Para debug
 
-      if (!result.success) {
-        throw new Error(result.error);
+      if (!result.success && !result.ok) {
+        throw new Error(result.error || "Error al guardar producto");
       }
 
       setOpenDialog(false);
@@ -112,9 +117,12 @@ const ProductsAdmin = () => {
         { variant: "success" }
       );
 
-      fetchProducts();
+      fetchProducts(pagination.page, itemsPerPage);
     } catch (err) {
-      enqueueSnackbar(err.message, { variant: "error" });
+      console.error("Error al guardar producto:", err);
+      enqueueSnackbar(`Error al guardar producto: ${err.message}`, { variant: "error" });
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -178,13 +186,12 @@ const ProductsAdmin = () => {
                 </TableHead>
                 <TableBody>
                   {products
-                    .filter(product => product.activo) // Solo productos activos
                     .map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>{product.id}</TableCell>
+                      <TableRow key={product._id}>
+                        <TableCell>{product._id}</TableCell>
                         <TableCell>{product.nombre}</TableCell>
                         <TableCell>{product.categoria || "Sin categoría"}</TableCell>
-                        <TableCell>${product.precio.toFixed(2)}</TableCell>
+                        <TableCell>${Number(product.precio).toFixed(2)}</TableCell>
                         <TableCell>{product.stock}</TableCell>
                         <TableCell>
                           <Chip 
@@ -195,7 +202,7 @@ const ProductsAdmin = () => {
                         <TableCell>
                           <IconButton 
                             color="primary" 
-                            onClick={() => navigate(`/productos/${product.id}`)}
+                            onClick={() => navigate(`/productos/${product._id}`)}
                           >
                             <VisibilityIcon />
                           </IconButton>
@@ -207,7 +214,7 @@ const ProductsAdmin = () => {
                           </IconButton>
                           <IconButton 
                             color="error" 
-                            onClick={() => handleDeleteProduct(product.id)}
+                            onClick={() => handleDeleteProduct(product._id)}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -237,7 +244,7 @@ const ProductsAdmin = () => {
         onClose={() => setOpenDialog(false)}
         product={selectedProduct}
         onSave={handleSaveProduct}
-        loading={loading}
+        loading={formLoading}
       />
     </Box>
   );

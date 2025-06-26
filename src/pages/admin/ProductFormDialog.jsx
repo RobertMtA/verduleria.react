@@ -15,6 +15,17 @@ import {
   FormControlLabel
 } from "@mui/material";
 
+const categoriasDisponibles = [
+  "Frutas",
+  "Verduras", 
+  "Lácteos",
+  "Carnes",
+  "Panadería",
+  "Bebidas",
+  "General",
+  "Otros"
+];
+
 const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
   const [formData, setFormData] = React.useState({
     nombre: "",
@@ -33,7 +44,6 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
         precio: product.precio || 0,
         stock: product.stock || 0,
         categoria: product.categoria || "",
-        // Asegura que activo sea booleano
         activo: product.activo === 1 || product.activo === "1" || product.activo === true ? true : false
       });
     } else {
@@ -57,7 +67,6 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
   };
 
   const handleSubmit = () => {
-    // Asegura que activo sea booleano antes de guardar
     onSave({ ...formData, activo: !!formData.activo });
   };
 
@@ -89,11 +98,9 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
                 label="Categoría"
                 required
               >
-                <MenuItem value="Frutas">Frutas</MenuItem>
-                <MenuItem value="Verduras">Verduras</MenuItem>
-                <MenuItem value="Orgánicos">Orgánicos</MenuItem>
-                <MenuItem value="De temporada">De temporada</MenuItem>
-                <MenuItem value="General">General</MenuItem>
+                {categoriasDisponibles.map(cat => (
+                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>

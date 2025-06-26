@@ -2,12 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NuevoProducto.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const NuevoProducto = () => {
-  // Configuración inicial
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost/api"; // <-- CORREGIDO para Vite
   const navigate = useNavigate();
-  
-  // Estados
+
   const [producto, setProducto] = useState({
     nombre: "",
     precio: "",
@@ -16,7 +15,7 @@ const NuevoProducto = () => {
     descripcion: "",
     imagen: ""
   });
-  
+
   const [errores, setErrores] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [products, setProducts] = useState([]);
@@ -26,7 +25,6 @@ const NuevoProducto = () => {
   const [itemsPerPage] = useState(5);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Categorías disponibles
   const categorias = [
     "Frutas",
     "Verduras",
@@ -37,13 +35,13 @@ const NuevoProducto = () => {
     "Otros"
   ];
 
-  // Obtener productos
+  // Obtener productos desde backend Node/MongoDB
   const fetchProductos = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/productos.php`);
+      const response = await fetch(`${API_URL}/productos`);
       if (!response.ok) throw new Error("Error al cargar productos");
       const data = await response.json();
-      setProducts(Array.isArray(data.data) ? data.data : []);
+      setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error:", error);
       alert(error.message);
@@ -57,15 +55,10 @@ const NuevoProducto = () => {
   // Manejar cambios en los inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Validación en tiempo real para campos numéricos
     if ((name === "precio" || name === "stock") && isNaN(value) && value !== "") {
       return;
     }
-    
     setProducto(prev => ({ ...prev, [name]: value }));
-    
-    // Limpiar error cuando se escribe
     if (errores[name]) {
       setErrores(prev => ({ ...prev, [name]: "" }));
     }
@@ -77,18 +70,18 @@ const NuevoProducto = () => {
 
     if (!producto.nombre.trim()) nuevosErrores.nombre = "El nombre es obligatorio";
     else if (producto.nombre.length < 3) nuevosErrores.nombre = "Mínimo 3 caracteres";
-    
+
     if (!producto.precio) nuevosErrores.precio = "El precio es obligatorio";
     else if (parseFloat(producto.precio) <= 0) nuevosErrores.precio = "Debe ser mayor a 0";
-    
+
     if (!producto.stock) nuevosErrores.stock = "El stock es obligatorio";
     else if (parseInt(producto.stock) < 0) nuevosErrores.stock = "No puede ser negativo";
-    
+
     if (!producto.categoria) nuevosErrores.categoria = "La categoría es obligatoria";
-    
+
     if (!producto.descripcion.trim()) nuevosErrores.descripcion = "La descripción es obligatoria";
     else if (producto.descripcion.length < 10) nuevosErrores.descripcion = "Mínimo 10 caracteres";
-    
+
     if (producto.imagen && !producto.imagen.startsWith('/images/') && !/^https?:\/\//.test(producto.imagen)) {
       nuevosErrores.imagen = "Debe comenzar con /images/ o ser una URL válida";
     }
@@ -105,9 +98,9 @@ const NuevoProducto = () => {
       stock: prod.stock,
       categoria: prod.categoria,
       descripcion: prod.descripcion,
-      imagen: prod.imagen || ""
+      imagen: prod.image || ""
     });
-    setEditId(prod.id);
+    setEditId(prod._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -133,17 +126,17 @@ const NuevoProducto = () => {
 
     try {
       const url = editId
-        ? `${API_URL}/productos.php?id=${editId}`
-        : `${API_URL}/productos.php`;
+        ? `${API_URL}/productos/${editId}`
+        : `${API_URL}/productos`;
       const method = editId ? "PUT" : "POST";
-      
+
       const productoData = {
         nombre: producto.nombre.trim(),
         precio: parseFloat(producto.precio),
         stock: parseInt(producto.stock),
         categoria: producto.categoria,
         descripcion: producto.descripcion.trim(),
-        imagen: producto.imagen.trim() || null
+        image: producto.imagen.trim() || null
       };
 
       const response = await fetch(url, {
@@ -160,7 +153,6 @@ const NuevoProducto = () => {
       setSuccessMessage(editId ? "Producto actualizado correctamente" : "Producto creado exitosamente");
       setTimeout(() => setSuccessMessage(""), 3000);
 
-      // Actualizar lista de productos
       await fetchProductos();
       handleCancel();
     } catch (error) {
@@ -172,7 +164,7 @@ const NuevoProducto = () => {
 
   // Filtrar y paginar productos
   const productosArray = Array.isArray(products) ? products : [];
-  const filteredProducts = products.filter(prod => 
+  const filteredProducts = productosArray.filter(prod =>
     prod.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     prod.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -338,7 +330,7 @@ const NuevoProducto = () => {
             <tbody>
               {currentProducts.length > 0 ? (
                 currentProducts.map((prod) => (
-                  <tr key={prod.id}>
+                  <tr key={prod._id}>
                     <td>{prod.nombre}</td>
                     <td>${Number(prod.precio).toFixed(2)}</td>
                     <td>{prod.stock}</td>

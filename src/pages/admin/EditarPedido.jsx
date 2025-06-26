@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const EditarPedido = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -10,9 +12,12 @@ const EditarPedido = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Traer datos del pedido
-    fetch(`http://localhost/api/pedido_por_id.php?id=${id}`)
-      .then(res => res.json())
+    // Traer datos del pedido desde el backend Node/MongoDB
+    fetch(`${API_URL}/pedidos/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error("No se pudo cargar el pedido");
+        return res.json();
+      })
       .then(data => {
         setPedido(data);
         setEstado(data.estado);
@@ -22,21 +27,25 @@ const EditarPedido = () => {
         setError("No se pudo cargar el pedido");
         setLoading(false);
       });
-  }, [id]);
+  }, [id, API_URL]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    const res = await fetch("http://localhost/api/actualizar_pedido.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, estado })
-    });
-    const result = await res.json();
-    if (result.success) {
-      navigate("/admin/pedidos");
-    } else {
-      setError(result.error || "Error al actualizar");
+    try {
+      const res = await fetch(`${API_URL}/pedidos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado })
+      });
+      const result = await res.json();
+      if (res.ok) {
+        navigate("/admin/pedidos");
+      } else {
+        setError(result.error || "Error al actualizar");
+      }
+    } catch (err) {
+      setError("Error al actualizar");
     }
   };
 

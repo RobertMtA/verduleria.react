@@ -1,8 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import './ProductList.css';
 
 const ProductList = ({ products, addToCart }) => {
-  console.log("Productos recibidos:", products);
+  const [quantities, setQuantities] = useState({});
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const initialQuantities = {};
+      products.forEach(product => {
+        initialQuantities[product.id] = 1;
+      });
+      setQuantities(initialQuantities);
+    }
+  }, [products]);
+
+  const handleAddToCart = (product) => {
+    const cantidad = quantities[product.id] || 1;
+    if (product.stock < cantidad) {
+      alert('No hay suficiente stock');
+      return;
+    }
+    addToCart(product, cantidad);
+    // Resetear la cantidad a 1 después de agregar al carrito
+    setQuantities(prev => ({
+      ...prev,
+      [product.id]: 1
+    }));
+  };
+
+  const adjustQuantity = (productId, amount) => {
+    setQuantities(prev => {
+      const current = prev[productId] || 1;
+      const product = products.find(p => p.id === productId);
+      const maxStock = product?.stock || 99;
+      
+      return {
+        ...prev,
+        [productId]: Math.max(1, Math.min(current + amount, maxStock))
+      };
+    });
+  };
 
   return (
     <div className="product-list">
@@ -29,8 +66,32 @@ const ProductList = ({ products, addToCart }) => {
               e.target.src = "/images/placeholder.jpg";
             }}
           />
+          
           {addToCart && (
-            <button onClick={() => addToCart(product)}>Agregar al Carrito</button>
+            <div className="product-actions">
+              <div className="quantity-controls">
+                <button 
+                  onClick={() => adjustQuantity(product.id, -1)} 
+                  disabled={quantities[product.id] <= 1}
+                >
+                  -
+                </button>
+                <span>{quantities[product.id] || 1}</span>
+                <button 
+                  onClick={() => adjustQuantity(product.id, 1)} 
+                  disabled={quantities[product.id] >= (product.stock || 99)}
+                >
+                  +
+                </button>
+              </div>
+              <button 
+                onClick={() => handleAddToCart(product)}
+                className="add-to-cart"
+                disabled={product.stock <= 0}
+              >
+                {product.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
+              </button>
+            </div>
           )}
         </div>
       ))}

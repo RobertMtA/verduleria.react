@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import "./HistorialPedidos.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const HistorialPedidos = () => {
   const { user } = useAuth();
   const [pedidos, setPedidos] = useState([]);
@@ -11,16 +13,25 @@ const HistorialPedidos = () => {
   useEffect(() => {
     if (user?.email) {
       setLoading(true);
-      fetch(`http://localhost/api/pedidos_cliente.php?email=${user.email}`)
+      fetch(`${API_URL}/pedidos_cliente?email=${encodeURIComponent(user.email)}`)
         .then(res => {
           if (!res.ok) throw new Error("Error al cargar pedidos");
           return res.json();
         })
-        .then(data => setPedidos(data))
+        .then(data => {
+          // Si la API devuelve {data: [...]}, usar data.data, si es array directo, usar data
+          if (Array.isArray(data)) {
+            setPedidos(data);
+          } else if (Array.isArray(data.data)) {
+            setPedidos(data.data);
+          } else {
+            setPedidos([]);
+          }
+        })
         .catch(err => setError(err.message))
         .finally(() => setLoading(false));
     }
-  }, [user]);
+  }, [user, API_URL]);
 
   const formatFecha = (fechaString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -28,7 +39,7 @@ const HistorialPedidos = () => {
   };
 
   const getEstadoClass = (estado) => {
-    switch(estado.toLowerCase()) {
+    switch((estado || "").toLowerCase()) {
       case 'pendiente': return 'estado-pendiente';
       case 'en proceso': return 'estado-proceso';
       case 'entregado': return 'estado-entregado';
@@ -80,7 +91,7 @@ const HistorialPedidos = () => {
                 <tr key={pedido.id}>
                   <td className="pedido-id">#{pedido.id}</td>
                   <td>{formatFecha(pedido.fecha)}</td>
-                  <td className="pedido-total">${pedido.total.toLocaleString('es-AR')}</td>
+                  <td className="pedido-total">${pedido.total?.toLocaleString('es-AR')}</td>
                   <td>
                     <span className={`estado-badge ${getEstadoClass(pedido.estado)}`}>
                       {pedido.estado}

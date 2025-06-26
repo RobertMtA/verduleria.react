@@ -20,6 +20,7 @@
     "emailjs-com": "^3.2.0",
     "express": "^5.1.0",
     "mercadopago": "^2.8.0",
+    "mongodb": "^6.17.0",
     "mysql2": "^3.14.1",
     "notistack": "^3.0.2",
     "prop-types": "^15.8.1",

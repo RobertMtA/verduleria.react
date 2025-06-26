@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import './Cart.css';
 
 const Cart = ({ isOpen, onClose }) => {
-  const { cartItems, removeFromCart, updateQuantity, clearCart, calculateTotal } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
 
   useEffect(() => {
     // Cerrar con la tecla ESC
@@ -60,7 +60,7 @@ const Cart = ({ isOpen, onClose }) => {
                 const precio = item.precio ?? item.price ?? 0;
 
                 return (
-                  <div key={`${item.id}-${item.talla || ''}-${item.color || ''}`} className="cart-item">
+                  <div key={`${item.id ?? item._id}-${item.talla || ''}-${item.color || ''}`} className="cart-item">
                     <div className="item-image">
                       <img 
                         src={item.imagen ?? item.image ?? '/images/default-product.jpg'} 
@@ -75,8 +75,8 @@ const Cart = ({ isOpen, onClose }) => {
                       <div className="item-info">
                         <h3>{item.nombre ?? item.name}</h3>
                         <p className="price">
-                          ${typeof item.precio === "number" && !isNaN(item.precio)
-                            ? item.precio.toLocaleString('es-AR')
+                          ${typeof precio === "number" && !isNaN(precio)
+                            ? precio.toLocaleString('es-AR')
                             : "0"}/kg
                         </p>
                         {item.talla && <p className="attribute"><span>Talla:</span> {item.talla}</p>}
@@ -85,7 +85,7 @@ const Cart = ({ isOpen, onClose }) => {
                       <div className="item-actions">
                         <div className="quantity-controls">
                           <button 
-                            onClick={() => updateQuantity(item.id, item.cantidad - 1)}
+                            onClick={() => updateQuantity(item.id ?? item._id, item.cantidad - 1)}
                             className="quantity-btn"
                             aria-label="Reducir cantidad"
                           >
@@ -93,7 +93,7 @@ const Cart = ({ isOpen, onClose }) => {
                           </button>
                           <span className="quantity">{item.cantidad}</span>
                           <button 
-                            onClick={() => updateQuantity(item.id, item.cantidad + 1)}
+                            onClick={() => updateQuantity(item.id ?? item._id, item.cantidad + 1)}
                             className="quantity-btn"
                             aria-label="Aumentar cantidad"
                           >
@@ -101,7 +101,7 @@ const Cart = ({ isOpen, onClose }) => {
                           </button>
                         </div>
                         <button 
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(item.id ?? item._id)}
                           className="remove-btn"
                           aria-label="Eliminar producto"
                         >

@@ -8,8 +8,7 @@ import './Header.css';
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { cartItems } = useCart(); // <-- usa cartItems, no cart
-  const { isAuthenticated, user, logout } = useContext(AuthContext);
-  const { setUser } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [navbarOpen, setNavbarOpen] = useState(false);
 
@@ -18,9 +17,8 @@ const Header = () => {
   const rol = localStorage.getItem("rol");
 
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    // Redirige al login o a la página principal
+    logout();
+    navigate("/login");
   };
 
   return (
@@ -36,7 +34,7 @@ const Header = () => {
       >
         <Link to="/">
           <img
-            src="/src/assets/img-logo1.jpg"
+            src="/images/img-logo1.jpg"
             alt="Logo Verdulería"
             style={{ height: "100px", width: "100px", objectFit: "contain", cursor: "pointer" }}
           />
@@ -96,13 +94,9 @@ const Header = () => {
             </button>
             {isAuthenticated ? (
               <>
-                <button
-                  className="user-icon"
-                  onClick={() => navigate('/perfil')}
-                  aria-label="Perfil de usuario"
-                >
+                <Link to="/perfil" className="user-icon" aria-label="Perfil de usuario">
                   <i className="fas fa-user"></i>
-                </button>
+                </Link>
                 {user?.role === 'admin' && (
                   <button
                     className="admin-icon"
@@ -112,7 +106,7 @@ const Header = () => {
                     <i className="fas fa-user-cog"></i>
                   </button>
                 )}
-                <button onClick={logout}>Cerrar sesión</button>
+                <button onClick={handleLogout}>Cerrar sesión</button>
               </>
             ) : (
               <button
@@ -133,9 +127,6 @@ const Header = () => {
       <div>
         {user ? <span>Hola, {user.nombre}</span> : <span>No has iniciado sesión</span>}
       </div>
-      <nav>
-        {isAuthenticated ? <button>Mi Perfil</button> : <button>Login</button>}
-      </nav>
     </header>
   );
 };

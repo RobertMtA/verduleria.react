@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './FormularioNuevoUsuario.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+
 const FormularioNuevoUsuario = ({ onClose, onUserAdded, user, usuarios = [] }) => {
   const [formData, setFormData] = useState({
     nombre: user?.nombre || "",
@@ -61,17 +63,22 @@ const FormularioNuevoUsuario = ({ onClose, onUserAdded, user, usuarios = [] }) =
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Aquí deberías hacer el fetch al backend para agregar el usuario
-        const res = await fetch('http://localhost/api/usuarios_admin.php', {
+        // Enviar al backend Node/MongoDB
+        const res = await fetch(`${API_URL}/users`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({
+            nombre: formData.nombre,
+            email: formData.email,
+            password: formData.password,
+            role: formData.rol
+          })
         });
         const data = await res.json();
-        if (data.success) {
-          onUserAdded(); // Solo aquí cierras el modal o actualizas la lista
+        if (res.ok) {
+          onUserAdded();
         } else {
-          setErrors({ submit: data.error || 'Error al agregar usuario' });
+          setErrors({ submit: data.message || 'Error al agregar usuario' });
         }
       } catch (err) {
         setErrors({ submit: 'Error de red' });
@@ -80,7 +87,7 @@ const FormularioNuevoUsuario = ({ onClose, onUserAdded, user, usuarios = [] }) =
     }
   };
 
-  const filteredUsuarios = usuarios.filter(u => u.nombre && u.nombre.includes(filtro));
+  const filteredUsuarios = usuarios.filter(u => u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase()));
 
   return (
     <div className="modal-overlay">

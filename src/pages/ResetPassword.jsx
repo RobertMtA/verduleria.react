@@ -13,7 +13,9 @@ import {
 } from "@mui/material";
 import PasswordStrengthBar from 'react-password-strength-bar';
 
-const API_URL = "http://localhost/api/reset_password.php";
+const API_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/reset_password`
+  : "http://localhost:4001/api/reset_password";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -80,22 +82,24 @@ const ResetPassword = () => {
           token,
           newPassword: formData.password 
         }),
-        credentials: "include" // Importante para CORS con credenciales
+        credentials: "include"
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error en la solicitud");
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        setErrors(prev => ({ ...prev, form: "Respuesta inválida del servidor." }));
+        setLoading(false);
+        return;
       }
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setSuccess(true);
-        setTimeout(() => navigate("/login"), 3000);
-      } else {
+      if (!response.ok || !data.success) {
         throw new Error(data.message || "Error al cambiar la contraseña");
       }
+
+      setSuccess(true);
+      setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
       setErrors(prev => ({ ...prev, form: err.message }));
     } finally {
