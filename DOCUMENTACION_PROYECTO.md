@@ -556,6 +556,7 @@ npm start
 
 **Proyecto desarrollado como entrega final del curso de React**
 
+- **Desarrollador:** Roberto Gaona
 - **Funcionalidades:** 100% implementadas
 - **Responsive:** Totalmente optimizado
 - **Producción:** Desplegado y funcionando
