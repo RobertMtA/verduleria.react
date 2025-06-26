@@ -8,15 +8,18 @@
   background-color: #1a1a1a;
   color: white;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 .admin-sidebar h2 {
   margin-bottom: 2rem;
+  font-size: 1.3rem;
 }
 
 .admin-sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .admin-sidebar li {
@@ -26,8 +29,84 @@
 .admin-sidebar a {
   color: white;
   text-decoration: none;
+  display: block;
+  padding: 0.75rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.admin-sidebar a:hover,
+.admin-sidebar a.active {
+  background-color: #333;
+  color: #4CAF50;
 }
 
 .admin-content {
   padding: 2rem;
+  overflow-x: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  
+  .admin-sidebar {
+    padding: 1rem;
+    position: relative;
+    background-color: #2c2c2c;
+  }
+  
+  .admin-sidebar h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  
+  .admin-sidebar ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  
+  .admin-sidebar li {
+    margin-bottom: 0;
+  }
+  
+  .admin-sidebar a {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  
+  .admin-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-sidebar {
+    padding: 0.75rem;
+  }
+  
+  .admin-sidebar h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .admin-sidebar ul {
+    gap: 0.3rem;
+  }
+  
+  .admin-sidebar a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .admin-content {
+    padding: 0.75rem;
+  }
 }

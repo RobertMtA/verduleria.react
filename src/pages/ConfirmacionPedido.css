@@ -4,6 +4,7 @@
   align-items: center;
   min-height: 60vh;
   background: #f8fafc;
+  padding: 2rem;
 }
 
 .confirmacion-pedido-card {
@@ -12,29 +13,108 @@
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   text-align: center;
+  max-width: 500px;
+  width: 100%;
+  animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .confirmacion-pedido-card h2 {
   color: #27ae60;
   margin-bottom: 1rem;
+  font-size: 1.8rem;
 }
 
 .confirmacion-pedido-card p {
   margin-bottom: 2rem;
   color: #333;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .btn-volver-productos {
   display: inline-block;
-  padding: 0.7rem 1.5rem;
-  background: #27ae60;
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, #27ae60, #219150);
   color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  transition: background 0.2s;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
 }
 
 .btn-volver-productos:hover {
-  background: #219150;
+  background: linear-gradient(135deg, #219150, #1e8449);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .confirmacion-pedido-container {
+    padding: 1.5rem;
+    min-height: 50vh;
+  }
+  
+  .confirmacion-pedido-card {
+    padding: 2rem 1.5rem;
+    border-radius: 10px;
+  }
+  
+  .confirmacion-pedido-card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .confirmacion-pedido-card p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .btn-volver-productos {
+    padding: 0.7rem 1.8rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .confirmacion-pedido-container {
+    padding: 1rem;
+    min-height: 40vh;
+  }
+  
+  .confirmacion-pedido-card {
+    padding: 1.5rem 1rem;
+    border-radius: 8px;
+  }
+  
+  .confirmacion-pedido-card h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .confirmacion-pedido-card p {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .btn-volver-productos {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 250px;
+  }
 }

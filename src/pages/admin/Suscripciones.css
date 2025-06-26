@@ -159,4 +159,6 @@
   .subscribe-form {
     flex-direction: column;
     align-items: stretch;
-    gap:
+    gap: 1rem;
+  }
+}

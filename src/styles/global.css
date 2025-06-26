@@ -1,4 +1,34 @@
 /* global.css */
+/* Reset y configuración base para móviles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* Mejoras de accesibilidad y touch */
+@media (max-width: 768px) {
+  /* Mejorar el tamaño de toque en móviles */
+  button, a, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevenir zoom en inputs en iOS */
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
 .full-page-loader {
   display: flex;
   flex-direction: column;
@@ -6,6 +36,8 @@
   justify-content: center;
   height: 100vh;
   gap: 20px;
+  padding: 20px;
+  background: #f8fafc;
 }
 
 .loader-spinner {
@@ -32,11 +64,14 @@
 .not-found h2 {
   color: #e74c3c;
   margin-bottom: 20px;
+  font-size: 1.8rem;
 }
 
 .not-found p {
   font-size: 1.1rem;
   margin-bottom: 30px;
+  color: #666;
+  line-height: 1.5;
 }
 
 .app-container {
@@ -48,4 +83,204 @@
 .main-content {
   flex: 1;
   padding: 20px 0;
+}
+
+/* Botones responsivos */
+.btn-primary {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #27ae60;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.btn-primary:hover {
+  background-color: #219150;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+  color: white;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 2px solid #27ae60;
+  background-color: transparent;
+  color: #27ae60;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background-color: #27ae60;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Utilidades de layout responsivo */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.grid-responsive {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.flex-responsive {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Clases de utilidad para mostrar/ocultar en diferentes tamaños */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+/* Responsividad general */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 10px 0;
+  }
+  
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .not-found h2 {
+    font-size: 1.5rem;
+  }
+  
+  .not-found p {
+    font-size: 1rem;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 100px;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .full-page-loader {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .loader-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+  
+  .not-found {
+    padding: 30px 15px;
+  }
+  
+  .not-found h2 {
+    font-size: 1.3rem;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .container {
+    padding: 0 0.25rem;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible para navegación por teclado */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #27ae60;
+  outline-offset: 2px;
+}
+
+/* Mejoras para pantallas pequeñas */
+@media (max-width: 360px) {
+  .container {
+    padding: 0;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
 }

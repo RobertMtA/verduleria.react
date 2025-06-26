@@ -5,6 +5,8 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { BrowserRouter } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import './styles/global.css';
+import './styles/forms.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

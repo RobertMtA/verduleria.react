@@ -180,21 +180,168 @@
 }
 
 /* Responsive para móviles */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .product-card {
-    max-width: 100%;
+    max-width: 280px;
+    margin: 12px auto;
   }
   
   .product-image {
-    height: 150px;
+    height: 160px;
+  }
+  
+  .product-info {
+    padding: 16px 10px 14px 10px;
+  }
+  
+  .product-info h3 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+  
+  .product-price {
+    font-size: 1.05em;
+    margin-bottom: 10px;
+  }
+  
+  .quantity-controls button {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+  
+  .quantity-controls span {
+    font-size: 15px;
+    min-width: 25px;
+  }
+  
+  .add-cart-btn {
+    padding: 6px 12px;
+    font-size: 0.95em;
+    margin-top: 8px;
   }
 }
 
 @media (max-width: 600px) {
   .product-card {
     max-width: 95vw;
+    margin: 10px auto;
+    border-radius: 10px;
   }
+  
+  .product-image {
+    height: 140px;
+  }
+  
+  .product-info {
+    padding: 14px 8px 12px 8px;
+  }
+  
+  .product-info h3 {
+    font-size: 1.05rem;
+    margin-bottom: 5px;
+  }
+  
+  .product-price {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .quantity-controls {
+    gap: 8px;
+    margin: 8px 0;
+  }
+  
+  .quantity-controls button {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+  
+  .quantity-controls span {
+    font-size: 14px;
+    min-width: 20px;
+  }
+  
+  .add-cart-btn {
+    padding: 8px 10px;
+    font-size: 0.9em;
+    margin-top: 6px;
+    border-radius: 5px;
+  }
+  
+  .description {
+    font-size: 0.85rem;
+    margin: 4px 0;
+  }
+  
+  .price {
+    font-size: 1.05rem;
+    margin: 6px 0;
+  }
+  
+  .stock {
+    font-size: 0.8rem;
+    margin: 4px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card {
+    max-width: 100%;
+    margin: 8px auto;
+    border-radius: 8px;
+  }
+  
   .product-image {
     height: 120px;
+  }
+  
+  .product-info {
+    padding: 12px 6px 10px 6px;
+  }
+  
+  .product-info h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  
+  .product-price {
+    font-size: 0.95em;
+    margin-bottom: 6px;
+  }
+  
+  .quantity-controls {
+    gap: 6px;
+    margin: 6px 0;
+  }
+  
+  .quantity-controls button {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+  
+  .quantity-controls span {
+    font-size: 13px;
+    min-width: 18px;
+  }
+  
+  .add-cart-btn {
+    padding: 7px 8px;
+    font-size: 0.85em;
+    margin-top: 5px;
+  }
+  
+  .description {
+    font-size: 0.8rem;
+  }
+  
+  .price {
+    font-size: 1rem;
+  }
+  
+  .stock {
+    font-size: 0.75rem;
   }
 }
