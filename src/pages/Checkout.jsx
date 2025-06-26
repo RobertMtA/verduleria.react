@@ -55,7 +55,7 @@ const Checkout = () => {
           unit_price: Number(item.precio)
         }));
 
-        const res = await fetch("http://localhost:4001/api/crear-preferencia", {
+        const res = await fetch(`${API_URL}/crear-preferencia`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -99,23 +99,23 @@ const Checkout = () => {
 
     try {
       const pedidoData = {
-        usuario_id: user?.id || null,
-        cliente: formData.nombre,
-        email: formData.email,
-        telefono: formData.telefono,
-        direccion: formData.direccion,
-        ciudad: formData.ciudad,
-        total: total,
-        metodo_pago: formData.metodoPago,
-        items: cartItems.map(item => ({
-          producto_id: item.id,
+        usuario: {
+          nombre: formData.nombre,
+          email: formData.email,
+          telefono: formData.telefono,
+          direccion: `${formData.direccion}, ${formData.ciudad}`
+        },
+        productos: cartItems.map(item => ({
           nombre: item.nombre || item.name,
-          cantidad: item.cantidad,
-          precio: item.precio || item.price
-        }))
+          precio: Number(item.precio || item.price),
+          cantidad: Number(item.cantidad),
+          subtotal: Number(item.precio || item.price) * Number(item.cantidad)
+        })),
+        total: total,
+        metodo_pago: formData.metodoPago
       };
 
-      const response = await fetch(`${API_URL}/crear_pedido.php`, {
+      const response = await fetch(`${API_URL}/pedidos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,11 +130,12 @@ const Checkout = () => {
       }
 
       clearCart();
-      navigate("/confirmacion", { 
+      navigate("/confirmacion-pedido", { 
         state: { 
-          pedidoId: responseData.id,
+          pedidoId: responseData.pedido?._id || responseData.pedido?.id,
           cliente: formData.nombre,
-          total: total
+          total: total,
+          productos: cartItems
         } 
       });
 

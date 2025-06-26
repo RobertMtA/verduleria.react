@@ -6,6 +6,13 @@ const ConfirmacionPedido = () => {
   const location = useLocation();
   const { pedidoId, cliente, total } = location.state || {};
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    }).format(price);
+  };
+
   return (
     <div className="confirmacion-pedido-container">
       <div className="confirmacion-pedido-card">
