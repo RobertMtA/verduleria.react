@@ -212,6 +212,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Endpoint alternativo de health check
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    message: 'Keep-alive funcionando',
+    timestamp: new Date().toISOString(),
+    version: '1.0.1'
+  });
+});
+
 // Ruta de perfil de usuario
 app.get('/api/perfil.php', async (req, res) => {
   try {
