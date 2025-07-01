@@ -14,3 +14,4 @@
 ## Variables de entorno (opcional):
 - PORT: se detecta automáticamente
 - NODE_ENV: production (se configura automáticamente)
+# Force redeploy
