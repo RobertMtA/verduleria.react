@@ -5,7 +5,8 @@ const BACKEND_URL = 'https://verduleria-backend-m19n.onrender.com'; // URL real 
 
 const keepAlive = async () => {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/health`, {
+    // Usar endpoint que sabemos que funciona
+    const response = await fetch(`${BACKEND_URL}/api/productos`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
