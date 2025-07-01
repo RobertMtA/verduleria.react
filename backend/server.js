@@ -202,6 +202,16 @@ app.use("/api/productos", productosRouter);
 app.use('/api/users', usersRoutes);
 // app.use('/api/reportes', reportesRouter); // Removido - ahora manejado directamente
 
+// Endpoint de health check para keep-alive
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    message: 'Servidor funcionando correctamente',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // Ruta de perfil de usuario
 app.get('/api/perfil.php', async (req, res) => {
   try {
