@@ -121,6 +121,8 @@ const Suscripciones = () => {
 
       <div className="controls">
         <input
+          id="search-subscribers"
+          name="search"
           type="text"
           placeholder="Buscar por email..."
           value={terminoBusqueda}
@@ -138,7 +140,10 @@ const Suscripciones = () => {
 
       {mostrarFormulario && (
         <form onSubmit={manejarEnvioSuscripcion} className="subscribe-form">
+          <label htmlFor="new-email" className="sr-only">Email del nuevo suscriptor</label>
           <input
+            id="new-email"
+            name="email"
             type="email"
             placeholder="Ingrese email"
             value={emailNuevo}

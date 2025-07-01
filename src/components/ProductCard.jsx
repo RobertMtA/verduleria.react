@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { getProductImageUrl, handleImageError } from "../utils/imageUtils";
 import "./ProductCard.css";
 
 const ProductCard = ({ product }) => {
@@ -37,10 +38,10 @@ const ProductCard = ({ product }) => {
       
       {product.imagen && (
         <img
-          src={product.imagen}
+          src={getProductImageUrl(product)}
           alt={product.nombre}
           className="product-image"
-          onError={e => { e.target.src = '/images/placeholder.jpg'; }}
+          onError={handleImageError}
         />
       )}
 

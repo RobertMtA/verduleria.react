@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { getProductImageUrl, handleImageError } from '../utils/imageUtils';
 import './Cart.css';
 
 const Cart = ({ isOpen, onClose }) => {
@@ -63,12 +64,9 @@ const Cart = ({ isOpen, onClose }) => {
                   <div key={`${item.id ?? item._id}-${item.talla || ''}-${item.color || ''}`} className="cart-item">
                     <div className="item-image">
                       <img 
-                        src={item.imagen ?? item.image ?? '/images/default-product.jpg'} 
+                        src={getProductImageUrl(item)} 
                         alt={item.nombre ?? item.name} 
-                        onError={(e) => {
-                          e.target.onerror = null; 
-                          e.target.src = '/images/default-product.jpg';
-                        }}
+                        onError={handleImageError}
                       />
                     </div>
                     <div className="item-details">

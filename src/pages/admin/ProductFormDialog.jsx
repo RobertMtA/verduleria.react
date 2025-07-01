@@ -12,8 +12,13 @@ import {
   Select,
   MenuItem,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  Box,
+  Typography
 } from "@mui/material";
+import { getImageUrl } from "../../utils/imageUtils";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
 
 const categoriasDisponibles = [
   "Frutas",
@@ -33,8 +38,14 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
     precio: 0,
     stock: 0,
     categoria: "",
-    activo: true
+    activo: true,
+    imagen: ""
   });
+
+  const [selectedImage, setSelectedImage] = React.useState(null);
+  const [imagePreview, setImagePreview] = React.useState("");
+  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [imageError, setImageError] = React.useState("");
 
   React.useEffect(() => {
     if (product) {
@@ -44,8 +55,12 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
         precio: product.precio || 0,
         stock: product.stock || 0,
         categoria: product.categoria || "",
-        activo: product.activo === 1 || product.activo === "1" || product.activo === true ? true : false
+        activo: product.activo === 1 || product.activo === "1" || product.activo === true ? true : false,
+        imagen: product.image || ""
       });
+      // Limpiar imagen preview cuando se abre el modal para editar
+      setImagePreview("");
+      setSelectedImage(null);
     } else {
       setFormData({
         nombre: "",
@@ -53,10 +68,14 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
         precio: 0,
         stock: 0,
         categoria: "",
-        activo: true
+        activo: true,
+        imagen: ""
       });
+      setImagePreview("");
+      setSelectedImage(null);
     }
-  }, [product]);
+    setImageError("");
+  }, [product, open]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -66,8 +85,83 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    onSave({ ...formData, activo: !!formData.activo });
+  // Manejar selección de imagen
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setImageError("Solo se permiten archivos JPG, PNG o WebP");
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError("La imagen no puede superar 5MB");
+        return;
+      }
+
+      setSelectedImage(file);
+      setImageError("");
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Subir imagen al servidor
+  const uploadImage = async (file) => {
+    const formDataImg = new FormData();
+    formDataImg.append('image', file);
+
+    try {
+      setUploadingImage(true);
+      console.log('🚀 Subiendo imagen:', file.name);
+      
+      const response = await fetch(`${API_URL}/upload-image`, {
+        method: 'POST',
+        body: formDataImg
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Error del servidor:', errorData);
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Imagen subida exitosamente:', data);
+      return data.imagePath; // Retorna la ruta de la imagen
+    } catch (error) {
+      console.error('💥 Error al subir imagen:', error);
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    let finalFormData = { ...formData, activo: !!formData.activo };
+
+    // Si hay una imagen seleccionada, subirla primero
+    if (selectedImage) {
+      try {
+        const imagePath = await uploadImage(selectedImage);
+        finalFormData.image = imagePath;
+      } catch (error) {
+        setImageError("Error al subir la imagen: " + error.message);
+        return;
+      }
+    }
+
+    onSave(finalFormData);
   };
 
   return (
@@ -155,6 +249,97 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
               label="Producto activo"
             />
           </Grid>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" gutterBottom>
+              Imagen del Producto
+            </Typography>
+            <input
+              accept="image/*"
+              id="image-upload"
+              type="file"
+              style={{ display: 'none' }}
+              onChange={handleImageChange}
+            />
+            <label htmlFor="image-upload">
+              <Button 
+                variant="contained" 
+                component="span"
+                color="primary"
+                disabled={uploadingImage}
+                sx={{ mr: 2 }}
+              >
+                {uploadingImage ? "Subiendo..." : (selectedImage ? "Cambiar Imagen" : "Subir Imagen")}
+              </Button>
+            </label>
+            {selectedImage && (
+              <Typography variant="caption" color="text.secondary">
+                {selectedImage.name}
+              </Typography>
+            )}
+            {imagePreview && (
+              <Box sx={{ mt: 2, position: 'relative' }}>
+                <img 
+                  src={imagePreview} 
+                  alt="Vista previa" 
+                  style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8, objectFit: 'cover' }}
+                />
+                <Button
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setImagePreview("");
+                  }}
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    minWidth: 0,
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    padding: 0,
+                    minHeight: 0
+                  }}
+                >
+                  ×
+                </Button>
+              </Box>
+            )}
+            
+            {/* Mostrar imagen actual cuando se está editando */}
+            {!imagePreview && formData.imagen && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Imagen actual:
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <img 
+                    src={getImageUrl(formData.imagen)} 
+                    alt="Imagen actual" 
+                    style={{ 
+                      maxWidth: '100%', 
+                      maxHeight: '200px', 
+                      borderRadius: 8, 
+                      objectFit: 'cover',
+                      border: '1px solid #ddd'
+                    }}
+                    onError={(e) => {
+                      console.error('Error cargando imagen:', formData.imagen);
+                      console.error('URL construida:', getImageUrl(formData.imagen));
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </Box>
+              </Box>
+            )}
+            {imageError && (
+              <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                {imageError}
+              </Typography>
+            )}
+          </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
@@ -165,9 +350,9 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
           onClick={handleSubmit} 
           color="primary" 
           variant="contained"
-          disabled={loading}
+          disabled={loading || uploadingImage}
         >
-          {loading ? "Guardando..." : "Guardar"}
+          {uploadingImage ? "Subiendo imagen..." : (loading ? "Guardando..." : "Guardar")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -56,9 +56,211 @@
 }
 
 .payment-method {
+  position: relative;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 80px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.payment-method:hover {
+  border-color: #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.payment-method:hover label {
+  color: #000; /* Negro fuerte en hover para mejor visibilidad */
+  font-weight: 700;
+}
+
+.payment-method input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.payment-method label {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+  color: #1a1a1a; /* Color negro oscuro para mejor legibilidad */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); /* Sombra sutil para mejor contraste */
+}
+
+.payment-method label::before {
+  content: '';
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Iconos y colores específicos para cada método de pago */
+.payment-method[data-method="efectivo"] {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+}
+
+.payment-method[data-method="efectivo"] label::before {
+  content: '💵';
+}
+
+.payment-method[data-method="efectivo"]:hover,
+.payment-method[data-method="efectivo"].selected {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #c3e6cb 0%, #f8fff9 100%);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.payment-method[data-method="efectivo"]:hover label,
+.payment-method[data-method="efectivo"].selected label {
+  color: #000; /* Negro fuerte para efectivo */
+}
+
+.payment-method[data-method="tarjeta"] {
+  border-color: #007bff;
+  background: linear-gradient(135deg, #cce7ff 0%, #ffffff 100%);
+}
+
+.payment-method[data-method="tarjeta"] label::before {
+  content: '💳';
+}
+
+.payment-method[data-method="tarjeta"]:hover,
+.payment-method[data-method="tarjeta"].selected {
+  border-color: #007bff;
+  background: linear-gradient(135deg, #b3d9ff 0%, #f0f8ff 100%);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.payment-method[data-method="tarjeta"]:hover label,
+.payment-method[data-method="tarjeta"].selected label {
+  color: #000; /* Negro fuerte para tarjeta */
+}
+
+.payment-method[data-method="mercadopago"] {
+  border-color: #009ee3;
+  background: linear-gradient(135deg, #cceeff 0%, #ffffff 100%);
+}
+
+.payment-method[data-method="mercadopago"] label::before {
+  content: '🔵';
+}
+
+.payment-method[data-method="mercadopago"]:hover,
+.payment-method[data-method="mercadopago"].selected {
+  border-color: #009ee3;
+  background: linear-gradient(135deg, #b3e6ff 0%, #f0faff 100%);
+  box-shadow: 0 4px 12px rgba(0, 158, 227, 0.2);
+}
+
+.payment-method[data-method="mercadopago"]:hover label,
+.payment-method[data-method="mercadopago"].selected label {
+  color: #000; /* Negro fuerte para Mercado Pago */
+}
+
+.payment-method[data-method="transferencia"] {
+  border-color: #6f42c1;
+  background: linear-gradient(135deg, #e2d9f3 0%, #ffffff 100%);
+}
+
+.payment-method[data-method="transferencia"] label::before {
+  content: '🏦';
+}
+
+.payment-method[data-method="transferencia"]:hover,
+.payment-method[data-method="transferencia"].selected {
+  border-color: #6f42c1;
+  background: linear-gradient(135deg, #d1c4e9 0%, #f8f6ff 100%);
+  box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);
+}
+
+.payment-method[data-method="transferencia"]:hover label,
+.payment-method[data-method="transferencia"].selected label {
+  color: #000; /* Negro fuerte para transferencia */
+}
+
+/* Estado seleccionado */
+.payment-method.selected {
+  transform: translateY(-2px);
+  border-width: 3px;
+}
+
+.payment-method input[type="radio"]:checked + label {
+  color: #000; /* Negro más fuerte para el estado seleccionado */
+  font-weight: 700; /* Peso más fuerte cuando está seleccionado */
+}
+
+.payment-method input[type="radio"]:checked + label::after {
+  content: '✓';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #28a745;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  animation: checkmarkBounce 0.4s ease-out;
+}
+
+@keyframes checkmarkBounce {
+  0% { 
+    transform: scale(0) rotate(0deg); 
+    opacity: 0; 
+  }
+  50% { 
+    transform: scale(1.3) rotate(180deg); 
+    opacity: 0.8; 
+  }
+  100% { 
+    transform: scale(1) rotate(360deg); 
+    opacity: 1; 
+  }
+}
+
+/* Efecto de pulso sutil cuando está seleccionado */
+.payment-method.selected::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 16px;
+  background: inherit;
+  opacity: 0.1;
+  animation: paymentPulse 2s infinite;
+}
+
+@keyframes paymentPulse {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 0.1; 
+  }
+  50% { 
+    transform: scale(1.02); 
+    opacity: 0.2; 
+  }
 }
 
 .order-summary {
@@ -173,6 +375,22 @@
   
   .payment-methods {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .payment-method {
+    min-height: 70px;
+    padding: 0.75rem;
+  }
+  
+  .payment-method label {
+    font-size: 1rem;
+    color: #1a1a1a; /* Mantener el color negro en móvil */
+    font-weight: 600;
+  }
+  
+  .payment-method label::before {
+    font-size: 1.8rem;
   }
   
   .order-items {
@@ -225,7 +443,20 @@
   }
   
   .payment-method {
+    min-height: 60px;
+    padding: 0.6rem;
     font-size: 0.9rem;
+  }
+  
+  .payment-method label {
+    font-size: 0.9rem;
+    color: #1a1a1a; /* Mantener el color negro en pantallas pequeñas */
+    font-weight: 600;
+  }
+  
+  .payment-method label::before {
+    font-size: 1.6rem;
+    margin-bottom: 0.15rem;
   }
   
   .order-summary {

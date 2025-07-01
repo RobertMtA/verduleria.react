@@ -10,12 +10,29 @@ const Contacto = () => (
     </p>
     <div className="contacto-contenido">
       <form className="contacto-form">
-        <label>Nombre completo</label>
-        <input type="text" placeholder="Tu nombre" required />
-        <label>Email</label>
-        <input type="email" placeholder="Tu correo" required />
-        <label>Mensaje</label>
-        <textarea placeholder="Escribe tu mensaje" required />
+        <label htmlFor="contact-name">Nombre completo</label>
+        <input 
+          id="contact-name"
+          name="name"
+          type="text" 
+          placeholder="Tu nombre" 
+          required 
+        />
+        <label htmlFor="contact-email">Email</label>
+        <input 
+          id="contact-email"
+          name="email"
+          type="email" 
+          placeholder="Tu correo" 
+          required 
+        />
+        <label htmlFor="contact-message">Mensaje</label>
+        <textarea 
+          id="contact-message"
+          name="message"
+          placeholder="Escribe tu mensaje" 
+          required 
+        />
         <button type="submit">Enviar</button>
       </form>
       <div className="contacto-info">

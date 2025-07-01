@@ -80,29 +80,50 @@
 }
 
 /* Tabla */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  overflow: hidden;
+table,
+.pedidos-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  background-color: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  margin-top: 20px !important;
+  visibility: visible !important;
+  display: table !important;
+  border: 2px solid #1976d2 !important;
 }
 
 thead {
-  background-color: #1976d2;
-  color: white;
+  background-color: #1976d2 !important;
+  color: white !important;
+  display: table-header-group !important;
+}
+
+thead tr {
+  background-color: #1976d2 !important;
+  color: white !important;
+  display: table-row !important;
 }
 
 th {
-  padding: 15px;
-  text-align: left;
-  font-weight: 500;
+  padding: 15px !important;
+  text-align: left !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  background-color: #1976d2 !important;
+  color: white !important;
+  border: 1px solid #1565c0 !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
 }
 
 td {
   padding: 12px 15px;
   border-bottom: 1px solid #e0e0e0;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  color: #333;
 }
 
 tr:last-child td {
@@ -194,6 +215,58 @@ button:hover {
   padding: 20px;
   color: #666;
   font-style: italic;
+}
+
+/* Sobrescribir cualquier estilo conflictivo con máxima especificidad */
+.pedidos-container .pedidos-table thead th {
+  background-color: #1976d2 !important;
+  color: white !important;
+  font-weight: bold !important;
+  padding: 15px !important;
+  border: 1px solid #1565c0 !important;
+  text-align: left !important;
+  font-size: 14px !important;
+  display: table-cell !important;
+  visibility: visible !important;
+}
+
+.pedidos-container .pedidos-table thead {
+  background-color: #1976d2 !important;
+  color: white !important;
+  display: table-header-group !important;
+}
+
+.pedidos-container .pedidos-table thead tr {
+  background-color: #1976d2 !important;
+  color: white !important;
+  display: table-row !important;
+}
+
+/* Estilos específicos para headers - asegurar visibilidad */
+.pedidos-table thead,
+.pedidos-table th {
+  background: #1976d2 !important;
+  color: white !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.pedidos-table th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.pedidos-table th:last-child {
+  border-top-right-radius: 6px;
+}
+
+/* Asegurar que los headers no sean sobrescritos por otros estilos */
+.admin-content .pedidos-table th {
+  background-color: #1976d2 !important;
+  color: white !important;
+  padding: 15px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
 }
 
 /* Responsive */

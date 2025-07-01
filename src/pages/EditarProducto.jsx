@@ -65,21 +65,47 @@ const EditarProducto = () => {
 
   return (
     <form className="editar-producto-form" onSubmit={handleSubmit}>
-      <label>
+      <label htmlFor="edit-nombre">
         Nombre:
-        <input name="nombre" value={producto.nombre} onChange={handleChange} required />
+        <input 
+          id="edit-nombre"
+          name="nombre" 
+          value={producto.nombre} 
+          onChange={handleChange} 
+          required 
+        />
       </label>
-      <label>
+      <label htmlFor="edit-precio">
         Precio:
-        <input name="precio" type="number" step="0.01" value={producto.precio} onChange={handleChange} required />
+        <input 
+          id="edit-precio"
+          name="precio" 
+          type="number" 
+          step="0.01" 
+          value={producto.precio} 
+          onChange={handleChange} 
+          required 
+        />
       </label>
-      <label>
+      <label htmlFor="edit-stock">
         Stock:
-        <input name="stock" type="number" value={producto.stock} onChange={handleChange} required />
+        <input 
+          id="edit-stock"
+          name="stock" 
+          type="number" 
+          value={producto.stock} 
+          onChange={handleChange} 
+          required 
+        />
       </label>
-      <label>
+      <label htmlFor="edit-categoria">
         Categoría:
-        <input name="categoria" value={producto.categoria} onChange={handleChange} />
+        <input 
+          id="edit-categoria"
+          name="categoria" 
+          value={producto.categoria} 
+          onChange={handleChange} 
+        />
       </label>
       <button type="submit">Guardar</button>
     </form>

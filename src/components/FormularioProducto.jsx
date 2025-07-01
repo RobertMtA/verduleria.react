@@ -41,21 +41,35 @@ function FormularioProducto({ onAgregar }) {
         <form onSubmit={handleSubmit}>
             <h2>Agregar Producto</h2>
             <div>
-                <label>Nombre:</label>
+                <label htmlFor="form-nombre">Nombre:</label>
                 <input
-                    type="text" name="nombre" value={producto.nombre} onChange={handleChange} required />
-                     {errores.nombre && <p style={{ color: 'red' }}>{errores.nombre}</p>}
+                    id="form-nombre"
+                    type="text" 
+                    name="nombre" 
+                    value={producto.nombre} 
+                    onChange={handleChange} 
+                    required 
+                />
+                {errores.nombre && <p style={{ color: 'red' }}>{errores.nombre}</p>}
             </div>
             <div>
-                <label>Precio:</label>
-                <input type="number" name="precio" value={producto.precio} onChange={handleChange} required
-                    min="0" />
-                    {errores.precio && <p style={{ color: 'red' }}>{errores.precio}</p>}
+                <label htmlFor="form-precio">Precio:</label>
+                <input 
+                    id="form-precio"
+                    type="number" 
+                    name="precio" 
+                    value={producto.precio} 
+                    onChange={handleChange} 
+                    required
+                    min="0" 
+                />
+                {errores.precio && <p style={{ color: 'red' }}>{errores.precio}</p>}
             </div>
 
             <div>
-                <label>Descripción:</label>
+                <label htmlFor="form-descripcion">Descripción:</label>
                 <textarea
+                    id="form-descripcion"
                     name="descripcion"
                     value={producto.descripcion}
                     onChange={handleChange}

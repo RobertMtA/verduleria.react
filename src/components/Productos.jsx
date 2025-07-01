@@ -3,6 +3,7 @@ import './Productos.css';
 import { Link } from 'react-router-dom';
 import useProducts from '../hooks/useProducts';
 import { CartContext } from '../context/CartContext';
+import { getProductImageUrl, handleImageError } from '../utils/imageUtils';
 
 const Productos = () => {
   const { products, loading, error } = useProducts();
@@ -58,10 +59,10 @@ const Productos = () => {
         <div key={product.id} className="product-card">
           <div className="image-container">
             <img
-              src={product.imagen}
+              src={getProductImageUrl(product)}
               alt={product.nombre}
               className="product-image"
-              onError={e => { e.target.src = '/images/placeholder.jpg'; }}
+              onError={handleImageError}
             />
           </div>
           <h3>{product.nombre}</h3>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageUtils";
 import "./NuevoProducto.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
@@ -24,6 +25,9 @@ const NuevoProducto = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [successMessage, setSuccessMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const categorias = [
     "Frutas",
@@ -82,8 +86,12 @@ const NuevoProducto = () => {
     if (!producto.descripcion.trim()) nuevosErrores.descripcion = "La descripción es obligatoria";
     else if (producto.descripcion.length < 10) nuevosErrores.descripcion = "Mínimo 10 caracteres";
 
-    if (producto.imagen && !producto.imagen.startsWith('/images/') && !/^https?:\/\//.test(producto.imagen)) {
-      nuevosErrores.imagen = "Debe comenzar con /images/ o ser una URL válida";
+    // La imagen ya no es requerida como URL, solo validar si hay una seleccionada
+    if (selectedImage) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(selectedImage.type)) {
+        nuevosErrores.imagen = "Solo se permiten archivos JPG, PNG o WebP";
+      }
     }
 
     setErrores(nuevosErrores);
@@ -116,6 +124,8 @@ const NuevoProducto = () => {
     });
     setEditId(null);
     setErrores({});
+    setSelectedImage(null);
+    setImagePreview("");
   };
 
   // Guardar producto (crear o actualizar)
@@ -125,6 +135,19 @@ const NuevoProducto = () => {
     setIsSubmitting(true);
 
     try {
+      let imagePath = producto.imagen;
+
+      // Si hay una imagen seleccionada, subirla primero
+      if (selectedImage) {
+        try {
+          imagePath = await uploadImage(selectedImage);
+        } catch (error) {
+          alert("Error al subir la imagen: " + error.message);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const url = editId
         ? `${API_URL}/productos/${editId}`
         : `${API_URL}/productos`;
@@ -136,7 +159,7 @@ const NuevoProducto = () => {
         stock: parseInt(producto.stock),
         categoria: producto.categoria,
         descripcion: producto.descripcion.trim(),
-        image: producto.imagen.trim() || null
+        image: imagePath || null
       };
 
       const response = await fetch(url, {
@@ -161,6 +184,79 @@ const NuevoProducto = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Manejar selección de imagen
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrores(prev => ({ ...prev, imagen: "Solo se permiten archivos JPG, PNG o WebP" }));
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrores(prev => ({ ...prev, imagen: "La imagen no puede superar 5MB" }));
+        return;
+      }
+
+      setSelectedImage(file);
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Limpiar errores
+      setErrores(prev => ({ ...prev, imagen: "" }));
+    }
+  };
+
+  // Subir imagen al servidor
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      setUploadingImage(true);
+      const response = await fetch(`${API_URL}/upload-image`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen');
+      }
+
+      const data = await response.json();
+      return data.imagePath; // Retorna la ruta de la imagen
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Efecto para subir imagen al crear/editar producto
+  useEffect(() => {
+    const uploadImageAsync = async () => {
+      if (selectedImage) {
+        try {
+          const imagePath = await uploadImage(selectedImage);
+          setProducto(prev => ({ ...prev, imagen: imagePath }));
+        } catch (error) {
+          setErrores(prev => ({ ...prev, imagen: error.message }));
+        }
+      }
+    };
+
+    uploadImageAsync();
+  }, [selectedImage, uploadImage]);
 
   // Filtrar y paginar productos
   const productosArray = Array.isArray(products) ? products : [];
@@ -261,20 +357,64 @@ const NuevoProducto = () => {
           </div>
           
           <div className="form-group full-width">
-            <label htmlFor="imagen">URL de la Imagen</label>
-            <input
-              id="imagen"
-              type="text"
-              name="imagen"
-              value={producto.imagen}
-              onChange={handleChange}
-              placeholder="/images/img-tomate1.jpg o https://ejemplo.com/imagen.jpg"
-              className={errores.imagen ? "error" : ""}
-            />
-            {errores.imagen && <span className="error-message">{errores.imagen}</span>}
-            <small className="input-hint">
-              Usar <code>/images/nombre.jpg</code> para imágenes locales o URL completa para imágenes externas
-            </small>
+            <label htmlFor="imagen">Imagen del Producto</label>
+            <div className="image-upload-section">
+              <input
+                id="imagen"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className={errores.imagen ? "error" : ""}
+                style={{ marginBottom: '10px' }}
+              />
+              {errores.imagen && <span className="error-message">{errores.imagen}</span>}
+              
+              {/* Preview de la imagen */}
+              {imagePreview && (
+                <div className="image-preview">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    style={{ 
+                      maxWidth: '200px', 
+                      maxHeight: '200px', 
+                      objectFit: 'cover',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      marginTop: '10px'
+                    }} 
+                  />
+                </div>
+              )}
+              
+              {/* Mostrar imagen existente cuando se está editando */}
+              {!imagePreview && producto.imagen && (
+                <div className="current-image">
+                  <p>Imagen actual:</p>
+                  <img 
+                    src={getImageUrl(producto.imagen)} 
+                    alt="Imagen actual" 
+                    style={{ 
+                      maxWidth: '200px', 
+                      maxHeight: '200px', 
+                      objectFit: 'cover',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      marginTop: '10px'
+                    }} 
+                    onError={(e) => {
+                      console.error('Error cargando imagen:', producto.imagen);
+                      console.error('URL construida:', getImageUrl(producto.imagen));
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
+              <small className="input-hint">
+                Formatos permitidos: JPG, PNG, WebP. Tamaño máximo: 5MB
+              </small>
+            </div>
           </div>
         </div>
         
@@ -290,12 +430,12 @@ const NuevoProducto = () => {
           <button
             type="submit"
             className="primary-button"
-            disabled={isSubmitting}
+            disabled={isSubmitting || uploadingImage}
           >
-            {isSubmitting ? (
+            {isSubmitting || uploadingImage ? (
               <>
                 <span className="spinner"></span>
-                {editId ? "Actualizando..." : "Creando..."}
+                {uploadingImage ? "Subiendo imagen..." : (editId ? "Actualizando..." : "Creando...")}
               </>
             ) : editId ? "Actualizar Producto" : "Crear Producto"}
           </button>
@@ -308,6 +448,8 @@ const NuevoProducto = () => {
           <h3>Productos Existentes</h3>
           <div className="search-box">
             <input
+              id="search-products"
+              name="search"
               type="text"
               placeholder="Buscar productos..."
               value={searchTerm}

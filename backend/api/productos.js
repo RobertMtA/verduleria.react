@@ -18,8 +18,18 @@ router.get("/", async (req, res) => {
   try {
     const { collection, client } = await getCollection();
     const productos = await collection.find().toArray();
+    
+    // Convertir _id de MongoDB a id para evitar problemas en el frontend
+    const productosConId = productos.map(p => {
+      const { _id, ...product } = p;
+      return {
+        ...product,
+        id: _id.toString()
+      };
+    });
+    
     await client.close();
-    res.json(productos);
+    res.json(productosConId);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener productos", detalle: error.message });
   }
@@ -34,7 +44,15 @@ router.get("/:id", async (req, res) => {
     if (!producto) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
-    res.json(producto);
+    
+    // Convertir _id a id
+    const { _id, ...product } = producto;
+    const productoConId = {
+      ...product,
+      id: _id.toString()
+    };
+    
+    res.json(productoConId);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener producto", detalle: error.message });
   }

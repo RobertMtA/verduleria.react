@@ -36,6 +36,7 @@ const useProducts = () => {
       const productosNumericos = Array.isArray(data)
         ? data.map((p) => ({
             ...p,
+            id: p.id || p._id, // Asegurar que siempre haya un ID
             precio: Number(p.precio),
             stock: Number(p.stock),
           }))

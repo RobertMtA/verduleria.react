@@ -19,7 +19,7 @@ const Home = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
-  // Filtrar productos destacados
+  // Filtrar productos destacados (reducir a 4 para balance)
   useEffect(() => {
     if (products.length) {
       setFeaturedProducts(products.slice(0, 4));
@@ -30,6 +30,12 @@ const Home = () => {
   const filteredProducts = products.filter(
     p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Limitar productos para la página de inicio (2 filas = 8 productos máximo)
+  // Solo cuando NO hay búsqueda activa para mantener la página concisa
+  const homeProducts = searchTerm.trim() 
+    ? filteredProducts // Mostrar todos los resultados de búsqueda
+    : filteredProducts.slice(0, 8); // Limitar a 8 productos en vista normal
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -153,17 +159,29 @@ const Home = () => {
               actionText="Reintentar"
               onAction={() => window.location.reload()}
             />
-          ) : filteredProducts.length > 0 ? (
+          ) : homeProducts.length > 0 ? (
             <>
               <ProductList 
-                products={filteredProducts} 
+                products={homeProducts} 
                 addToCart={addToCart}
               />
-              <div className="text-center">
-                <Link to="/productos" className="btn btn-primary">
-                  Ver Todo el Catálogo
-                </Link>
-              </div>
+              {/* Mostrar botón "Ver más" solo si hay más productos disponibles */}
+              {!searchTerm.trim() && filteredProducts.length > 8 && (
+                <div className="text-center" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+                  <Link to="/productos" className="btn btn-view-more">
+                    <i className="fas fa-chevron-right" style={{ marginRight: '8px' }}></i>
+                    Ver Todos los Productos ({filteredProducts.length} disponibles)
+                  </Link>
+                </div>
+              )}
+              {/* Si hay búsqueda activa, mostrar enlace al catálogo completo */}
+              {searchTerm.trim() && (
+                <div className="text-center" style={{ marginTop: '2rem' }}>
+                  <Link to="/productos" className="btn btn-primary">
+                    Ver Todo el Catálogo
+                  </Link>
+                </div>
+              )}
             </>
           ) : (
             <EmptyState 
@@ -173,6 +191,8 @@ const Home = () => {
                 ? "Intenta con otros términos de búsqueda" 
                 : "Pronto tendremos más productos disponibles"
               }
+              actionText={searchTerm.trim() ? "Ver todos los productos" : undefined}
+              onAction={searchTerm.trim() ? () => window.location.href = '/productos' : undefined}
             />
           )}
         </div>

@@ -118,6 +118,8 @@ const Usuarios = () => {
         <h2>Administración de Usuarios</h2>
         <div className="usuarios-actions">
           <input
+            id="search-users"
+            name="search"
             type="text"
             placeholder="Buscar usuarios..."
             value={searchTerm}

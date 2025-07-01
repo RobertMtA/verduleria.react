@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getProductImageUrl, handleImageError } from '../utils/imageUtils';
 import './ProductList.css';
 
 const ProductList = ({ products, addToCart }) => {
@@ -59,12 +60,10 @@ const ProductList = ({ products, addToCart }) => {
               : "0"}
           </p>
           <img
-            src={product.imagen}
+            src={getProductImageUrl(product)}
             alt={product.nombre}
             className="product-image"
-            onError={e => {
-              e.target.src = "/images/placeholder.jpg";
-            }}
+            onError={handleImageError}
           />
           
           {addToCart && (

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { getProductImageUrl, handleImageError } from "../utils/imageUtils";
 import "./Checkout.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
@@ -228,7 +229,11 @@ const Checkout = () => {
             <h2>Método de pago</h2>
             <div className="payment-methods">
               {['efectivo', 'tarjeta', 'mercadopago', 'transferencia'].map((method) => (
-                <div key={method} className="payment-method">
+                <div 
+                  key={method} 
+                  className={`payment-method ${formData.metodoPago === method ? 'selected' : ''}`}
+                  data-method={method}
+                >
                   <input
                     type="radio"
                     id={`payment-${method}`}
@@ -240,9 +245,9 @@ const Checkout = () => {
                   />
                   <label htmlFor={`payment-${method}`}>
                     {method === 'efectivo' && 'Efectivo'}
-                    {method === 'tarjeta' && 'Tarjeta'}
+                    {method === 'tarjeta' && 'Tarjeta de Crédito/Débito'}
                     {method === 'mercadopago' && 'Mercado Pago'}
-                    {method === 'transferencia' && 'Transferencia'}
+                    {method === 'transferencia' && 'Transferencia Bancaria'}
                   </label>
                 </div>
               ))}
@@ -262,8 +267,9 @@ const Checkout = () => {
                 <div key={`${item.id ?? item._id}-${item.nombre ?? item.name}`} className="order-item">
                   <div className="item-image">
                     <img 
-                      src={item.imagen || item.image || '/images/default-product.jpg'} 
+                      src={getProductImageUrl(item)} 
                       alt={item.nombre || item.name} 
+                      onError={handleImageError}
                     />
                   </div>
                   <div className="item-info">

@@ -2,6 +2,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useProducts from "../hooks/useProducts";
 import { useCart } from "../context/CartContext";
+import { getProductImageUrl, handleImageError } from "../utils/imageUtils";
 import "./ProductDetail.css";
 
 const ProductDetail = () => {
@@ -38,16 +39,11 @@ const ProductDetail = () => {
     <div className="product-detail">
       <div className="product-image">
         <img
-          src={
-            producto.imagen
-              ? `/images/${producto.imagen.replace(/^\/?images\//, "")}`
-              : producto.image
-              ? `/images/${producto.image.replace(/^\/?images\//, "")}`
-              : "/images/default-product.jpg"
-          }
+          src={getProductImageUrl(producto)}
           alt={producto.nombre ?? producto.name}
           className="product-detail-image"
           style={{ width: "200px", height: "200px", objectFit: "cover" }}
+          onError={handleImageError}
         />
       </div>
 
@@ -69,6 +65,8 @@ const ProductDetail = () => {
               -
             </button>
             <input
+              id="product-quantity"
+              name="quantity"
               type="number"
               value={cantidad}
               onChange={(e) =>
@@ -76,6 +74,7 @@ const ProductDetail = () => {
               }
               min="1"
               max={producto.stock}
+              aria-label="Cantidad del producto"
             />
             <button
               onClick={() => setCantidad((prev) => Math.min(producto.stock, prev + 1))}

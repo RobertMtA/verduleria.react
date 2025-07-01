@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import "./PedidosAdmin.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
 
 const PedidosAdmin = () => {
+  const { user, isAuthenticated } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -110,27 +112,30 @@ const PedidosAdmin = () => {
       </div>
 
       {loading ? (
-        <div>Cargando...</div>
+        <div className="loading">Cargando pedidos...</div>
       ) : pedidosFiltrados.length === 0 ? (
-        <p>No hay pedidos {filter !== "todos" ? `con estado ${filter}` : ""}</p>
+        <div>
+          <p>No hay pedidos {filter !== "todos" ? `con estado ${filter}` : ""}</p>
+          <p>Total de pedidos en estado: {pedidos.length}</p>
+        </div>
       ) : (
-        <table>
-          <thead>
+        <table className="pedidos-table" style={{width: '100%', borderCollapse: 'collapse', background: 'white'}}>
+          <thead style={{backgroundColor: '#1976d2', color: 'white'}}>
             <tr>
-              <th>ID</th>
-              <th>Cliente</th>
-              <th>Fecha</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th style={{padding: '15px', backgroundColor: '#1976d2', color: 'white', fontWeight: 'bold'}}>ID</th>
+              <th style={{padding: '15px', backgroundColor: '#1976d2', color: 'white', fontWeight: 'bold'}}>Cliente</th>
+              <th style={{padding: '15px', backgroundColor: '#1976d2', color: 'white', fontWeight: 'bold'}}>Fecha</th>
+              <th style={{padding: '15px', backgroundColor: '#1976d2', color: 'white', fontWeight: 'bold'}}>Total</th>
+              <th style={{padding: '15px', backgroundColor: '#1976d2', color: 'white', fontWeight: 'bold'}}>Estado</th>
+              <th style={{padding: '15px', backgroundColor: '#1976d2', color: 'white', fontWeight: 'bold'}}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {pedidosFiltrados.map(pedido => (
+            {pedidosFiltrados.length > 0 ? pedidosFiltrados.map(pedido => (
               <tr key={pedido._id}>
                 <td>#{pedido._id}</td>
-                <td>{pedido.cliente}</td>
-                <td>{pedido.fecha ? new Date(pedido.fecha).toLocaleDateString() : "-"}</td>
+                <td>{pedido.usuario?.nombre || pedido.cliente || "-"}</td>
+                <td>{pedido.fecha_pedido ? new Date(pedido.fecha_pedido).toLocaleDateString() : "-"}</td>
                 <td>${Number(pedido.total).toLocaleString()}</td>
                 <td>
                   <select
@@ -152,7 +157,13 @@ const PedidosAdmin = () => {
                   </button>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>
+                  No hay pedidos para mostrar
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       )}

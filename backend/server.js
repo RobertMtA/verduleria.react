@@ -3,6 +3,13 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ACCESS_TOKEN = 'TEST-8823875515856581-062100-7403bf2c717e78cea313b61ed2f47a2a-792003923';
 
@@ -71,9 +78,53 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:5174',
     'https://verduleria-react.netlify.app'
-  ]
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.use(express.json());
+
+// Configuración de multer para subida de archivos
+const uploadsDir = path.join(__dirname, '../public/images');
+
+// Crear directorio si no existe
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    // Generar nombre único: timestamp + nombre original
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB máximo
+  },
+  fileFilter: function (req, file, cb) {
+    // Verificar tipo de archivo
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten imágenes (jpeg, jpg, png, webp)'));
+    }
+  }
+});
+
+// Servir archivos estáticos de imágenes
+app.use('/images', express.static(uploadsDir));
 
 // Endpoint para crear preferencia de pago
 app.post('/api/crear-preferencia', async (req, res) => {
@@ -111,6 +162,38 @@ app.post('/api/crear-preferencia', async (req, res) => {
     console.error("Error Mercado Pago:", error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// Endpoint para subir imágenes
+app.post('/api/upload-image', (req, res) => {
+  console.log('📷 Recibiendo request de upload de imagen...');
+  
+  upload.single('image')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      console.error('❌ Error de Multer:', err);
+      return res.status(400).json({ error: `Error de subida: ${err.message}` });
+    } else if (err) {
+      console.error('❌ Error desconocido:', err);
+      return res.status(400).json({ error: `Error: ${err.message}` });
+    }
+
+    console.log('📁 Archivo recibido:', req.file);
+    
+    if (!req.file) {
+      console.error('❌ No se recibió ningún archivo');
+      return res.status(400).json({ error: 'No se recibió ningún archivo' });
+    }
+
+    // Retornar la ruta relativa de la imagen
+    const imagePath = `/images/${req.file.filename}`;
+    console.log('✅ Imagen guardada en:', imagePath);
+    
+    res.json({ 
+      success: true, 
+      imagePath: imagePath,
+      fileName: req.file.filename 
+    });
+  });
 });
 
 // Rutas principales

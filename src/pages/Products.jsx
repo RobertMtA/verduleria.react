@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from "../context/CartContext.jsx";
 import useProducts from '../hooks/useProducts';
+import { getProductImageUrl, handleImageError } from '../utils/imageUtils';
 import './Products.css';
 
 const Products = () => {
@@ -76,6 +77,20 @@ const Products = () => {
     .filter(p => p.activo)
     .filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
+  // Debug: verificar si hay IDs duplicados (se puede remover después)
+  const productIds = filteredProducts.map(p => p.id);
+  const uniqueIds = [...new Set(productIds)];
+  if (productIds.length !== uniqueIds.length) {
+    console.warn('⚠️ Productos con IDs duplicados detectados después de corrección del backend');
+    const duplicatedProducts = filteredProducts.filter((p, index, arr) => 
+      arr.findIndex(item => item.id === p.id) !== index
+    );
+    console.log('Productos duplicados:', duplicatedProducts);
+    console.log('Todos los productos filtrados:', filteredProducts);
+  } else {
+    console.log('✅ No se detectaron productos duplicados');
+  }
+
   if (loading) {
     return (
       <div className="loading">
@@ -106,6 +121,8 @@ const Products = () => {
           autoComplete="off"
         >
           <input
+            id="search-products"
+            name="search"
             type="text"
             className="products-search-input"
             placeholder="Buscar productos..."
@@ -133,11 +150,9 @@ const Products = () => {
                 <Link to={`/productos/${producto.id}`} className="product-link">
                   <div className="product-image-container">
                     <img 
-                      src={producto.imagen || '/default-product.png'} 
+                      src={getProductImageUrl(producto)} 
                       alt={producto.nombre} 
-                      onError={(e) => {
-                        e.target.src = '/default-product.png';
-                      }}
+                      onError={handleImageError}
                     />
                     {producto.stock === 0 && (
                       <div className="out-of-stock-badge">Agotado</div>
