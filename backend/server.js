@@ -128,48 +128,71 @@ const Reseña = model('Reseña', ReseñaSchema);
 
 const app = express();
 
-// Middleware CORS personalizado que se aplica a TODAS las respuestas
+// 🚨 CORS ULTRA-AGRESIVO - SOLUCIÓN TEMPORAL 🚨
 app.use((req, res, next) => {
-  // Agregar headers CORS de forma explícita
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  console.log(`🌐 REQUEST: ${req.method} ${req.path} - Origin: ${req.get('Origin')}`);
   
-  // Interceptar todas las respuestas para asegurar que tengan headers CORS
-  const originalSend = res.send;
-  const originalJson = res.json;
-  const originalStatus = res.status;
+  // Headers CORS ultra-permisivos
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Max-Age', '86400');
+  
+  // Interceptar TODAS las funciones de respuesta
+  const originalRes = {
+    send: res.send,
+    json: res.json,
+    status: res.status,
+    end: res.end
+  };
+  
+  const addCorsHeaders = () => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+  };
   
   res.send = function(data) {
-    res.header('Access-Control-Allow-Origin', '*');
-    return originalSend.call(this, data);
+    addCorsHeaders();
+    console.log(`📤 SENDING: ${req.method} ${req.path} - Status: ${this.statusCode}`);
+    return originalRes.send.call(this, data);
   };
   
   res.json = function(data) {
-    res.header('Access-Control-Allow-Origin', '*');
-    return originalJson.call(this, data);
+    addCorsHeaders();
+    console.log(`📤 JSON: ${req.method} ${req.path} - Status: ${this.statusCode}`);
+    return originalRes.json.call(this, data);
   };
   
   res.status = function(code) {
-    res.header('Access-Control-Allow-Origin', '*');
-    return originalStatus.call(this, code);
+    addCorsHeaders();
+    return originalRes.status.call(this, code);
   };
   
-  // Responder a preflight OPTIONS inmediatamente
+  res.end = function(data) {
+    addCorsHeaders();
+    console.log(`📤 END: ${req.method} ${req.path} - Status: ${this.statusCode}`);
+    return originalRes.end.call(this, data);
+  };
+  
+  // Respuesta inmediata para OPTIONS
   if (req.method === 'OPTIONS') {
+    console.log(`✅ OPTIONS: ${req.path} - Responding immediately`);
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
     return res.status(200).end();
   }
   
   next();
 });
 
-// CORS adicional con cors package como fallback
+// CORS package como backup
 app.use(cors({
-  origin: '*', // Permitir todos los orígenes explícitamente
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: false // Cambiar a false para evitar conflictos
+  origin: '*',
+  methods: '*',
+  allowedHeaders: '*',
+  credentials: false
 }));
 
 app.use(express.json());
