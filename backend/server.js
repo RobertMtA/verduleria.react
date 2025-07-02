@@ -131,7 +131,9 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://verduleria-react.netlify.app'
+    'https://verduleria-react.netlify.app',
+    'https://verduleria-react.vercel.app',
+    'https://verduleria-react-git-main-robertogaona1985-1518s-projects.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
