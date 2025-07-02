@@ -3,19 +3,39 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
+import dotenv from 'dotenv';
+
+// Cargar variables de entorno
+dotenv.config();
+
+// Importar servicios de email y PDF
+import { enviarEmailConfirmacion, enviarEmailResetPassword, enviarEmailNotificacionAdmin } from './services/emailService.js';
+import { generarComprobantePDF, guardarComprobantePDF } from './services/pdfService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ACCESS_TOKEN = 'TEST-8823875515856581-062100-7403bf2c717e78cea313b61ed2f47a2a-792003923';
 
+// Configurar MercadoPago
+const client = new MercadoPagoConfig({ 
+  accessToken: ACCESS_TOKEN,
+  options: { timeout: 5000 }
+});
+
+const preference = new Preference(client);
+
 import usersRoutes from './routes/users.js';
 import authRouter from "./api/auth.js";
 import productosRouter from "./api/productos.js";
+import ofertasRouter from "./api/ofertas.js";
+import chatRouter from "./routes/chat.js";
 // import reportesRouter from './api/reportes.js'; // Removido - manejado directamente
 
 // --- Conexión a MongoDB ---
@@ -42,7 +62,9 @@ const UsuarioSchema = new Schema({
   role: { type: String, default: 'user' },
   telefono: { type: String, default: '' },
   direccion: { type: String, default: '' },
-  fecha_registro: { type: Date, default: Date.now }
+  fecha_registro: { type: Date, default: Date.now },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 });
 const Usuario = model('Usuario', UsuarioSchema);
 
@@ -58,7 +80,8 @@ const PedidoSchema = new Schema({
     nombre: { type: String, required: true },
     precio: { type: Number, required: true },
     cantidad: { type: Number, required: true },
-    subtotal: { type: Number, required: true }
+    subtotal: { type: Number, required: true },
+    image: { type: String, default: '' }
   }],
   total: { type: Number, required: true },
   estado: { 
@@ -72,6 +95,37 @@ const PedidoSchema = new Schema({
 });
 const Pedido = model('Pedido', PedidoSchema);
 
+// --- Modelo de Reseña ---
+const ReseñaSchema = new Schema({
+  usuario: {
+    nombre: { type: String, required: true },
+    email: { type: String, required: true }
+  },
+  calificacion: { 
+    type: Number, 
+    required: true, 
+    min: 1, 
+    max: 5 
+  },
+  comentario: { 
+    type: String, 
+    required: true,
+    maxlength: 500
+  },
+  fecha_reseña: { type: Date, default: Date.now },
+  aprobada: { type: Boolean, default: false }, // Para moderación
+  producto: { 
+    type: String, 
+    default: 'general' // 'general' para reseñas del servicio, o nombre del producto específico
+  },
+  pedido_id: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Pedido',
+    required: false // Opcional, para asociar reseña con pedido específico
+  }
+});
+const Reseña = model('Reseña', ReseñaSchema);
+
 const app = express();
 app.use(cors({
   origin: [
@@ -79,7 +133,7 @@ app.use(cors({
     'http://localhost:5174',
     'https://verduleria-react.netlify.app'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
@@ -126,41 +180,96 @@ const upload = multer({
 // Servir archivos estáticos de imágenes
 app.use('/images', express.static(uploadsDir));
 
-// Endpoint para crear preferencia de pago
+// Endpoint para crear preferencia de pago con MercadoPago (usando fetch directamente)
 app.post('/api/crear-preferencia', async (req, res) => {
-  const { items, email } = req.body;
+  console.log('🔄 Creando preferencia de MercadoPago...');
+  
   try {
+    const { items, email, usuario, direccion } = req.body;
+    
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Debe proporcionar al menos un producto' 
+      });
+    }
+
+    if (!email) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Debe proporcionar un email' 
+      });
+    }
+
+    // Validar y formatear items
+    const formattedItems = items.map(item => {
+      const unitPrice = Number(item.unit_price);
+      const quantity = Number(item.quantity);
+      
+      if (isNaN(unitPrice) || unitPrice <= 0) {
+        throw new Error(`Precio inválido para el producto: ${item.title}`);
+      }
+      
+      if (isNaN(quantity) || quantity <= 0) {
+        throw new Error(`Cantidad inválida para el producto: ${item.title}`);
+      }
+
+      return {
+        title: String(item.title),
+        quantity: quantity,
+        unit_price: unitPrice,
+        currency_id: 'ARS'
+      };
+    });
+
+    const preferenceData = {
+      items: formattedItems,
+      payer: {
+        email: email
+      },
+      back_urls: {
+        success: "http://localhost:5173/pago-exitoso",
+        failure: "http://localhost:5173/pago-fallido", 
+        pending: "http://localhost:5173/pago-pendiente"
+      },
+      external_reference: `pedido_${Date.now()}`
+    };
+
+    console.log('📦 Datos de preferencia:', JSON.stringify(preferenceData, null, 2));
+
+    // Usar fetch directamente en lugar del SDK
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${ACCESS_TOKEN}`
       },
-      body: JSON.stringify({
-        items: items.map(item => ({
-          title: String(item.title),
-          quantity: Number(item.quantity),
-          unit_price: Number(item.unit_price)
-        })),
-        payer: { email: String(email) },
-        back_urls: {
-          success: "https://tusitio.com/confirmacion",
-          failure: "https://tusitio.com/error",
-          pending: "https://tusitio.com/pending"
-        },
-        auto_return: "approved"
-      })
+      body: JSON.stringify(preferenceData)
     });
-    const data = await response.json();
-    if (data.init_point) {
-      res.json({ init_point: data.init_point });
-    } else {
-      console.error("Error Mercado Pago:", data);
-      res.status(500).json({ error: data.message || 'Error al crear preferencia' });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Error de MercadoPago:', result);
+      throw new Error(result.message || 'Error al crear preferencia de pago');
     }
+
+    console.log('✅ Preferencia creada exitosamente:', result.id);
+    
+    res.json({ 
+      success: true,
+      preference_id: result.id,
+      init_point: result.init_point,
+      sandbox_init_point: result.sandbox_init_point
+    });
+
   } catch (error) {
-    console.error("Error Mercado Pago:", error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error al crear preferencia de MercadoPago:', error);
+    
+    res.status(500).json({ 
+      success: false,
+      error: error.message || 'Error interno del servidor al crear la preferencia de pago'
+    });
   }
 });
 
@@ -199,7 +308,9 @@ app.post('/api/upload-image', (req, res) => {
 // Rutas principales
 app.use('/api/auth', authRouter);
 app.use("/api/productos", productosRouter);
+app.use('/api/ofertas', ofertasRouter);
 app.use('/api/users', usersRoutes);
+app.use('/api/chat', chatRouter);
 // app.use('/api/reportes', reportesRouter); // Removido - ahora manejado directamente
 
 // Endpoint de health check para keep-alive
@@ -267,32 +378,53 @@ app.get('/api/perfil.php', async (req, res) => {
 });
 
 // Ruta para actualizar perfil de usuario
-app.post('/api/perfil.php', (req, res) => {
+app.put('/api/perfil/:email', async (req, res) => {
   try {
-    const { user_id, nombre, email, telefono, direccion } = req.body;
-    console.log('Actualizando perfil:', { user_id, nombre, email, telefono, direccion });
+    const { email } = req.params;
+    const { nombre, telefono, direccion } = req.body;
     
-    if (!user_id) {
+    console.log('Actualizando perfil para email:', email);
+    console.log('Datos a actualizar:', { nombre, telefono, direccion });
+    
+    if (!email) {
       return res.status(400).json({
         success: false,
-        error: "user_id es requerido"
+        error: "Email es requerido"
       });
     }
 
-    // Simulamos la actualización
+    // Actualizar en la base de datos
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { email: email },
+      { 
+        $set: {
+          nombre: nombre || '',
+          telefono: telefono || '',
+          direccion: direccion || ''
+        }
+      },
+      { 
+        new: true, // Retorna el documento actualizado
+        runValidators: true
+      }
+    ).select('-password');
+
+    if (!usuarioActualizado) {
+      return res.status(404).json({
+        success: false,
+        error: "Usuario no encontrado"
+      });
+    }
+
+    console.log('Usuario actualizado:', usuarioActualizado);
+
     res.json({
       success: true,
       message: "Perfil actualizado correctamente",
-      data: {
-        id: user_id,
-        nombre,
-        email,
-        telefono,
-        direccion
-      }
+      data: usuarioActualizado
     });
   } catch (error) {
-    console.error('Error en update perfil:', error);
+    console.error('Error al actualizar perfil:', error);
     res.status(500).json({
       success: false,
       error: "Error interno del servidor"
@@ -501,14 +633,68 @@ app.delete('/api/suscriptores/:id', async (req, res) => {
 });
 
 // PEDIDOS
-// Obtener todos los pedidos
+// Obtener todos los pedidos con información actualizada del usuario
 app.get('/api/pedidos', async (req, res) => {
   try {
     const pedidos = await Pedido.find().sort({ fecha_pedido: -1 });
-    res.json(pedidos);
+    
+    // Enriquecer pedidos con información actualizada del usuario
+    const pedidosEnriquecidos = await Promise.all(
+      pedidos.map(async (pedido) => {
+        try {
+          // Buscar usuario actualizado por email
+          const usuarioActualizado = await Usuario.findOne({ 
+            email: pedido.usuario.email 
+          }).select('-password');
+          
+          if (usuarioActualizado) {
+            // Combinar información del pedido con datos actualizados del usuario
+            return {
+              ...pedido.toObject(),
+              usuario: {
+                ...pedido.usuario,
+                // Dirección actualizada del usuario
+                direccion_actual: usuarioActualizado.direccion,
+                telefono_actual: usuarioActualizado.telefono,
+                // Mantener dirección original del pedido para auditoría
+                direccion_pedido: pedido.usuario.direccion
+              }
+            };
+          }
+          return pedido.toObject();
+        } catch (err) {
+          console.error('Error al obtener usuario actualizado:', err);
+          return pedido.toObject();
+        }
+      })
+    );
+    
+    res.json(pedidosEnriquecidos);
   } catch (error) {
     console.error('Error al obtener pedidos:', error);
     res.status(500).json({ error: 'Error al obtener pedidos' });
+  }
+});
+
+// Obtener pedidos por email de usuario
+app.get('/api/pedidos/usuario/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    console.log('Buscando pedidos para email:', email);
+    
+    const pedidos = await Pedido.find({ 'usuario.email': email }).sort({ fecha_pedido: -1 });
+    console.log('Pedidos encontrados:', pedidos.length);
+    
+    res.json({ 
+      success: true, 
+      pedidos: pedidos 
+    });
+  } catch (error) {
+    console.error('Error al obtener pedidos del usuario:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al obtener pedidos del usuario' 
+    });
   }
 });
 
@@ -524,20 +710,87 @@ app.post('/api/pedidos', async (req, res) => {
       });
     }
 
-    const nuevoPedido = new Pedido({
-      usuario,
-      productos,
-      total,
-      metodo_pago: metodo_pago || 'mercadopago',
-      estado: 'pendiente'
-    });
+    // Conectar a MongoDB para enriquecer productos con imágenes
+    const { MongoClient } = await import('mongodb');
+    const mongoUri = 'mongodb+srv://Verduleria:Prueba1234@cluster0.lzugghn.mongodb.net/verduleria?retryWrites=true&w=majority&appName=Cluster0';
+    const client = new MongoClient(mongoUri);
+    
+    try {
+      await client.connect();
+      const db = client.db('verduleria');
+      const productosCollection = db.collection('productos');
+      
+      // Enriquecer productos con imágenes de la base de datos
+      const productosEnriquecidos = await Promise.all(
+        productos.map(async (prod) => {
+          try {
+            // Buscar el producto por nombre (podrían tener IDs también)
+            const productoDB = await productosCollection.findOne({ 
+              nombre: prod.nombre 
+            });
+            
+            return {
+              nombre: prod.nombre,
+              precio: prod.precio,
+              cantidad: prod.cantidad,
+              subtotal: prod.subtotal,
+              image: productoDB?.image || '/images/default-product.svg'
+            };
+          } catch (error) {
+            console.error('Error al buscar producto:', prod.nombre, error);
+            return {
+              ...prod,
+              image: '/images/default-product.svg'
+            };
+          }
+        })
+      );
 
-    const pedidoGuardado = await nuevoPedido.save();
-    res.json({ 
-      success: true, 
-      message: 'Pedido creado correctamente',
-      pedido: pedidoGuardado 
-    });
+      const nuevoPedido = new Pedido({
+        usuario,
+        productos: productosEnriquecidos,
+        total,
+        metodo_pago: metodo_pago || 'mercadopago',
+        estado: 'pendiente'
+      });
+
+      const pedidoGuardado = await nuevoPedido.save();
+      
+      // Enviar email de confirmación automáticamente
+      try {
+        const emailResult = await enviarEmailConfirmacion(pedidoGuardado);
+        if (emailResult.success) {
+          console.log('✅ Email de confirmación enviado a:', usuario.email);
+        } else {
+          console.log('⚠️ No se pudo enviar el email de confirmación:', emailResult.error);
+        }
+      } catch (emailError) {
+        console.error('⚠️ Error enviando email de confirmación:', emailError);
+        // No fallar el pedido si no se puede enviar el email
+      }
+
+      // Enviar notificación al admin de nueva venta
+      try {
+        const adminEmailResult = await enviarEmailNotificacionAdmin(pedidoGuardado);
+        if (adminEmailResult.success) {
+          console.log('🚨 Notificación de nueva venta enviada al admin');
+        } else {
+          console.log('⚠️ No se pudo enviar notificación al admin:', adminEmailResult.error);
+        }
+      } catch (adminEmailError) {
+        console.error('⚠️ Error enviando notificación al admin:', adminEmailError);
+        // No fallar el pedido si no se puede enviar el email al admin
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'Pedido creado correctamente',
+        pedido: pedidoGuardado 
+      });
+      
+    } finally {
+      await client.close();
+    }
   } catch (error) {
     console.error('Error al crear pedido:', error);
     res.status(500).json({ 
@@ -553,7 +806,7 @@ app.put('/api/pedidos/:id', async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
     
-    const estadosValidos = ['pendiente', 'en_proceso', 'entregado', 'cancelado'];
+    const estadosValidos = ['pendiente', 'confirmado', 'en_proceso', 'en_camino', 'entregado', 'cancelado'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ 
         success: false, 
@@ -591,6 +844,55 @@ app.put('/api/pedidos/:id', async (req, res) => {
   }
 });
 
+// Actualizar estado de un pedido (para admin y usuario)
+app.put('/api/pedidos/:id/estado', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nuevoEstado } = req.body;
+    
+    // Validar que el nuevo estado sea válido
+    const estadosValidos = ['pendiente', 'confirmado', 'en_proceso', 'en_camino', 'entregado', 'cancelado'];
+    if (!estadosValidos.includes(nuevoEstado)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Estado no válido. Estados permitidos: ' + estadosValidos.join(', ')
+      });
+    }
+
+    // Buscar y actualizar el pedido
+    const pedidoActualizado = await Pedido.findByIdAndUpdate(
+      id,
+      { 
+        estado: nuevoEstado,
+        fecha_actualizacion: new Date()
+      },
+      { new: true }
+    );
+    
+    if (!pedidoActualizado) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Pedido no encontrado' 
+      });
+    }
+
+    console.log(`✅ Estado del pedido ${id} actualizado a: ${nuevoEstado}`);
+    
+    res.json({ 
+      success: true, 
+      message: `Estado actualizado a ${nuevoEstado}`,
+      pedido: pedidoActualizado
+    });
+    
+  } catch (error) {
+    console.error('Error actualizando estado del pedido:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error interno del servidor' 
+    });
+  }
+});
+
 // Obtener un pedido por ID
 app.get('/api/pedidos/:id', async (req, res) => {
   try {
@@ -610,6 +912,137 @@ app.get('/api/pedidos/:id', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Error al obtener pedido' 
+    });
+  }
+});
+
+// Generar y descargar comprobante PDF
+app.get('/api/pedidos/:id/comprobante', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Buscar el pedido
+    const pedido = await Pedido.findById(id);
+    
+    if (!pedido) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Pedido no encontrado' 
+      });
+    }
+
+    // Solo permitir generar comprobante si el pedido está pagado
+    if (pedido.estado === 'cancelado') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No se puede generar comprobante para pedidos cancelados' 
+      });
+    }
+
+    // Generar PDF
+    const pdfResult = await generarComprobantePDF(pedido);
+    
+    if (!pdfResult.success) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Error generando el comprobante PDF' 
+      });
+    }
+
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${pdfResult.fileName}"`);
+    res.setHeader('Content-Length', pdfResult.buffer.length);
+    
+    // Enviar el PDF
+    res.send(pdfResult.buffer);
+    
+  } catch (error) {
+    console.error('Error generando comprobante:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error interno del servidor' 
+    });
+  }
+});
+
+// Enviar email de confirmación manualmente (para testing)
+app.post('/api/pedidos/:id/enviar-email', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { adjuntarPDF = false } = req.body; // Opción para adjuntar PDF
+    
+    // Buscar el pedido
+    const pedido = await Pedido.findById(id);
+    
+    if (!pedido) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Pedido no encontrado' 
+      });
+    }
+
+    // Enviar email con opción de PDF
+    const emailResult = await enviarEmailConfirmacion(pedido, adjuntarPDF);
+    
+    if (emailResult.success) {
+      res.json({ 
+        success: true, 
+        message: `Email enviado correctamente${adjuntarPDF ? ' con comprobante PDF adjunto' : ''}`,
+        messageId: emailResult.messageId 
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: emailResult.error 
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error enviando email:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error interno del servidor' 
+    });
+  }
+});
+
+// Nuevo endpoint: Enviar email con PDF adjunto
+app.post('/api/pedidos/:id/enviar-email-con-pdf', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Buscar el pedido
+    const pedido = await Pedido.findById(id);
+    
+    if (!pedido) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Pedido no encontrado' 
+      });
+    }
+
+    // Enviar email con PDF adjunto
+    const emailResult = await enviarEmailConfirmacion(pedido, true);
+    
+    if (emailResult.success) {
+      res.json({ 
+        success: true, 
+        message: 'Email enviado correctamente con comprobante PDF adjunto',
+        messageId: emailResult.messageId 
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: emailResult.error 
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error enviando email con PDF:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error interno del servidor' 
     });
   }
 });
@@ -746,6 +1179,38 @@ app.put('/api/usuarios/:id', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Error al actualizar usuario' 
+    });
+  }
+});
+
+// Obtener perfil de usuario por email
+app.get('/api/perfil/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    console.log('Obteniendo perfil para email:', email);
+    
+    const usuario = await Usuario.findOne({ email }).select('-password');
+    
+    if (!usuario) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Usuario no encontrado' 
+      });
+    }
+
+    // Obtener pedidos del usuario
+    const pedidos = await Pedido.find({ 'usuario.email': email }).sort({ fecha_pedido: -1 });
+    
+    res.json({ 
+      success: true, 
+      data: usuario,
+      pedidos: pedidos 
+    });
+  } catch (error) {
+    console.error('Error al obtener perfil:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al obtener perfil' 
     });
   }
 });
@@ -904,8 +1369,402 @@ app.get('/api/reportes', async (req, res) => {
   }
 });
 
+// Endpoint para manejar notificaciones de MercadoPago (Webhooks)
+app.post('/api/mercadopago/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+  console.log('🔔 Recibida notificación de MercadoPago');
+  
+  try {
+    const data = JSON.parse(req.body);
+    console.log('📄 Datos del webhook:', data);
+    
+    if (data.type === 'payment') {
+      console.log('💳 Procesando notificación de pago:', data.data.id);
+      
+      // Aquí puedes actualizar el estado del pedido en tu base de datos
+      // según el estado del pago recibido desde MercadoPago
+      
+      // Ejemplo: buscar y actualizar pedido por external_reference
+      if (data.data && data.data.id) {
+        console.log(`🔄 Actualizando estado del pago: ${data.data.id}`);
+        // Implementar lógica de actualización de estado del pedido
+      }
+    }
+    
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('❌ Error procesando webhook de MercadoPago:', error);
+    res.status(500).send('Error');
+  }
+});
+
+// Endpoint para consultar estado de pago
+app.get('/api/mercadopago/payment/:paymentId', async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    
+    const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: {
+        'Authorization': `Bearer ${ACCESS_TOKEN}`
+      }
+    });
+    
+    const paymentData = await response.json();
+    
+    res.json({
+      success: true,
+      payment: paymentData
+    });
+    
+  } catch (error) {
+    console.error('❌ Error consultando pago:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Endpoint para solicitar reset de contraseña
+app.post('/api/forgot_password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email es requerido"
+      });
+    }
+
+    // Buscar usuario por email
+    const usuario = await Usuario.findOne({ email });
+    
+    if (!usuario) {
+      // Por seguridad, devolvemos éxito aunque no exista el usuario
+      return res.json({
+        success: true,
+        message: "Si el email existe en nuestro sistema, recibirás un enlace de recuperación"
+      });
+    }
+
+    // Generar token de reset
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hora
+
+    // Guardar token en la base de datos
+    usuario.resetPasswordToken = resetToken;
+    usuario.resetPasswordExpires = resetTokenExpires;
+    await usuario.save();
+
+    // Crear enlace de reset
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+    
+    // Crear datos para el email
+    const emailData = {
+      _id: 'reset_' + Date.now(),
+      usuario: {
+        nombre: usuario.nombre,
+        email: usuario.email,
+        direccion: '',
+        telefono: ''
+      },
+      productos: [],
+      total: 0,
+      estado: 'reset_password',
+      metodo_pago: '',
+      fecha_pedido: new Date()
+    };
+
+    // Enviar email de recuperación
+    try {
+      await enviarEmailResetPassword(usuario, resetUrl);
+      console.log(`📧 Email de reset enviado a: ${email}`);
+      console.log(`🔗 Enlace de reset generado: ${resetUrl}`);
+    } catch (emailError) {
+      console.warn('No se pudo enviar email de reset:', emailError.message);
+      // En desarrollo, mostramos el enlace en consola como fallback
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔗 Enlace de reset (fallback): ${resetUrl}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Si el email existe en nuestro sistema, recibirás un enlace de recuperación",
+      // Solo para desarrollo y testing - remover en producción final
+      resetUrl: (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'testing') ? resetUrl : undefined
+    });
+
+  } catch (error) {
+    console.error('Error en forgot password:', error);
+    res.status(500).json({
+      success: false,
+      error: "Error interno del servidor"
+    });
+  }
+});
+
+// Endpoint para reset de contraseña con token
+app.post('/api/reset_password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Token y nueva contraseña son requeridos"
+      });
+    }
+
+    // Validar longitud de contraseña
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: "La contraseña debe tener al menos 6 caracteres"
+      });
+    }
+
+    // Buscar usuario con token válido y no expirado
+    const usuario = await Usuario.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() }
+    });
+
+    if (!usuario) {
+      return res.status(400).json({
+        success: false,
+        error: "Token inválido o expirado"
+      });
+    }
+
+    // Hashear nueva contraseña
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Actualizar contraseña y limpiar tokens
+    usuario.password = hashedPassword;
+    usuario.resetPasswordToken = undefined;
+    usuario.resetPasswordExpires = undefined;
+    await usuario.save();
+
+    console.log(`✅ Contraseña actualizada para usuario: ${usuario.email}`);
+
+    res.json({
+      success: true,
+      message: "Contraseña actualizada correctamente"
+    });
+
+  } catch (error) {
+    console.error('Error en reset password:', error);
+    res.status(500).json({
+      success: false,
+      error: "Error interno del servidor"
+    });
+  }
+});
+
 const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
   console.log(`Servidor backend escuchando en puerto ${PORT}`);
+});
+
+// RESEÑAS
+// Obtener todas las reseñas (para admin y display público)
+app.get('/api/resenas', async (req, res) => {
+  try {
+    const { aprobadas } = req.query;
+    let filtro = {};
+    
+    // Si se especifica el parámetro aprobadas=true, solo mostrar las aprobadas
+    if (aprobadas === 'true') {
+      filtro.aprobada = true;
+    }
+    
+    const reseñas = await Reseña.find(filtro).sort({ fecha_reseña: -1 });
+    res.json({
+      success: true,
+      reseñas
+    });
+  } catch (error) {
+    console.error('Error al obtener reseñas:', error);
+    res.status(500).json({ success: false, error: 'Error al obtener reseñas' });
+  }
+});
+
+// Crear nueva reseña
+app.post('/api/resenas', async (req, res) => {
+  try {
+    console.log('📝 Datos recibidos para nueva reseña:', req.body);
+    const { usuario, calificacion, comentario, producto, pedido_id } = req.body;
+    
+    // Validaciones
+    if (!usuario) {
+      console.log('❌ Error: Usuario no proporcionado');
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Usuario requerido' 
+      });
+    }
+    
+    if (!usuario.nombre || !usuario.email) {
+      console.log('❌ Error: Datos de usuario incompletos:', usuario);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Nombre y email del usuario requeridos' 
+      });
+    }
+    
+    if (!calificacion || calificacion < 1 || calificacion > 5) {
+      console.log('❌ Error: Calificación inválida:', calificacion);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Calificación debe ser entre 1 y 5 estrellas' 
+      });
+    }
+    
+    if (!comentario || comentario.length < 10) {
+      console.log('❌ Error: Comentario muy corto:', comentario, 'Length:', comentario?.length);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Comentario debe tener al menos 10 caracteres' 
+      });
+    }
+    
+    if (comentario.length > 500) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Comentario no puede exceder 500 caracteres' 
+      });
+    }
+    
+    const nuevaReseña = new Reseña({
+      usuario: {
+        nombre: usuario.nombre,
+        email: usuario.email
+      },
+      calificacion,
+      comentario,
+      producto: producto || 'general',
+      pedido_id: pedido_id || null,
+      aprobada: false // Requiere aprobación por defecto
+    });
+    
+    console.log('✅ Creando reseña:', nuevaReseña);
+    await nuevaReseña.save();
+    console.log('✅ Reseña guardada exitosamente');
+    
+    res.json({ 
+      success: true, 
+      message: 'Reseña enviada exitosamente. Será revisada antes de publicarse.',
+      reseña: nuevaReseña 
+    });
+  } catch (error) {
+    console.error('❌ Error al crear reseña:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al crear reseña: ' + error.message 
+    });
+  }
+});
+
+// Aprobar/Desaprobar reseña (solo admin)
+app.put('/api/resenas/:id/aprobar', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { aprobada } = req.body;
+    
+    const reseña = await Reseña.findByIdAndUpdate(
+      id,
+      { aprobada: aprobada },
+      { new: true }
+    );
+    
+    if (!reseña) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Reseña no encontrada' 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Reseña ${aprobada ? 'aprobada' : 'desaprobada'} exitosamente`,
+      reseña 
+    });
+  } catch (error) {
+    console.error('Error al actualizar reseña:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al actualizar reseña' 
+    });
+  }
+});
+
+// Eliminar reseña (solo admin)
+app.delete('/api/resenas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reseñaEliminada = await Reseña.findByIdAndDelete(id);
+    
+    if (!reseñaEliminada) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Reseña no encontrada' 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Reseña eliminada correctamente' 
+    });
+  } catch (error) {
+    console.error('Error al eliminar reseña:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al eliminar reseña' 
+    });
+  }
+});
+
+// Obtener estadísticas de reseñas
+app.get('/api/resenas/estadisticas', async (req, res) => {
+  try {
+    const totalReseñas = await Reseña.countDocuments();
+    const reseñasAprobadas = await Reseña.countDocuments({ aprobada: true });
+    const reseñasPendientes = await Reseña.countDocuments({ aprobada: false });
+    
+    // Calcular promedio de calificación de reseñas aprobadas
+    const promedioResult = await Reseña.aggregate([
+      { $match: { aprobada: true } },
+      { $group: { _id: null, promedio: { $avg: "$calificacion" } } }
+    ]);
+    
+    const promedioCalificacion = promedioResult.length > 0 ? 
+      Math.round(promedioResult[0].promedio * 10) / 10 : 0;
+    
+    // Distribución de calificaciones
+    const distribucion = await Reseña.aggregate([
+      { $match: { aprobada: true } },
+      { $group: { _id: "$calificacion", count: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+    
+    res.json({
+      success: true,
+      estadisticas: {
+        total: totalReseñas,
+        aprobadas: reseñasAprobadas,
+        pendientes: reseñasPendientes,
+        promedio: promedioCalificacion,
+        distribucion
+      }
+    });
+  } catch (error) {
+    console.error('Error al obtener estadísticas:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al obtener estadísticas' 
+    });
+  }
 });
 

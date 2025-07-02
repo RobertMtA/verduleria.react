@@ -59,8 +59,9 @@ const Products = () => {
         )
       );
       
-      // Sincronización con el backend
-      await reloadProducts();
+      // No recargar todos los productos, solo mostrar mensaje de éxito
+      console.log('Producto agregado al carrito:', producto.nombre);
+      
     } catch (err) {
       console.error("Error al actualizar el carrito:", err);
       // Revertir cambios si falla

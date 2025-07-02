@@ -1,0 +1,267 @@
+/* MapaRecorrido.css */
+
+.mapa-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.mapa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mapa-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.mapa-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mapa-leyenda {
+  display: flex;
+  gap: 20px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  flex-wrap: wrap;
+}
+
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.leyenda-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mapa-leaflet {
+  border-radius: 0 0 12px 12px;
+  z-index: 1;
+}
+
+.mapa-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #27ae60;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos para los popups */
+.popup-content {
+  min-width: 200px;
+}
+
+.popup-content h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.popup-content p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.popup-content small {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.estado-badge {
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mapa-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .mapa-stats {
+    gap: 15px;
+  }
+
+  .mapa-leyenda {
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .leyenda-item {
+    font-size: 12px;
+  }
+
+  .popup-content {
+    min-width: 150px;
+  }
+
+  .stat-number {
+    font-size: 1.2rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mapa-header {
+    padding: 15px;
+  }
+
+  .mapa-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .mapa-leyenda {
+    padding: 10px 15px;
+    gap: 10px;
+  }
+
+  .mapa-stats {
+    gap: 10px;
+  }
+}
+
+/* Estilos adicionales para el modo admin */
+.admin-mapa-controles {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-mapa {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-mapa:hover {
+  background: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-mapa.activo {
+  background: #27ae60;
+  color: white;
+  border-color: #27ae60;
+}
+
+/* Mejoras para los marcadores */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Efectos para las líneas de ruta */
+.leaflet-interactive {
+  cursor: pointer;
+}
+
+/* Estilos para el contenedor principal cuando se usa en páginas */
+.pagina-mapa {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pagina-mapa .mapa-container {
+  margin-top: 20px;
+}
+
+.mapa-titulo {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.mapa-descripcion {
+  text-align: center;
+  color: #6c757d;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}

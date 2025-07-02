@@ -92,15 +92,20 @@
 
 .footer-contact li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
   color: #E8F5E9;
+  line-height: 1.5;
 }
 
 .footer-contact i {
   width: 20px;
-  margin-right: 0.8rem;
+  text-align: center;
+  margin-right: 12px;
   color: #81C784;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
 .social-icons {
@@ -119,7 +124,8 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  text-decoration: none;
 }
 
 .social-icons a:hover {

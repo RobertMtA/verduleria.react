@@ -39,6 +39,15 @@
   margin-right: 10px;
   position: relative;
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-nav .nav-link i {
+  width: 18px;
+  text-align: center;
+  margin-right: 8px;
+  font-size: 1rem;
 }
 
 .navbar-nav .nav-link:hover,

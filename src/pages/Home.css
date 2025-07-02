@@ -343,17 +343,218 @@
   color: #155724;
 }
 
-/* Accesibilidad */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+/* Ofertas Destacadas en Home */
+.ofertas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  margin: 30px 0;
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Responsive para ofertas */
+@media (max-width: 1024px) {
+  .ofertas-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ofertas-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+.oferta-card-home {
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  border-radius: 15px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+}
+
+.oferta-card-home:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.oferta-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.oferta-imagen-container {
+  text-align: center;
+  margin-bottom: 15px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.oferta-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.oferta-card-home:hover .oferta-img {
+  transform: scale(1.05);
+}
+
+.sin-imagen-oferta {
+  font-size: 3rem;
+  color: #6c757d;
+}
+
+.oferta-content h3 {
+  color: #2a7f62;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.oferta-descripcion {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.precios-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.precio-original {
+  color: #6c757d;
+  text-decoration: line-through;
+  font-size: 0.9rem;
+}
+
+.precio-oferta {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.btn-agregar-oferta {
+  width: 100%;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-agregar-oferta:hover {
+  background: linear-gradient(135deg, #20c997, #28a745);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-agregar-oferta:active {
+  transform: translateY(0);
+}
+
+/* Reviews Section */
+.reviews-section {
+  padding: 60px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-top: 1px solid #dee2e6;
+}
+
+.reviews-section .section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #2d5a2d;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.reviews-section .section-title i {
+  color: #ffc107;
+  margin-right: 0.5rem;
+  filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3));
+}
+
+/* Indicador de scroll horizontal */
+.scroll-hint {
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-hint::after {
+  content: '← Desliza para ver más →';
+  position: absolute;
+  bottom: -5px;
+  right: 20px;
+  background: rgba(40, 167, 69, 0.8);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 10;
+  animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Responsive adjustments for reviews */
+@media (max-width: 768px) {
+  .reviews-section {
+    padding: 40px 0;
+  }
+  
+  .reviews-section .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+  
+  .scroll-hint::after {
+    content: '← Desliza →';
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    right: 10px;
+  }
 }
 
 /* Responsive */
@@ -396,6 +597,20 @@
     width: 100%;
     margin: 5px 0;
   }
+
+  .ofertas-grid {
+    gap: 15px;
+    padding: 10px 0 15px 0;
+  }
+  
+  .oferta-card-home {
+    padding: 15px;
+    min-width: 250px;
+  }
+  
+  .oferta-imagen-container {
+    height: 150px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -409,5 +624,15 @@
   
   .newsletter-card {
     padding: 20px;
+  }
+
+  .ofertas-grid {
+    gap: 10px;
+    padding: 10px 0;
+  }
+  
+  .oferta-card-home {
+    margin: 0 5px;
+    min-width: 220px;
   }
 }

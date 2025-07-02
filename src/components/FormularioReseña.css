@@ -1,0 +1,223 @@
+/* Formulario de Reseñas */
+.formulario-reseña {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+}
+
+.formulario-reseña.compact {
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.formulario-reseña h3 {
+  color: #2d5a2d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Auth Required */
+.auth-required {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 2px dashed #6c757d;
+}
+
+.auth-required h3 {
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.auth-required p {
+  color: #6c757d;
+  margin: 0;
+}
+
+.auth-required a {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-required a:hover {
+  text-decoration: underline;
+}
+
+/* Form Elements */
+.reseña-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.reseña-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2d5a2d;
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Stars Rating */
+.stars-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.3;
+  transform: scale(1);
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+.star-btn.active {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(255, 193, 7, 0.5));
+}
+
+.rating-text {
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Character Count */
+.char-count {
+  display: block;
+  text-align: right;
+  margin-top: 0.25rem;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+/* Alert Messages */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .formulario-reseña {
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  
+  .formulario-reseña h3 {
+    font-size: 1.25rem;
+  }
+  
+  .stars-rating {
+    justify-content: center;
+  }
+  
+  .star-btn {
+    font-size: 1.25rem;
+  }
+  
+  .rating-text {
+    font-size: 0.8rem;
+  }
+}

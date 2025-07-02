@@ -71,6 +71,18 @@ const Header = () => {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link className="nav-link" to="/resenas">
+                  <i className="fas fa-star"></i> Reseñas
+                </Link>
+              </li>
+              {isAuthenticated && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/perfil/seguimiento">
+                    <i className="fas fa-truck"></i> Seguimiento
+                  </Link>
+                </li>
+              )}
+              <li className="nav-item">
                 <Link className="nav-link" to="/contacto">
                   <i className="fas fa-envelope"></i> Contacto
                 </Link>

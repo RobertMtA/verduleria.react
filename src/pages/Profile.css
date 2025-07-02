@@ -26,15 +26,43 @@
 }
 
 .profile-error {
-  background-color: #ffebee;
-  color: #d32f2f;
-  border: 1px solid #ef9a9a;
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+  color: #b71c1c;
+  border: 1px solid #f44336;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
+  text-align: center;
+}
+
+.profile-error button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.profile-error button:hover {
+  background-color: #d32f2f;
 }
 
 .profile-success {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #a5d6a7;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  color: #1b5e20;
+  border: 1px solid #4caf50;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+  font-weight: 500;
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
 }
 
 .profile-empty {
@@ -305,25 +333,956 @@
 
 .no-orders {
   text-align: center;
-  padding: 40px;
-  background: #f9f9f9;
-  border-radius: 8px;
-  color: #666;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+  color: #495057;
+  border: 2px dashed #dee2e6;
 }
 
-.no-orders button {
-  background-color: #3498db;
+.no-orders-icon {
+  margin-bottom: 20px;
+}
+
+.no-orders-icon i {
+  font-size: 4rem;
+  color: #6c757d;
+  opacity: 0.5;
+}
+
+.no-orders h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.no-orders p {
+  margin: 0 0 30px 0;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+.orders-section {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.orders-header h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.btn-comprar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-comprar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(0, 123, 255, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+.orders-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
+  border-top: 1px solid #e9ecef;
+  margin-top: 20px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(108, 117, 125, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+/* Estilos para las cards de pedidos */
+.pedidos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.pedido-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pedido-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.pedido-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border-bottom: 1px solid #dee2e6;
+}
+
+.pedido-info .pedido-numero {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pedido-info .pedido-numero i {
+  color: #28a745;
+  font-size: 1.1rem;
+}
+
+.pedido-fecha {
+  margin: 8px 0 0 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.estado-badge {
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pedido-card-body {
+  padding: 24px;
+}
+
+.pedido-resumen {
+  margin-bottom: 30px;
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.resumen-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.resumen-item:hover {
+  border-color: #28a745;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.1);
+}
+
+.resumen-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.resumen-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resumen-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resumen-valor {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.productos-section {
+  border-top: 2px solid #e9ecef;
+  padding-top: 24px;
+}
+
+.productos-titulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.productos-titulo i {
+  color: #28a745;
+  background: #e8f5e9;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.productos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 16px;
+}
+
+.producto-item {
+  display: flex;
+  gap: 16px;
+  padding: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.producto-item:hover {
+  border-color: #28a745;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.producto-imagen {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.producto-imagen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.image-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.spinner-small {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 2px solid #28a745;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+.producto-item:hover .producto-imagen img {
+  transform: scale(1.1);
+}
+
+.producto-detalles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.producto-nombre {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.producto-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.spec-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.spec-value {
+  font-size: 0.9rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+.spec-value.precio {
+  color: #fd7e14;
+}
+
+.spec-value.subtotal {
+  color: #28a745;
+  font-weight: 700;
+}
+
+.pedido-actions {
+  padding: 20px 24px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.btn-recomprar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 20px;
   cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
 }
 
-.no-orders button:hover {
-  background-color: #2980b9;
+.btn-recomprar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+/* Botón para descargar comprobante */
+.btn-comprobante {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(23, 162, 184, 0.3);
+}
+
+.btn-comprobante:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(23, 162, 184, 0.4);
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(135deg, #138496 0%, #1e7e34 100%);
+}
+
+.btn-comprobante:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Estilos para botones de actualización de estado */
+.estado-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 18px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  min-width: 140px;
+  justify-content: center;
+}
+
+.btn-estado:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-estado:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-estado-entregado {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+}
+
+.btn-estado-entregado:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-estado-cancelado {
+  background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+}
+
+.btn-estado-cancelado:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.error-estado {
+  background: #ffebee;
+  color: #c62828;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border: 1px solid #ffcdd2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* Mensaje de advertencia mejorado */
+.profile-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+.profile-warning .close-message-btn {
+  background: none;
+  border: none;
+  color: #856404;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: 15px;
+  flex-shrink: 0;
+}
+
+.profile-warning .close-message-btn:hover {
+  background-color: rgba(133, 100, 4, 0.1);
+  transform: scale(1.1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos específicos para teléfono completo */
+.resumen-item-telefono {
+  min-width: 200px;
+}
+
+.telefono-completo {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2196f3;
+}
+
+/* Estilos para el sistema de chat */
+.chat-container {
+  margin-top: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.chat-header i {
+  font-size: 18px;
+}
+
+.chat-messages {
+  height: 300px;
+  overflow-y: auto;
+  padding: 15px;
+  background: #fafafa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.chat-message {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.chat-message.user {
+  justify-content: flex-end;
+}
+
+.chat-message.admin {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+}
+
+.message-bubble.user {
+  background: #4caf50;
+  color: white;
+  border-bottom-right-radius: 6px;
+}
+
+.message-bubble.admin {
+  background: white;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-bottom-left-radius: 6px;
+}
+
+.message-time {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 5px;
+  text-align: right;
+}
+
+.message-time.admin {
+  text-align: left;
+}
+
+.chat-input-container {
+  padding: 15px;
+  background: white;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.chat-input:focus {
+  border-color: #4caf50;
+}
+
+.chat-send-btn {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  min-width: 45px;
+  height: 45px;
+}
+
+.chat-send-btn:hover {
+  background: #45a049;
+}
+
+.chat-send-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.chat-typing {
+  padding: 10px 15px;
+  font-style: italic;
+  color: #666;
+  font-size: 13px;
+}
+
+.order-status-update {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+}
+
+.order-status-update .status-icon {
+  color: #2196f3;
+  margin-right: 8px;
+}
+
+/* Mensaje de chat deshabilitado */
+.chat-disabled-message {
+  padding: 15px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chat-disabled-message i {
+  color: #999;
+}
+
+/* Botón de chat cerrado */
+.chat-open-btn.chat-closed {
+  background: #999 !important;
+  opacity: 0.8;
+}
+
+.chat-open-btn.chat-closed:hover {
+  background: #777 !important;
+  opacity: 1;
+}
+
+/* Navegación de pedidos */
+.orders-navigation {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.order-selector {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f8f9fa;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.nav-btn {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 36px;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.order-counter {
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  min-width: 80px;
+  text-align: center;
+}
+
+.single-order-container {
+  margin: 20px 0;
+}
+
+.orders-summary {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #495057;
+  font-size: 14px;
+}
+
+.stat-item i {
+  color: #6c757d;
+  width: 16px;
+}
+
+/* Estilo mejorado para vista de pedido único */
+.single-order-container .pedido-card {
+  background: #fff;
+  border: 2px solid #e9ecef;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.single-order-container .pedido-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border-color: #4caf50;
+}
+
+.single-order-container .pedido-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+}
+
+/* Ajustes para el header del pedido en vista única */
+.single-order-container .pedido-card-header {
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+}
+
+.single-order-container .pedido-numero {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.single-order-container .estado-badge {
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Botón de chat mejorado en vista única */
+.single-order-container .chat-open-btn {
+  background: linear-gradient(135deg, #4caf50, #66bb6a) !important;
+  border: none !important;
+  padding: 12px 20px !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.single-order-container .chat-open-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4) !important;
+}
+
+.single-order-container .chat-open-btn.chat-closed {
+  background: linear-gradient(135deg, #999, #bbb) !important;
+  box-shadow: 0 4px 12px rgba(153, 153, 153, 0.3) !important;
+}
+
+/* Estilos para el seguimiento dentro del perfil */
+.seguimiento-container {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.seguimiento-container .seguimiento-entrega {
+  background: transparent;
+  padding: 0;
+  min-height: auto;
+}
+
+.seguimiento-header-simple {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.seguimiento-header-simple h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.seguimiento-header-simple p {
+  color: #6c757d;
+  font-size: 1rem;
+  margin: 0;
 }
 
 /* Responsive */
@@ -336,11 +1295,6 @@
     margin-bottom: 5px;
   }
   
-  .pedido-details {
-    flex-direction: column;
-    gap: 5px;
-  }
-  
   .profile-tabs {
     flex-direction: column;
   }
@@ -349,4 +1303,185 @@
     text-align: left;
     padding: 10px;
   }
+  
+  .pedido-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 20px;
+  }
+  
+  .resumen-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .productos-lista {
+    grid-template-columns: 1fr;
+  }
+  
+  .producto-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .producto-imagen {
+    align-self: center;
+    width: 100px;
+    height: 100px;
+  }
+
+  .spec-item {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .orders-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .btn-comprar {
+    justify-content: center;
+    padding: 15px 20px;
+    font-size: 1rem;
+  }
+
+  .no-orders {
+    padding: 40px 20px;
+  }
+
+  .no-orders-icon i {
+    font-size: 3rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 15px 20px;
+    font-size: 1rem;
+    justify-content: center;
+  }
+
+  .orders-navigation {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .order-selector {
+    justify-content: center;
+  }
+  
+  .summary-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pedidos-container {
+    gap: 20px;
+  }
+  
+  .pedido-card-body {
+    padding: 16px;
+  }
+  
+  .pedido-card-header {
+    padding: 16px;
+  }
+
+  .resumen-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .resumen-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .producto-item {
+    padding: 16px;
+  }
+
+  .productos-titulo {
+    font-size: 1.1rem;
+    gap: 8px;
+  }
+
+  .pedido-info .pedido-numero {
+    font-size: 1.1rem;
+  }
+
+  .orders-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .btn-comprar {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .no-orders h3 {
+    font-size: 1.3rem;
+  }
+
+  .no-orders p {
+    font-size: 1rem;
+  }
+
+  .pedido-actions {
+    padding: 16px;
+  }
+
+  .btn-recomprar {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Estilos para información del usuario en pedidos */
+.pedido-usuario {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pedido-usuario i {
+  color: #4caf50;
+  font-size: 12px;
+}
+
+.pedido-usuario strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.usuario-email {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Mejorar la visualización de direcciones largas */
+.resumen-valor[title] {
+  cursor: help;
+}
+
+.resumen-item .resumen-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.resumen-item .resumen-info .resumen-valor {
+  word-break: break-word;
+  line-height: 1.3;
 }

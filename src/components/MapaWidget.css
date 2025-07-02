@@ -1,0 +1,287 @@
+/* MapaWidget.css */
+
+.mapa-widget {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.widget-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.btn-ver-completo {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.btn-ver-completo:hover {
+  opacity: 1;
+  text-decoration: none;
+  color: white;
+}
+
+.widget-stats {
+  display: flex;
+  gap: 15px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.stat-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-mini .numero {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.stat-mini .etiqueta {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.mapa-widget-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.widget-footer {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.pedidos-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pedido-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  font-size: 0.85rem;
+}
+
+.pedido-numero {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.estado-mini {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: white;
+}
+
+.estado-mini.pendiente {
+  background: #ffc107;
+}
+
+.estado-mini.preparando {
+  background: #17a2b8;
+}
+
+.estado-mini.en_camino {
+  background: #007bff;
+}
+
+.estado-mini.entregado {
+  background: #28a745;
+}
+
+.estado-mini.cancelado {
+  background: #dc3545;
+}
+
+.pedido-total {
+  font-weight: 600;
+  color: #27ae60;
+}
+
+/* Estados especiales */
+.widget-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #6c757d;
+}
+
+.spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+.widget-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  color: #6c757d;
+  padding: 40px 20px;
+}
+
+.widget-empty p {
+  margin: 0 0 5px 0;
+  font-weight: 500;
+}
+
+.widget-empty small {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mapa-widget {
+    height: 400px;
+  }
+
+  .widget-header {
+    padding: 12px 15px;
+  }
+
+  .widget-header h3 {
+    font-size: 1rem;
+  }
+
+  .btn-ver-completo {
+    font-size: 0.8rem;
+  }
+
+  .widget-stats {
+    padding: 12px 15px;
+  }
+
+  .stat-mini .numero {
+    font-size: 1rem;
+  }
+
+  .stat-mini .etiqueta {
+    font-size: 0.7rem;
+  }
+
+  .widget-footer {
+    padding: 12px 15px;
+  }
+
+  .pedido-mini {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mapa-widget {
+    height: 350px;
+  }
+
+  .widget-stats {
+    gap: 10px;
+  }
+
+  .pedido-mini {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .estado-mini {
+    align-self: flex-end;
+  }
+}
+
+/* Estilos para integración en dashboard */
+.dashboard-mapa-widget {
+  grid-column: span 2; /* Ocupa 2 columnas en grid del dashboard */
+}
+
+@media (max-width: 992px) {
+  .dashboard-mapa-widget {
+    grid-column: span 1;
+  }
+}
+
+/* Animaciones suaves */
+.mapa-widget {
+  animation: fadeInScale 0.6s ease;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Hover effects */
+.pedido-mini:hover {
+  background: #f8f9fa;
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}
+
+.btn-ver-completo:hover {
+  transform: translateX(2px);
+  transition: transform 0.2s ease;
+}

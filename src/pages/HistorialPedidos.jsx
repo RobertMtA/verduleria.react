@@ -13,17 +13,25 @@ const HistorialPedidos = () => {
   useEffect(() => {
     if (user?.email) {
       setLoading(true);
-      fetch(`${API_URL}/pedidos_cliente?email=${encodeURIComponent(user.email)}`)
+      
+      const token = localStorage.getItem('token');
+      
+      fetch(`${API_URL}/pedidos/usuario/${encodeURIComponent(user.email)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
         .then(res => {
           if (!res.ok) throw new Error("Error al cargar pedidos");
           return res.json();
         })
         .then(data => {
-          // Si la API devuelve {data: [...]}, usar data.data, si es array directo, usar data
-          if (Array.isArray(data)) {
+          // El endpoint /pedidos/usuario devuelve {success: true, pedidos: [...]}
+          if (data.success && Array.isArray(data.pedidos)) {
+            setPedidos(data.pedidos);
+          } else if (Array.isArray(data)) {
             setPedidos(data);
-          } else if (Array.isArray(data.data)) {
-            setPedidos(data.data);
           } else {
             setPedidos([]);
           }

@@ -81,6 +81,11 @@ const Admin = () => {
                 throw new Error(data.error || 'Error al agregar producto');
             }
 
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || 'Error al agregar producto');
+            }
+
             setSuccessMessage('Producto agregado correctamente');
             setIsFormOpen(false);
             await fetchProductos();
@@ -93,7 +98,8 @@ const Admin = () => {
 
     const handleUpdateProduct = async (updatedProduct) => {
         try {
-            const response = await fetch(`${API_URL}/productos/${updatedProduct._id}`, {
+            const productId = editingProduct._id;
+            const response = await fetch(`${API_URL}/productos/${productId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -106,8 +112,14 @@ const Admin = () => {
                 throw new Error(data.error || 'Error al actualizar producto');
             }
 
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || 'Error al actualizar producto');
+            }
+
             setSuccessMessage('Producto actualizado correctamente');
             setEditingProduct(null);
+            setIsFormOpen(false);
             await fetchProductos();
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {

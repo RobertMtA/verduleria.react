@@ -13,6 +13,9 @@ const Loader = () => (
   </div>
 );
 
+// Componentes de debug
+const DebugProfile = lazy(() => import('./components/DebugProfile'));
+
 // Layouts con pre-carga
 const MainLayout = lazy(() => import('./layouts/MainLayout'));
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -26,12 +29,14 @@ const PublicPages = {
   Register: lazy(() => import('./pages/Register')),
   Contacto: lazy(() => import('./pages/Contacto')),
   Ofertas: lazy(() => import('./pages/Ofertas')),
+  Resenas: lazy(() => import('./pages/Resenas')),
   About: lazy(() => import('./pages/About')),
   Cart: lazy(() => import('./pages/Cart')),
   ForgotPassword: lazy(() => import('./pages/ForgotPassword')),
   ResetPassword: lazy(() => import('./pages/ResetPassword')),
   ConfirmacionPedido: lazy(() => import('./pages/ConfirmacionPedido')),
-  HistorialPedidos: lazy(() => import('./pages/HistorialPedidos'))
+  HistorialPedidos: lazy(() => import('./pages/HistorialPedidos')),
+  SeguimientoEntrega: lazy(() => import('./pages/SeguimientoEntrega'))
 };
 
 // Páginas protegidas
@@ -52,7 +57,20 @@ const AdminPages = {
   Suscripciones: lazy(() => import('./pages/admin/Suscripciones')),
   EditarPedido: lazy(() => import('./pages/admin/EditarPedido')),
   PedidosAdmin: lazy(() => import('./pages/admin/PedidosAdmin')),
-  ProductsAdmin: lazy(() => import('./pages/admin/ProductsAdmin'))
+  ProductsAdmin: lazy(() => import('./pages/admin/ProductsAdmin')),
+  ReseñasAdmin: lazy(() => import('./pages/admin/ReseñasAdmin')),
+  AdminChat: lazy(() => import('./components/AdminChat')),
+  AdminOfertas: lazy(() => import('./components/AdminOfertas')),
+  AdminEstadisticas: lazy(() => import('./components/AdminEstadisticas')),
+  MapaAdmin: lazy(() => import('./pages/admin/MapaAdmin'))
+};
+
+// Páginas de pago de MercadoPago
+const PaymentPages = {
+  PaymentSuccess: lazy(() => import('./pages/PaymentSuccess')),
+  PaymentFailure: lazy(() => import('./pages/PaymentFailure')),
+  PaymentPending: lazy(() => import('./pages/PaymentPending')),
+  TransferInstructions: lazy(() => import('./pages/TransferInstructions'))
 };
 
 // Componentes de ruta mejorados
@@ -118,10 +136,17 @@ function App() {
               <Route path="registro" element={<PublicPages.Register />} />
               <Route path="contacto" element={<PublicPages.Contacto />} />
               <Route path="ofertas" element={<PublicPages.Ofertas />} />
+              <Route path="resenas" element={<PublicPages.Resenas />} />
               <Route path="/about" element={<PublicPages.About />} />
               <Route path="confirmacion-pedido" element={<PublicPages.ConfirmacionPedido />} />
               <Route path="/forgot-password" element={<PublicPages.ForgotPassword />} />
-              <Route path="/reset-password" element={<PublicPages.ResetPassword />} />
+              <Route path="/reset-password/:token" element={<PublicPages.ResetPassword />} />
+
+              {/* Rutas de resultado de pagos MercadoPago */}
+              <Route path="pago-exitoso" element={<PaymentPages.PaymentSuccess />} />
+              <Route path="pago-fallido" element={<PaymentPages.PaymentFailure />} />
+              <Route path="pago-pendiente" element={<PaymentPages.PaymentPending />} />
+              <Route path="instrucciones-transferencia" element={<PaymentPages.TransferInstructions />} />
 
               {/* Rutas protegidas */}
               <Route path="checkout" element={
@@ -138,10 +163,18 @@ function App() {
                 } />
                 <Route path="pedidos" element={
                   <ProtectedRoute>
-                    <PublicPages.HistorialPedidos />
+                    <Navigate to="/perfil" state={{ tab: 'orders' }} replace />
+                  </ProtectedRoute>
+                } />
+                <Route path="seguimiento" element={
+                  <ProtectedRoute>
+                    <PublicPages.SeguimientoEntrega />
                   </ProtectedRoute>
                 } />
               </Route>
+
+              {/* Ruta temporal de debug */}
+              <Route path="debug" element={<DebugProfile />} />
             </Route>
 
             {/* Rutas de administración */}
@@ -152,6 +185,11 @@ function App() {
                 <Route path="nuevo" element={<AdminPages.NuevoProducto />} />
               </Route>
               <Route path="pedidos" element={<AdminPages.PedidosAdmin />} />
+              <Route path="reseñas" element={<AdminPages.ReseñasAdmin />} />
+              <Route path="mapa" element={<AdminPages.MapaAdmin />} />
+              <Route path="ofertas" element={<AdminPages.AdminOfertas />} />
+              <Route path="chat" element={<AdminPages.AdminChat />} />
+              <Route path="estadisticas" element={<AdminPages.AdminEstadisticas />} />
               <Route path="panel" element={<AdminPages.Panel />} />
               <Route path="usuarios" element={<AdminPages.Usuarios />} />
               <Route path="reportes" element={<AdminPages.Reportes />} />

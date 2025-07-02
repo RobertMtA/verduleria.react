@@ -61,6 +61,7 @@ const EditarPedido = () => {
           <select value={estado} onChange={e => setEstado(e.target.value)}>
             <option value="pendiente">Pendiente</option>
             <option value="en_proceso">En Proceso</option>
+            <option value="en_camino">En Camino</option>
             <option value="entregado">Entregado</option>
             <option value="cancelado">Cancelado</option>
           </select>

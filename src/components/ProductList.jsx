@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getProductImageUrl, handleImageError } from '../utils/imageUtils';
 import './ProductList.css';
 
-const ProductList = ({ products, addToCart }) => {
+const ProductList = ({ products, addToCart, className = "" }) => {
   const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const ProductList = ({ products, addToCart }) => {
   };
 
   return (
-    <div className="product-list">
+    <div className={`product-list ${className}`.trim()}>
       {products.map((product) => (
         <div key={product.id} className="product-card">
           <h3>{product.nombre}</h3>

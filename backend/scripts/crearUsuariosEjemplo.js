@@ -28,7 +28,7 @@ async function crearUsuariosEjemplo() {
     const usuariosEjemplo = [
       {
         nombre: 'Juan Pérez',
-        email: 'juan@verduleria.com',
+        email: 'juan@email.com',
         password: 'usuario123',
         role: 'user',
         telefono: '+54 11 1234-5678',
@@ -36,7 +36,7 @@ async function crearUsuariosEjemplo() {
       },
       {
         nombre: 'María García',
-        email: 'maria@verduleria.com', 
+        email: 'maria@email.com', 
         password: 'usuario123',
         role: 'user',
         telefono: '+54 11 9876-5432',
@@ -44,7 +44,7 @@ async function crearUsuariosEjemplo() {
       },
       {
         nombre: 'Carlos López',
-        email: 'carlos@verduleria.com',
+        email: 'carlos@email.com',
         password: 'usuario123', 
         role: 'user',
         telefono: '+54 11 5555-1234',
@@ -52,7 +52,7 @@ async function crearUsuariosEjemplo() {
       },
       {
         nombre: 'Ana Martínez',
-        email: 'ana@verduleria.com',
+        email: 'ana@email.com',
         password: 'usuario123',
         role: 'user',
         telefono: '+54 11 7777-8888',
@@ -60,7 +60,7 @@ async function crearUsuariosEjemplo() {
       },
       {
         nombre: 'Roberto Silva',
-        email: 'roberto@verduleria.com',
+        email: 'roberto@email.com',
         password: 'moderador123',
         role: 'moderador',
         telefono: '+54 11 3333-4444', 

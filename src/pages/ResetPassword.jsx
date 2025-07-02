@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -18,8 +18,7 @@ const API_URL = import.meta.env.VITE_API_URL
   : "http://localhost:4001/api/reset_password";
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  const { token } = useParams();
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: ""

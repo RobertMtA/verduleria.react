@@ -269,28 +269,116 @@ button:hover {
   font-weight: bold !important;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .pedidos-container {
-    padding: 15px;
+/* Estilos específicos para la tabla de pedidos con dirección */
+.pedidos-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 13px;
+}
+
+.pedidos-table th {
+  padding: 12px 8px;
+  background-color: #1976d2;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pedidos-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Estilo específico para la columna de dirección */
+.pedidos-table td:nth-child(3) {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  text-align: left;
+  padding-left: 12px;
+}
+
+/* Tooltip para direcciones largas */
+.pedidos-table td:nth-child(3):hover {
+  position: relative;
+  white-space: normal;
+  overflow: visible;
+  background-color: #f8f9fa;
+  z-index: 10;
+  max-width: none;
+  width: auto;
+  min-width: 200px;
+}
+
+/* Responsividad para pantallas pequeñas */
+@media (max-width: 1024px) {
+  .pedidos-table {
+    font-size: 11px;
   }
   
-  table {
+  .pedidos-table th,
+  .pedidos-table td {
+    padding: 8px 4px;
+  }
+  
+  .pedidos-table td:nth-child(3) {
+    max-width: 120px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pedidos-table {
     display: block;
     overflow-x: auto;
+    white-space: nowrap;
   }
   
-  .filters {
-    flex-direction: column;
+  .pedidos-table thead,
+  .pedidos-table tbody,
+  .pedidos-table th,
+  .pedidos-table td,
+  .pedidos-table tr {
+    display: block;
   }
   
-  .filters button {
-    width: 100%;
-    margin-bottom: 5px;
+  .pedidos-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
   }
   
-  th, td {
+  .pedidos-table tr {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
     padding: 10px;
-    font-size: 14px;
+    background: white;
+    border-radius: 8px;
+  }
+  
+  .pedidos-table td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+    text-align: left;
+    white-space: normal;
+    overflow: visible;
+  }
+  
+  .pedidos-table td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #1976d2;
   }
 }

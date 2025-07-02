@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import MapaWidget from '../../components/MapaWidget';
 import './Dashboard.css';
 
 const AdminDashboard = () => {
@@ -38,28 +39,39 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="quick-actions">
-        <h2>Acciones Rápidas</h2>
-        <div className="actions-grid">
-          <Link to="/admin/productos/nuevo" className="action-card">
-            <i className="fas fa-plus"></i>
-            <span>Agregar Producto</span>
-          </Link>
-          
-          <Link to="/admin/pedidos" className="action-card">
-            <i className="fas fa-clipboard-list"></i>
-            <span>Ver Pedidos</span>
-          </Link>
-          
-          <Link to="/admin/productos" className="action-card">
-            <i className="fas fa-box"></i>
-            <span>Inventario</span>
-          </Link>
-          
-          <Link to="/admin/reportes" className="action-card">
-            <i className="fas fa-chart-bar"></i>
-            <span>Reportes</span>
-          </Link>
+      <div className="dashboard-content">
+        <div className="quick-actions">
+          <h2>Acciones Rápidas</h2>
+          <div className="actions-grid">
+            <Link to="/admin/productos/nuevo" className="action-card">
+              <i className="fas fa-plus"></i>
+              <span>Agregar Producto</span>
+            </Link>
+            
+            <Link to="/admin/pedidos" className="action-card">
+              <i className="fas fa-clipboard-list"></i>
+              <span>Ver Pedidos</span>
+            </Link>
+            
+            <Link to="/admin/mapa" className="action-card">
+              <i className="fas fa-map-marker-alt"></i>
+              <span>Mapa Entregas</span>
+            </Link>
+            
+            <Link to="/admin/productos" className="action-card">
+              <i className="fas fa-box"></i>
+              <span>Inventario</span>
+            </Link>
+            
+            <Link to="/admin/reportes" className="action-card">
+              <i className="fas fa-chart-bar"></i>
+              <span>Reportes</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="dashboard-mapa-widget">
+          <MapaWidget />
         </div>
       </div>
     </div>

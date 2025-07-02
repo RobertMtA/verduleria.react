@@ -6,6 +6,8 @@ import ProductList from '../components/ProductList';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 import { useAuth } from "../context/AuthContext";
+import Reseñas from '../components/Reseñas';
+import FormularioReseña from '../components/FormularioReseña';
 import './Home.css';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
@@ -15,16 +17,54 @@ const Home = () => {
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [ofertas, setOfertas] = useState([]);
+  const [ofertasLoading, setOfertasLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
-  // Filtrar productos destacados (reducir a 4 para balance)
+  // Filtrar productos destacados y cargar ofertas
   useEffect(() => {
     if (products.length) {
-      setFeaturedProducts(products.slice(0, 4));
+      setFeaturedProducts(products.slice(0, 3));
     }
+    // Cargar ofertas para mostrar en destacados
+    cargarOfertas();
   }, [products]);
+
+  const cargarOfertas = async () => {
+    try {
+      setOfertasLoading(true);
+      console.log('Cargando ofertas...');
+      const response = await fetch(`${API_URL}/ofertas?activas_solo=true`);
+      const data = await response.json();
+      console.log('Respuesta de ofertas:', data);
+      
+      if (data.success && data.ofertas) {
+        setOfertas(data.ofertas.slice(0, 3)); // Solo las primeras 3 ofertas
+        console.log('Ofertas cargadas:', data.ofertas.slice(0, 3));
+      } else {
+        console.log('No se encontraron ofertas o error en respuesta');
+      }
+    } catch (error) {
+      console.error('Error cargando ofertas:', error);
+    } finally {
+      setOfertasLoading(false);
+    }
+  };
+
+  const handleAddOfertaToCart = (oferta) => {
+    const producto = {
+      id: oferta._id,
+      nombre: oferta.nombre,
+      precio: oferta.precio_oferta,
+      imagen: oferta.imagen,
+      descripcion: oferta.descripcion,
+      esOferta: true,
+      descuento: oferta.descuento_porcentaje
+    };
+    addToCart(producto);
+  };
 
   // Filtrar productos por búsqueda
   const filteredProducts = products.filter(
@@ -35,7 +75,7 @@ const Home = () => {
   // Solo cuando NO hay búsqueda activa para mantener la página concisa
   const homeProducts = searchTerm.trim() 
     ? filteredProducts // Mostrar todos los resultados de búsqueda
-    : filteredProducts.slice(0, 8); // Limitar a 8 productos en vista normal
+    : filteredProducts.slice(0, 3); // Limitar a 3 productos en vista normal
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -120,16 +160,81 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Productos Destacados */}
-      {featuredProducts.length > 0 && (
+      {/* Ofertas Destacadas */}
+      {ofertasLoading ? (
+        <section className="featured-section" aria-label="Cargando ofertas">
+          <div className="container">
+            <h2 className="section-title">
+              <i className="fas fa-star" aria-hidden="true"></i> Nuestros Destacados - ¡En Oferta!
+            </h2>
+            <div className="loading-ofertas">
+              <p>Cargando ofertas especiales...</p>
+            </div>
+          </div>
+        </section>
+      ) : ofertas.length > 0 ? (
+        <section className="featured-section" aria-label="Ofertas destacadas">
+          <div className="container">
+            <h2 className="section-title">
+              <i className="fas fa-star" aria-hidden="true"></i> Nuestros Destacados - ¡En Oferta!
+            </h2>
+            <div className="ofertas-grid">
+              {ofertas.map((oferta) => (
+                <div className="oferta-card-home" key={oferta._id}>
+                  <div className="oferta-badge">
+                    {oferta.descuento_porcentaje}% OFF
+                  </div>
+                  
+                  <div className="oferta-imagen-container">
+                    {oferta.imagen ? (
+                      <img
+                        src={oferta.imagen.startsWith('/') ? oferta.imagen : `/${oferta.imagen}`}
+                        alt={oferta.nombre}
+                        className="oferta-img"
+                      />
+                    ) : (
+                      <div className="sin-imagen-oferta">
+                        <span>📦</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="oferta-content">
+                    <h3>{oferta.nombre}</h3>
+                    <p className="oferta-descripcion">{oferta.descripcion}</p>
+                    
+                    <div className="precios-container">
+                      <span className="precio-original">${oferta.precio_original?.toLocaleString()}</span>
+                      <span className="precio-oferta">${oferta.precio_oferta?.toLocaleString()}</span>
+                    </div>
+                    
+                    <button 
+                      className="btn-agregar-oferta"
+                      onClick={() => handleAddOfertaToCart(oferta)}
+                    >
+                      🛒 Agregar al Carrito
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link to="/ofertas" className="btn btn-outline">
+                Ver todas las ofertas
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : featuredProducts.length > 0 ? (
         <section className="featured-section" aria-label="Productos destacados">
           <div className="container">
             <h2 className="section-title">
               <i className="fas fa-star" aria-hidden="true"></i> Nuestros Destacados
             </h2>
             <ProductList 
-              products={featuredProducts.slice(0, 4)} 
+              products={featuredProducts.slice(0, 3)} 
               addToCart={addToCart}
+              className="grid-limitado"
             />
             <div className="text-center">
               <Link to="/productos/destacados" className="btn btn-outline">
@@ -138,7 +243,7 @@ const Home = () => {
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
       {/* Resultados de Búsqueda/Todos los Productos */}
       <section className="products-section" aria-label="Listado de productos">
@@ -164,9 +269,10 @@ const Home = () => {
               <ProductList 
                 products={homeProducts} 
                 addToCart={addToCart}
+                className="grid-limitado"
               />
               {/* Mostrar botón "Ver más" solo si hay más productos disponibles */}
-              {!searchTerm.trim() && filteredProducts.length > 8 && (
+              {!searchTerm.trim() && filteredProducts.length > 3 && (
                 <div className="text-center" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
                   <Link to="/productos" className="btn btn-view-more">
                     <i className="fas fa-chevron-right" style={{ marginRight: '8px' }}></i>
@@ -219,6 +325,21 @@ const Home = () => {
               <p>Directo del productor a tu mesa sin intermediarios</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Sección de Reseñas */}
+      <section className="reviews-section" aria-label="Reseñas de clientes">
+        <div className="container">
+          <h2 className="section-title">
+            <i className="fas fa-star" aria-hidden="true"></i> Lo que dicen nuestros clientes
+          </h2>
+          
+          {/* Mostrar reseñas existentes */}
+          <Reseñas />
+          
+          {/* Formulario para nuevas reseñas */}
+          <FormularioReseña className="compact" />
         </div>
       </section>
 

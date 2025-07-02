@@ -77,6 +77,7 @@ const Login = () => {
           telefono: data.user.telefono || "",
           direccion: data.user.direccion || "",
           role: data.user.role || "user",
+          token: data.token // ¡Agregar el token aquí!
         });
 
         const redirectPath = location.state?.from?.pathname ||

@@ -54,24 +54,31 @@ const ProductsAdmin = () => {
     
     try {
       setFormLoading(true);
+      console.log("Eliminando producto con ID:", productId);
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4001/api"}/productos/${productId}`, {
         method: "DELETE"
       });
       
+      console.log("Respuesta del servidor:", response.status);
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Error del servidor:", errorData);
         throw new Error(errorData.error || "Error al eliminar producto");
       }
       
       const result = await response.json();
+      console.log("Resultado:", result);
       
-      if (!result.success && !result.ok) {
+      if (!result.success) {
         throw new Error(result.error || "Error al eliminar producto");
       }
       
       enqueueSnackbar(result.message || "Producto eliminado correctamente", { variant: "success" });
       fetchProducts(pagination.page, itemsPerPage);
     } catch (err) {
+      console.error("Error completo:", err);
       enqueueSnackbar(err.message, { variant: "error" });
     } finally {
       setFormLoading(false);
@@ -86,9 +93,10 @@ const ProductsAdmin = () => {
       let body = productData;
 
       if (selectedProduct) {
-        url += `/${selectedProduct._id}`;
+        url += `/${selectedProduct.id}`;
         method = "PUT";
-        body = { ...productData, _id: selectedProduct._id };
+        // No incluir _id en el body para la actualización
+        body = productData;
       }
 
       console.log("Enviando datos:", { method, url, body }); // Para debug
@@ -101,17 +109,19 @@ const ProductsAdmin = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Error del servidor:", errorData);
         throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       console.log("Respuesta del servidor:", result); // Para debug
 
-      if (!result.success && !result.ok) {
+      if (!result.success) {
         throw new Error(result.error || "Error al guardar producto");
       }
 
       setOpenDialog(false);
+      setSelectedProduct(null);
       enqueueSnackbar(
         result.message || `Producto ${selectedProduct ? "actualizado" : "creado"} correctamente`,
         { variant: "success" }
@@ -187,8 +197,8 @@ const ProductsAdmin = () => {
                 <TableBody>
                   {products
                     .map((product) => (
-                      <TableRow key={product._id}>
-                        <TableCell>{product._id}</TableCell>
+                      <TableRow key={product.id}>
+                        <TableCell>{product.id}</TableCell>
                         <TableCell>{product.nombre}</TableCell>
                         <TableCell>{product.categoria || "Sin categoría"}</TableCell>
                         <TableCell>${Number(product.precio).toFixed(2)}</TableCell>
@@ -202,7 +212,7 @@ const ProductsAdmin = () => {
                         <TableCell>
                           <IconButton 
                             color="primary" 
-                            onClick={() => navigate(`/productos/${product._id}`)}
+                            onClick={() => navigate(`/productos/${product.id}`)}
                           >
                             <VisibilityIcon />
                           </IconButton>
@@ -214,7 +224,7 @@ const ProductsAdmin = () => {
                           </IconButton>
                           <IconButton 
                             color="error" 
-                            onClick={() => handleDeleteProduct(product._id)}
+                            onClick={() => handleDeleteProduct(product.id)}
                           >
                             <DeleteIcon />
                           </IconButton>
