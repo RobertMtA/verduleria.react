@@ -367,6 +367,97 @@ app.post('/api/upload-image', (req, res) => {
 app.use('/api/auth', authRouter);
 app.use("/api/productos", productosRouter);
 
+// 🚨 ENDPOINTS DE EMERGENCIA CORS-FREE 🚨
+app.get('/emergency/productos', (req, res) => {
+  console.log('🚨 EMERGENCY: productos endpoint');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Content-Type', 'application/json');
+  
+  const productosEmergencia = [
+    {
+      id: "emergency_001",
+      nombre: "Banana",
+      descripcion: "Bananas frescas (Por kilo)",
+      precio: 6000,
+      stock: 77000,
+      imagen: "/images/img-banana1.jpg",
+      categoria: "Frutas",
+      activo: true
+    },
+    {
+      id: "emergency_002",
+      nombre: "Naranja",
+      descripcion: "Naranja fresca y jugosa (Por kilo)",
+      precio: 2500,
+      stock: 1000,
+      imagen: "/images/img-naranja1.jpg",
+      categoria: "Frutas",
+      activo: true
+    },
+    {
+      id: "emergency_003",
+      nombre: "Lechuga",
+      descripcion: "Lechuga fresca (Por kilo)",
+      precio: 2500,
+      stock: 50,
+      imagen: "/images/img-lechuga1.jpg",
+      categoria: "Verduras",
+      activo: true
+    }
+  ];
+  
+  res.json({
+    success: true,
+    productos: productosEmergencia,
+    total: productosEmergencia.length,
+    source: 'emergency'
+  });
+});
+
+app.get('/emergency/ofertas', (req, res) => {
+  console.log('🚨 EMERGENCY: ofertas endpoint');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Content-Type', 'application/json');
+  
+  const ofertasEmergencia = [
+    {
+      _id: 'emergency_001',
+      nombre: 'Súper Oferta Bananas',
+      descripcion: 'Bananas frescas con 30% de descuento',
+      precio_original: 6000,
+      precio_oferta: 4200,
+      descuento_porcentaje: 30,
+      imagen: '/images/img-banana1.jpg',
+      activa: true,
+      vigente: true,
+      categoria: 'Frutas'
+    },
+    {
+      _id: 'emergency_002',
+      nombre: 'Oferta Especial Naranjas',
+      descripcion: 'Naranjas jugosas con 25% de descuento',
+      precio_original: 2500,
+      precio_oferta: 1875,
+      descuento_porcentaje: 25,
+      imagen: '/images/img-naranja1.jpg',
+      activa: true,
+      vigente: true,
+      categoria: 'Frutas'
+    }
+  ];
+  
+  res.json({
+    success: true,
+    ofertas: ofertasEmergencia,
+    total: ofertasEmergencia.length,
+    source: 'emergency'
+  });
+});
+
 // Ruta temporal para ofertas mientras se arregla el router
 app.get('/api/ofertas-temp', (req, res) => {
   console.log('📢 GET /api/ofertas-temp - Ruta temporal activada');
