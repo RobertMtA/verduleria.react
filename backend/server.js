@@ -130,12 +130,33 @@ const app = express();
 
 // Middleware CORS personalizado que se aplica a TODAS las respuestas
 app.use((req, res, next) => {
+  // Agregar headers CORS de forma explícita
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
   
-  // Responder a preflight OPTIONS
+  // Interceptar todas las respuestas para asegurar que tengan headers CORS
+  const originalSend = res.send;
+  const originalJson = res.json;
+  const originalStatus = res.status;
+  
+  res.send = function(data) {
+    res.header('Access-Control-Allow-Origin', '*');
+    return originalSend.call(this, data);
+  };
+  
+  res.json = function(data) {
+    res.header('Access-Control-Allow-Origin', '*');
+    return originalJson.call(this, data);
+  };
+  
+  res.status = function(code) {
+    res.header('Access-Control-Allow-Origin', '*');
+    return originalStatus.call(this, code);
+  };
+  
+  // Responder a preflight OPTIONS inmediatamente
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -143,12 +164,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS adicional con cors package
+// CORS adicional con cors package como fallback
 app.use(cors({
-  origin: true, // Permitir todos los orígenes temporalmente
+  origin: '*', // Permitir todos los orígenes explícitamente
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false // Cambiar a false para evitar conflictos
 }));
 
 app.use(express.json());
