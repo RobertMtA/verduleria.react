@@ -15,6 +15,7 @@ const Loader = () => (
 
 // Componentes de debug
 const DebugProfile = lazy(() => import('./components/DebugProfile'));
+const Debug = lazy(() => import('./pages/Debug'));
 
 // Layouts con pre-carga
 const MainLayout = lazy(() => import('./layouts/MainLayout'));
@@ -175,6 +176,7 @@ function App() {
 
               {/* Ruta temporal de debug */}
               <Route path="debug" element={<DebugProfile />} />
+              <Route path="debug-api" element={<Debug />} />
             </Route>
 
             {/* Rutas de administración */}
