@@ -29,9 +29,20 @@ router.get("/", async (req, res) => {
     });
     
     await client.close();
-    res.json(productosConId);
+    
+    // Siempre retornar un array, aunque esté vacío
+    res.json({
+      success: true,
+      productos: productosConId,
+      total: productosConId.length
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener productos", detalle: error.message });
+    console.error("Error al obtener productos:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Error al obtener productos", 
+      detalle: error.message 
+    });
   }
 });
 

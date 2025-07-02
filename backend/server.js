@@ -127,12 +127,30 @@ const ReseñaSchema = new Schema({
 const Reseña = model('Reseña', ReseñaSchema);
 
 const app = express();
+
+// Middleware CORS personalizado que se aplica a TODAS las respuestas
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Responder a preflight OPTIONS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
+// CORS adicional con cors package
 app.use(cors({
   origin: true, // Permitir todos los orígenes temporalmente
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
 app.use(express.json());
 
 // Configuración de multer para subida de archivos
@@ -1557,6 +1575,37 @@ app.post('/api/reset_password', async (req, res) => {
       error: "Error interno del servidor"
     });
   }
+});
+
+// ============== MANEJO DE ERRORES Y 404 ==============
+// Middleware para manejar rutas no encontradas (404) con headers CORS
+app.use('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  res.status(404).json({
+    success: false,
+    error: 'Ruta no encontrada',
+    message: `La ruta ${req.originalUrl} no existe`
+  });
+});
+
+// Middleware de manejo de errores global con headers CORS
+app.use((error, req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  console.error('Error en servidor:', error);
+  
+  res.status(500).json({
+    success: false,
+    error: 'Error interno del servidor',
+    message: error.message || 'Ha ocurrido un error inesperado'
+  });
 });
 
 const PORT = process.env.PORT || 4001;
