@@ -343,6 +343,43 @@ app.post('/api/upload-image', (req, res) => {
 // Rutas principales
 app.use('/api/auth', authRouter);
 app.use("/api/productos", productosRouter);
+
+// Ruta temporal para ofertas mientras se arregla el router
+app.get('/api/ofertas-temp', (req, res) => {
+  console.log('📢 GET /api/ofertas-temp - Ruta temporal activada');
+  res.json({
+    success: true,
+    ofertas: [
+      {
+        _id: 'temp_001',
+        nombre: 'Oferta Temporal 1',
+        descripcion: 'Oferta de prueba mientras se arregla el sistema',
+        precio_original: 5000,
+        precio_oferta: 3500,
+        descuento_porcentaje: 30,
+        imagen: '/images/img-banana1.jpg',
+        activa: true,
+        vigente: true,
+        categoria: 'general'
+      },
+      {
+        _id: 'temp_002',
+        nombre: 'Oferta Temporal 2',
+        descripcion: 'Segunda oferta de prueba',
+        precio_original: 8000,
+        precio_oferta: 6000,
+        descuento_porcentaje: 25,
+        imagen: '/images/img-naranja1.jpg',
+        activa: true,
+        vigente: true,
+        categoria: 'frutas'
+      }
+    ],
+    total: 2,
+    message: 'Datos temporales - Ofertas en mantenimiento'
+  });
+});
+
 app.use('/api/ofertas', ofertasRouter);
 app.use('/api/users', usersRoutes);
 app.use('/api/chat', chatRouter);
