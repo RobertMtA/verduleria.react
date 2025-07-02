@@ -32,6 +32,8 @@ const Oferta = mongoose.models.Oferta || mongoose.model('Oferta', OfertaSchema);
 // GET /api/ofertas - Obtener todas las ofertas (públicas)
 router.get("/", async (req, res) => {
   try {
+    console.log('📢 GET /api/ofertas - Params:', req.query);
+    
     const { activas_solo } = req.query;
     const ahora = new Date();
     
@@ -45,7 +47,9 @@ router.get("/", async (req, res) => {
       };
     }
 
+    console.log('🔍 Buscando ofertas con filtro:', filtro);
     const ofertas = await Oferta.find(filtro).sort({ creado_en: -1 });
+    console.log('✅ Ofertas encontradas:', ofertas.length);
     
     // Calcular el descuento automáticamente si no está definido
     const ofertasConDescuento = ofertas.map(oferta => {
@@ -61,13 +65,15 @@ router.get("/", async (req, res) => {
 
     res.json({
       success: true,
-      ofertas: ofertasConDescuento
+      ofertas: ofertasConDescuento,
+      total: ofertasConDescuento.length
     });
   } catch (error) {
-    console.error("Error obteniendo ofertas:", error);
+    console.error("❌ Error obteniendo ofertas:", error);
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor"
+      error: "Error interno del servidor",
+      message: error.message
     });
   }
 });
