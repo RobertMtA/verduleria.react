@@ -5,6 +5,7 @@ import useProducts from '../hooks/useProducts';
 import { getProductImageUrl } from '../utils/imageUtils';
 import ImageWithFallback from '../components/common/ImageWithFallback';
 import ImageDiagnostic from '../components/common/ImageDiagnostic';
+import SEOComponent from '../components/common/SEOComponent';
 import './Products.css';
 
 const Products = () => {
@@ -109,6 +110,15 @@ const Products = () => {
 
   return (
     <div className="products-page">
+      {/* SEO Component */}
+      <SEOComponent 
+        title="Productos | Frutas y Verduras Frescas Online - Verdulería Buenos Aires"
+        description="🍎 Catálogo completo de frutas y verduras frescas online. Tomates, lechugas, bananas, manzanas y más. Entrega a domicilio en Buenos Aires. ¡Comprá ahora!"
+        keywords="productos frescos, frutas online, verduras online, tomates frescos, lechugas, bananas, manzanas, catálogo verdulería"
+        image="/images/img-tomate1.jpg"
+        url="https://tudominio.com/productos"
+      />
+      
       <div className="products-header">
         <h1>Nuestros Productos</h1>
         

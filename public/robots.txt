@@ -1,0 +1,18 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /historial/
+Allow: /
+Allow: /productos
+Allow: /ofertas
+Allow: /resenas
+Allow: /contacto
+Allow: /about
+
+Sitemap: https://tudominio.com/sitemap.xml
+Sitemap: https://tudominio.com/ads.txt
+
+# Crawl-delay (opcional, reduce carga del servidor)
+Crawl-delay: 1

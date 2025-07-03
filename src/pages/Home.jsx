@@ -10,6 +10,7 @@ import Reseñas from '../components/Reseñas';
 import FormularioReseña from '../components/FormularioReseña';
 import ImageWithFallback from '../components/common/ImageWithFallback';
 import DemoBanner from '../components/DemoBanner';
+import SEOComponent from '../components/common/SEOComponent';
 import './Home.css';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
@@ -122,6 +123,15 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      {/* SEO Component */}
+      <SEOComponent 
+        title="Verdulería Online | Frutas y Verduras Frescas a Domicilio en Buenos Aires"
+        description="🥬 Compra frutas y verduras frescas online con entrega a domicilio en Buenos Aires. Productos orgánicos, ofertas especiales y la mejor calidad. ¡Pedí ahora!"
+        keywords="verdulería online, frutas frescas, verduras frescas, delivery Buenos Aires, productos orgánicos, verduras a domicilio, Roberto Gaona desarrollador"
+        image="/images/img-banner.jpg"
+        url="https://tudominio.com/"
+      />
+      
       {/* Demo Banner */}
       <DemoBanner />
       
