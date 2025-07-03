@@ -75,50 +75,125 @@
   border: 0 !important;
 }
 
-/* Corrección ultra-específica para Bootstrap navbar-toggler */
+/* SOLUCIÓN DEFINITIVA: Eliminar cuadrado blanco del menú móvil */
+.navbar-toggler,
 .navbar-expand-lg .navbar-toggler,
 .navbar-light .navbar-toggler,
 .navbar-dark .navbar-toggler,
-button.navbar-toggler {
-  background: transparent !important;
+button.navbar-toggler,
+.navbar .navbar-toggler,
+.navbar-toggler[aria-expanded="true"],
+.navbar-toggler[aria-expanded="false"] {
+  background: none !important;
   background-color: transparent !important;
-  border: none !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
-  padding: 4px 8px !important;
+  outline: none !important;
+  padding: 6px 8px !important;
+  position: relative !important;
+  width: auto !important;
+  height: auto !important;
 }
 
-/* Eliminar cualquier estilo de focus y active de Bootstrap */
+/* Eliminar cualquier estilo en todos los estados posibles */
+.navbar-toggler:hover,
 .navbar-toggler:focus,
 .navbar-toggler:focus-visible,
 .navbar-toggler:active,
-.navbar-toggler:active:focus {
-  background: transparent !important;
+.navbar-toggler:active:focus,
+.navbar-toggler.collapsed,
+.navbar-toggler:not(.collapsed),
+.navbar-toggler[aria-expanded="true"]:hover,
+.navbar-toggler[aria-expanded="false"]:hover {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+}
+
+/* Ícono del menú hamburguesa - visible en blanco */
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+  background-size: 1.2em 1.2em !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-color: transparent !important;
+  border: none !important;
+  width: 1.2em !important;
+  height: 1.2em !important;
+  display: inline-block !important;
+}
+
+/* CRÍTICO: Eliminar completamente cualquier pseudo-elemento o elemento flotante */
+.navbar-toggler::before,
+.navbar-toggler::after,
+.navbar-toggler .navbar-toggler-icon::before,
+.navbar-toggler .navbar-toggler-icon::after,
+.navbar-toggler *::before,
+.navbar-toggler *::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  position: static !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Forzar que NINGÚN elemento hijo tenga background */
+.navbar-toggler *,
+.navbar-toggler > *,
+.navbar-toggler span,
+.navbar-toggler > span {
+  background: none !important;
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  outline: none !important;
 }
 
-.navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-  background-size: 1.2em 1.2em;
-}
-
-/* Eliminar completamente cualquier background o borde del navbar-toggler */
-.navbar-toggler::before,
-.navbar-toggler::after {
-  display: none !important;
-}
-
-.navbar-toggler .navbar-toggler-icon {
-  background-color: transparent !important;
-}
-
-/* Asegurar que el navbar collapse tenga el fondo correcto en móvil */
+/* NAVBAR COLLAPSE: Asegurar fondo correcto en móvil */
 .navbar-collapse {
   background: #388e3c !important;
   border: none !important;
   box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.navbar-collapse.show,
+.navbar-collapse.collapsing {
+  background: #388e3c !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* OVERRIDE BOOTSTRAP: Eliminar cualquier style por defecto de Bootstrap 5 */
+.navbar-toggler[data-bs-toggle="collapse"] {
+  background: none !important;
+  border: none !important;
+}
+
+.navbar-toggler[aria-controls] {
+  background: none !important;
+  border: none !important;
+}
+
+/* CSS GRID/FLEXBOX: Asegurar que el botón no tenga layout issues */
+.navbar-toggler {
+  position: relative !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
 }
 
 /* Navbar links */
