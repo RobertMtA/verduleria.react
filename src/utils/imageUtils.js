@@ -1,17 +1,23 @@
 // utils/imageUtils.js
-const BASE_URL = "https://verduleria-react.vercel.app";
+const BASE_URL = "https://verduleria-backend-m19n.onrender.com";
+const GITHUB_FALLBACK = "https://raw.githubusercontent.com/RobertMtA/verduleria-backend/main/public";
 const DEFAULT_IMAGE = "/default-product.svg";
 
 /**
- * Construye la URL completa para una imagen
+ * Construye la URL completa para una imagen con fallback a GitHub
  * @param {string} imagePath - Ruta de la imagen (puede ser relativa o absoluta)
  * @returns {string} URL completa de la imagen
  */
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return DEFAULT_IMAGE; // Imagen por defecto
   if (imagePath.startsWith('http')) return imagePath; // URL absoluta
-  if (imagePath.startsWith('/images/')) return `${BASE_URL}${imagePath}`; // Ruta relativa
-  return `${BASE_URL}/images/${imagePath}`; // Solo nombre de archivo
+  
+  // Construir URL principal y fallback
+  const mainUrl = imagePath.startsWith('/images/') ? `${BASE_URL}${imagePath}` : `${BASE_URL}/images/${imagePath}`;
+  const fallbackUrl = imagePath.startsWith('/images/') ? `${GITHUB_FALLBACK}${imagePath}` : `${GITHUB_FALLBACK}/images/${imagePath}`;
+  
+  // Retornar la URL principal (el navegador manejará el fallback si es necesario)
+  return mainUrl;
 };
 
 /**

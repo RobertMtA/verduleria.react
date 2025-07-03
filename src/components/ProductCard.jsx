@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { getProductImageUrl, handleImageError } from "../utils/imageUtils";
+import { getProductImageUrl } from "../utils/imageUtils";
+import ImageWithFallback from "./common/ImageWithFallback";
 import "./ProductCard.css";
 
 const ProductCard = ({ product }) => {
@@ -37,11 +38,10 @@ const ProductCard = ({ product }) => {
       <p className="stock">Stock: {product.stock || 'Disponible'}</p>
       
       {product.imagen && (
-        <img
+        <ImageWithFallback
           src={getProductImageUrl(product)}
           alt={product.nombre}
           className="product-image"
-          onError={handleImageError}
         />
       )}
 
