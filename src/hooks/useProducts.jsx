@@ -24,26 +24,45 @@ const useProducts = () => {
       
       console.log('✅ Productos recibidos:', data);
       
-      if (data.success && data.productos) {
-        // Asegurar que los productos tengan formato numérico correcto
-        const productosNumericos = data.productos.map((p) => ({
-          ...p,
-          id: p.id || p._id, // Asegurar que siempre haya un ID
-          precio: Number(p.precio),
-          stock: Number(p.stock),
-        }));
-
-        setProducts(productosNumericos);
-        setPagination(prev => ({
-          ...prev,
-          total: data.total || data.productos.length,
-          page: page,
-          limit: limit,
-          totalPages: Math.ceil((data.total || data.productos.length) / limit)
-        }));
+      let productos = [];
+      
+      // Manejar diferentes formatos de respuesta
+      if (data && data.success && data.productos && Array.isArray(data.productos)) {
+        // Formato: {success: true, productos: [...]}
+        productos = data.productos;
+      } else if (Array.isArray(data)) {
+        // Formato: array directo [...]
+        productos = data;
+      } else if (data && data.productos && Array.isArray(data.productos)) {
+        // Formato: {productos: [...]} sin success
+        productos = data.productos;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        // Formato: {data: [...]}
+        productos = data.data;
       } else {
-        throw new Error('Formato de respuesta inválido');
+        console.warn('⚠️ Formato de respuesta no esperado, usando array vacío:', data);
+        productos = []; // No lanzar error, simplemente usar array vacío
       }
+      
+      // Asegurar que los productos tengan formato numérico correcto
+      const productosNumericos = productos.map((p) => ({
+        ...p,
+        id: p.id || p._id, // Asegurar que siempre haya un ID
+        precio: Number(p.precio),
+        stock: Number(p.stock),
+      }));
+
+      setProducts(productosNumericos);
+      setPagination(prev => ({
+        ...prev,
+        total: data.total || productos.length,
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil((data.total || productos.length) / limit)
+      }));
+      
+      console.log(`✅ ${productosNumericos.length} productos cargados exitosamente`);
+      
     } catch (err) {
       setError(err.message || "Error de conexión");
       console.error("❌ Error fetching products:", err);

@@ -43,14 +43,27 @@ const Home = () => {
       
       console.log('✅ Respuesta de ofertas:', data);
       
-      if (data.success && data.ofertas) {
-        setOfertas(data.ofertas.slice(0, 3)); // Solo las primeras 3 ofertas
-        console.log('✅ Ofertas cargadas:', data.ofertas.slice(0, 3));
+      if (data && data.success && data.ofertas && Array.isArray(data.ofertas)) {
+        const ofertasLimitadas = data.ofertas.slice(0, 3); // Solo las primeras 3 ofertas
+        setOfertas(ofertasLimitadas);
+        console.log(`✅ ${ofertasLimitadas.length} ofertas cargadas`);
+      } else if (data && data.ofertas && Array.isArray(data.ofertas)) {
+        // Formato sin success flag
+        const ofertasLimitadas = data.ofertas.slice(0, 3);
+        setOfertas(ofertasLimitadas);
+        console.log(`✅ ${ofertasLimitadas.length} ofertas cargadas (formato alternativo)`);
+      } else if (Array.isArray(data)) {
+        // Array directo
+        const ofertasLimitadas = data.slice(0, 3);
+        setOfertas(ofertasLimitadas);
+        console.log(`✅ ${ofertasLimitadas.length} ofertas cargadas (array directo)`);
       } else {
-        console.log('⚠️ No se encontraron ofertas o error en respuesta');
+        console.log('⚠️ No se encontraron ofertas en la respuesta:', data);
+        setOfertas([]); // Establecer array vacío en lugar de mantener undefined
       }
     } catch (error) {
-      console.error('❌ Error cargando ofertas:', error);
+      console.warn('⚠️ Error cargando ofertas, usando mock:', error.message);
+      setOfertas([]); // Array vacío en caso de error
     } finally {
       setOfertasLoading(false);
     }

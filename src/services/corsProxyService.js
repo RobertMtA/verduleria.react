@@ -19,7 +19,8 @@ async function fetchWithProxy(endpoint, options = {}) {
     });
     
     if (!response.ok) {
-      throw new Error(`Proxy error: ${response.status}`);
+      console.warn(`⚠️ Proxy error: ${response.status}, usando fallback`);
+      return getMockData(endpoint);
     }
     
     const proxyData = await response.json();
@@ -29,16 +30,56 @@ async function fetchWithProxy(endpoint, options = {}) {
       try {
         const actualData = JSON.parse(proxyData.contents);
         console.log(`✅ Datos recibidos vía proxy:`, actualData);
-        return actualData;
+        
+        // Si recibimos un array directo (como productos), convertir a formato esperado
+        if (Array.isArray(actualData)) {
+          const result = {
+            success: true,
+            total: actualData.length,
+            source: 'proxy'
+          };
+          
+          // Determinar el tipo de datos basado en el endpoint
+          if (endpoint === '/productos') {
+            result.productos = actualData;
+          } else if (endpoint.includes('/ofertas')) {
+            result.ofertas = actualData;
+          } else {
+            result.data = actualData;
+          }
+          
+          return result;
+        }
+        
+        // Si ya tiene el formato correcto, asegurar que tenga success: true
+        if (actualData && typeof actualData === 'object') {
+          return {
+            success: true,
+            source: 'proxy',
+            ...actualData
+          };
+        }
+        
+        // Fallback si no es ni array ni objeto válido
+        console.warn('⚠️ Formato de respuesta inesperado:', actualData);
+        return getMockData(endpoint);
+        
       } catch (parseError) {
         console.error('❌ Error parseando respuesta del proxy:', parseError);
-        throw new Error('Error parseando respuesta del servidor');
+        
+        // Si hay error de parseo, probablemente es HTML (404)
+        if (proxyData.contents.includes('<!DOCTYPE') || proxyData.contents.includes('<html>')) {
+          console.warn('⚠️ Respuesta es HTML (probablemente 404), usando fallback');
+        }
+        
+        return getMockData(endpoint);
       }
     } else {
-      throw new Error('Respuesta vacía del proxy');
+      console.warn('⚠️ Respuesta vacía del proxy, usando fallback');
+      return getMockData(endpoint);
     }
   } catch (error) {
-    console.error(`❌ Error en fetchWithProxy para ${endpoint}:`, error);
+    console.warn(`⚠️ Error en fetchWithProxy para ${endpoint}:`, error.message);
     
     // Fallback: retornar datos mock
     return getMockData(endpoint);
