@@ -63,12 +63,6 @@ const useProducts = () => {
     error,
     pagination,
     fetchProducts,
-  };
-};
-
-export default useProducts;
-    pagination,
-    fetchProducts,
     reloadProducts: fetchProducts, // Alias para mejor compatibilidad
     refetch: fetchProducts // Alias para mejor semántica
   };
