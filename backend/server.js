@@ -198,7 +198,7 @@ app.use(cors({
 app.use(express.json());
 
 // Configuración de multer para subida de archivos
-const uploadsDir = path.join(__dirname, '../public/images');
+const uploadsDir = path.join(__dirname, './public/images');
 
 // Crear directorio si no existe
 if (!fs.existsSync(uploadsDir)) {
