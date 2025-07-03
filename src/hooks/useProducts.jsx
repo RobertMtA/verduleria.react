@@ -25,7 +25,15 @@ const useProducts = () => {
       console.log('✅ Productos recibidos:', data);
       
       if (data.success && data.productos) {
-        setProducts(data.productos);
+        // Asegurar que los productos tengan formato numérico correcto
+        const productosNumericos = data.productos.map((p) => ({
+          ...p,
+          id: p.id || p._id, // Asegurar que siempre haya un ID
+          precio: Number(p.precio),
+          stock: Number(p.stock),
+        }));
+
+        setProducts(productosNumericos);
         setPagination(prev => ({
           ...prev,
           total: data.total || data.productos.length,
@@ -36,30 +44,9 @@ const useProducts = () => {
       } else {
         throw new Error('Formato de respuesta inválido');
       }
-      }
-
-      const data = await response.json();
-
-      // Si tu backend devuelve un array simple:
-      const productosNumericos = Array.isArray(data)
-        ? data.map((p) => ({
-            ...p,
-            id: p.id || p._id, // Asegurar que siempre haya un ID
-            precio: Number(p.precio),
-            stock: Number(p.stock),
-          }))
-        : [];
-
-      setProducts(productosNumericos);
-      setPagination(data.pagination || { 
-        total: 0, 
-        page, 
-        limit, 
-        totalPages: 1 
-      });
     } catch (err) {
       setError(err.message || "Error de conexión");
-      console.error("Error fetching products:", err);
+      console.error("❌ Error fetching products:", err);
     } finally {
       setLoading(false);
     }
@@ -74,6 +61,12 @@ const useProducts = () => {
     setProducts,
     loading,
     error,
+    pagination,
+    fetchProducts,
+  };
+};
+
+export default useProducts;
     pagination,
     fetchProducts,
     reloadProducts: fetchProducts, // Alias para mejor compatibilidad
