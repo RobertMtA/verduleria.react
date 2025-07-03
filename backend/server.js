@@ -1985,3 +1985,39 @@ app.get('/api/resenas/estadisticas', async (req, res) => {
   }
 });
 
+// Endpoint de debug para verificar imágenes
+app.get('/debug/images', (req, res) => {
+  try {
+    const imagesPath = path.join(__dirname, './public/images');
+    console.log('📁 Verificando directorio de imágenes:', imagesPath);
+    
+    if (!fs.existsSync(imagesPath)) {
+      return res.json({
+        status: 'error',
+        message: 'Directorio de imágenes no existe',
+        path: imagesPath,
+        __dirname: __dirname
+      });
+    }
+    
+    const files = fs.readdirSync(imagesPath);
+    
+    res.json({
+      status: 'success',
+      message: 'Directorio de imágenes encontrado',
+      path: imagesPath,
+      __dirname: __dirname,
+      files: files,
+      totalFiles: files.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Error verificando imágenes:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      __dirname: __dirname
+    });
+  }
+});
+
