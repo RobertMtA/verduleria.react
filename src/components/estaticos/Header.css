@@ -47,6 +47,20 @@
   outline: none !important;
 }
 
+/* Corrección específica para eliminar cuadrado blanco */
+.navbar-toggler,
+.navbar-toggler:not(.collapsed),
+.navbar-toggler.collapsed,
+.navbar-toggler:focus,
+.navbar-toggler:hover,
+.navbar-toggler:active {
+  background: none !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 /* Asegurar que no hay pseudo-elementos causando el cuadrado */
 .navbar-toggler:before,
 .navbar-toggler:after {
@@ -59,6 +73,30 @@
   background: none !important;
   background-color: transparent !important;
   border: 0 !important;
+}
+
+/* Corrección ultra-específica para Bootstrap navbar-toggler */
+.navbar-expand-lg .navbar-toggler,
+.navbar-light .navbar-toggler,
+.navbar-dark .navbar-toggler,
+button.navbar-toggler {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 8px !important;
+}
+
+/* Eliminar cualquier estilo de focus y active de Bootstrap */
+.navbar-toggler:focus,
+.navbar-toggler:focus-visible,
+.navbar-toggler:active,
+.navbar-toggler:active:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .navbar-toggler-icon {
