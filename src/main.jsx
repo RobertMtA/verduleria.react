@@ -7,6 +7,8 @@ import { BrowserRouter } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './styles/global.css';
 import './styles/forms.css';
+import './styles/Responsive.css';
+import './styles/MobileOptimizations.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

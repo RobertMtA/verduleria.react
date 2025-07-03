@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Reseñas - Verdulería</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e7d32;
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 10px;
+        }
+        .button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .review {
+            background: #f9f9f9;
+            border-left: 4px solid #4caf50;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .stars {
+            color: #ffc107;
+            font-size: 18px;
+        }
+        .approved {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .pending {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        .link {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Test de Reseñas - Verdulería</h1>
+        
+        <div class="status" id="status">
+            Cargando...
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button class="button" onclick="addSampleReviews()">📝 Agregar Reseñas de Ejemplo</button>
+            <button class="button" onclick="clearReviews()">🗑️ Limpiar Reseñas</button>
+            <button class="button" onclick="checkStatus()">🔄 Actualizar Estado</button>
+            <button class="button" onclick="openApp()">🌐 Abrir Aplicación</button>
+        </div>
+        
+        <div id="reviews-list">
+            <!-- Las reseñas se mostrarán aquí -->
+        </div>
+    </div>
+
+    <script>
+        const REVIEWS_KEY = 'reseñas_local';
+        
+        const sampleReviews = [
+            {
+                _id: '675b123456789012345678a1',
+                usuario: { nombre: 'María González' },
+                calificacion: 5,
+                comentario: 'Excelente servicio y productos frescos. Muy recomendable!',
+                fecha: new Date().toISOString(),
+                aprobada: true,
+                producto: 'general'
+            },
+            {
+                _id: '675b123456789012345678a2',
+                usuario: { nombre: 'Juan Pérez' },
+                calificacion: 4,
+                comentario: 'Buenos productos, entrega rápida. Solo mejoraría el empaque.',
+                fecha: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                aprobada: true,
+                producto: 'Tomates'
+            },
+            {
+                _id: '675b123456789012345678a3',
+                usuario: { nombre: 'Ana López' },
+                calificacion: 5,
+                comentario: 'Las verduras llegaron súper frescas y el precio es muy justo.',
+                fecha: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                aprobada: true,
+                producto: 'Lechugas'
+            },
+            {
+                _id: '675b123456789012345678a4',
+                usuario: { nombre: 'Carlos Ruiz' },
+                calificacion: 3,
+                comentario: 'El pedido llegó bien pero un poco tarde.',
+                fecha: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                aprobada: false,
+                producto: 'general'
+            },
+            {
+                _id: '675b123456789012345678a5',
+                usuario: { nombre: 'Laura Silva' },
+                calificacion: 5,
+                comentario: 'Increíble calidad, las frutas estaban perfectas!',
+                fecha: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                aprobada: true,
+                producto: 'Manzanas'
+            }
+        ];
+
+        function addSampleReviews() {
+            localStorage.setItem(REVIEWS_KEY, JSON.stringify(sampleReviews));
+            checkStatus();
+            alert('✅ Reseñas de ejemplo agregadas al localStorage');
+        }
+
+        function clearReviews() {
+            localStorage.removeItem(REVIEWS_KEY);
+            checkStatus();
+            alert('🗑️ Reseñas eliminadas del localStorage');
+        }
+
+        function getStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += i <= rating ? '★' : '☆';
+            }
+            return stars;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Hoy';
+            if (diffDays === 1) return 'Ayer';
+            if (diffDays < 7) return `Hace ${diffDays} días`;
+            return date.toLocaleDateString('es-ES');
+        }
+
+        function checkStatus() {
+            const reviews = JSON.parse(localStorage.getItem(REVIEWS_KEY) || '[]');
+            const approved = reviews.filter(r => r.aprobada);
+            const pending = reviews.filter(r => !r.aprobada);
+            
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `
+                <h3>📊 Estado del localStorage</h3>
+                <p><strong>Total de reseñas:</strong> ${reviews.length}</p>
+                <p><strong>Aprobadas:</strong> ${approved.length}</p>
+                <p><strong>Pendientes:</strong> ${pending.length}</p>
+                <p><strong>Clave en localStorage:</strong> "${REVIEWS_KEY}"</p>
+            `;
+            
+            const reviewsList = document.getElementById('reviews-list');
+            if (reviews.length === 0) {
+                reviewsList.innerHTML = '<p>❌ No hay reseñas en localStorage</p>';
+            } else {
+                reviewsList.innerHTML = `
+                    <h3>📝 Reseñas en localStorage:</h3>
+                    ${reviews.map(review => `
+                        <div class="review">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong>${review.usuario?.nombre || 'Usuario'}</strong>
+                                <span class="${review.aprobada ? 'approved' : 'pending'}">
+                                    ${review.aprobada ? '✅ Aprobada' : '⏳ Pendiente'}
+                                </span>
+                            </div>
+                            <div class="stars">${getStars(review.calificacion)}</div>
+                            <p>"${review.comentario}"</p>
+                            <small>Producto: ${review.producto} | ${formatDate(review.fecha)}</small>
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function openApp() {
+            window.open('http://localhost:5174/', '_blank');
+        }
+
+        // Cargar estado al iniciar
+        checkStatus();
+    </script>
+</body>
+</html>

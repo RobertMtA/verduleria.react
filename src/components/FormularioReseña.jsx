@@ -150,6 +150,7 @@ const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
             onChange={handleChange}
             placeholder="¿Qué producto te gustó más?"
             className="form-input"
+            autocomplete="off"
           />
         </div>
 
@@ -165,6 +166,7 @@ const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
             rows="4"
             className="form-textarea"
             maxLength="500"
+            autocomplete="off"
           />
           <small className="char-count">
             {formData.comentario.length}/500 caracteres

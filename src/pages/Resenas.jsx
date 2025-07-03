@@ -15,12 +15,15 @@ const ResenasPage = () => {
     try {
       setLoading(true);
       
-      const data = await corsProxyService.getResenas(true); // publicas=true
+      // Cambiado de publicas=true a aprobadas=true para coincidir con la API
+      const data = await corsProxyService.getResenas(true); // aprobadas=true
       
       if (data && (Array.isArray(data) || (data.success && data.reseñas))) {
         const reseñasArray = Array.isArray(data) ? data : (data.reseñas || []);
+        
         // Filtrar solo las reseñas aprobadas para mostrar al público
         const reseñasAprobadas = reseñasArray.filter(r => r.aprobada === true);
+        
         setReseñas(reseñasAprobadas);
         setError(null);
       } else {
@@ -41,6 +44,11 @@ const ResenasPage = () => {
 
   const handleReseñaEnviada = () => {
     // Recargar las reseñas después de enviar una nueva
+    cargarReseñas();
+  };
+
+  // Función para recargar manualmente
+  const recargarManualmente = () => {
     cargarReseñas();
   };
 
@@ -74,7 +82,29 @@ const ResenasPage = () => {
 
         {/* Lista de reseñas públicas */}
         <div className="resenas-section">
-          <h2>Todas las Reseñas</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2>Todas las Reseñas</h2>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', color: '#666' }}>
+                {reseñas.length > 0 ? `${reseñas.length} reseñas encontradas` : 'Sin reseñas'}
+              </span>
+              <button 
+                onClick={recargarManualmente}
+                disabled={loading}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                {loading ? '🔄 Cargando...' : '🔄 Recargar'}
+              </button>
+            </div>
+          </div>
           {loading ? (
             <div className="loading">
               <i className="fas fa-spinner fa-spin"></i> Cargando reseñas...
@@ -82,9 +112,24 @@ const ResenasPage = () => {
           ) : error ? (
             <div className="error">
               <i className="fas fa-exclamation-triangle"></i> {error}
+              <button 
+                onClick={recargarManualmente}
+                style={{
+                  marginLeft: '10px',
+                  padding: '4px 8px',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Reintentar
+              </button>
             </div>
           ) : (
-            <Reseñas reseñas={reseñas} />
+            <Reseñas reseñas={reseñas} showHeader={false} maxReseñas={50} />
           )}
         </div>
       </div>

@@ -1,0 +1,449 @@
+/* Responsive.css - Mejoras globales de responsividad para productos */
+
+/* Utilidades para touch devices */
+@media (hover: none) and (pointer: coarse) {
+  /* Mejoras para dispositivos táctiles */
+  .product-card:hover,
+  .card:hover {
+    transform: none; /* Desactivar hover en touch */
+  }
+  
+  .product-card:active,
+  .card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Botones más grandes para touch */
+  .quantity-controls button,
+  .add-to-cart,
+  .add-to-cart-btn {
+    min-height: 44px; /* Tamaño mínimo recomendado para touch */
+    min-width: 44px;
+  }
+}
+
+/* Mejoras para pantallas de alta densidad */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .product-image,
+  .product-image-container img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Landscape para móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  
+  .product-card,
+  .card {
+    max-height: 280px;
+  }
+  
+  .product-image,
+  .product-image-container {
+    height: 120px;
+  }
+  
+  .product-info {
+    padding: 6px;
+  }
+  
+  .product-actions {
+    padding: 4px;
+  }
+}
+
+/* Optimizaciones para iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .product-card,
+  .card {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .search-input {
+    border-radius: 0; /* Evita bordes redondeados problemáticos en iOS */
+  }
+}
+
+/* Mejoras para foldables y pantallas muy estrechas */
+@media (max-width: 280px) {
+  .products-page {
+    padding: 2px 4px 8px 4px;
+  }
+  
+  .products-grid {
+    gap: 6px;
+  }
+  
+  .product-card,
+  .card {
+    min-height: 240px;
+    padding: 4px;
+  }
+  
+  .product-info h3,
+  .product-name {
+    font-size: 0.85rem;
+    line-height: 1.1;
+  }
+  
+  .product-image,
+  .product-image-container {
+    height: 80px;
+  }
+  
+  .quantity-controls {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  
+  .quantity-controls button {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+  
+  .quantity-controls span {
+    min-width: 16px;
+    font-size: 10px;
+  }
+}
+
+/* Grid para tablets en orientación portrait */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* Grid para tablets en orientación landscape */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+}
+
+/* Mejoras de accesibilidad para motion */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .card,
+  .quantity-controls button,
+  .add-to-cart,
+  .add-to-cart-btn {
+    transition: none;
+  }
+  
+  .product-card:hover,
+  .card:hover {
+    transform: none;
+  }
+}
+
+/* Mejoras para tema oscuro */
+@media (prefers-color-scheme: dark) {
+  .product-card,
+  .card {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .product-info h3,
+  .product-name {
+    color: #f7fafc;
+  }
+  
+  .description,
+  .product-card p {
+    color: #a0aec0;
+  }
+  
+  .quantity-controls span {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+  }
+}
+
+/* Container queries para componentes (experimental) */
+@container (max-width: 300px) {
+  .product-card {
+    padding: 8px;
+  }
+  
+  .product-info h3 {
+    font-size: 0.9rem;
+  }
+  
+  .quantity-controls {
+    gap: 4px;
+  }
+}
+
+/* Smooth scroll para navegación */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mejoras para el focus en keyboards */
+.quantity-controls button:focus,
+.add-to-cart:focus,
+.add-to-cart-btn:focus,
+.search-input:focus {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+/* Prevenir text selection en botones */
+.quantity-controls button,
+.add-to-cart,
+.add-to-cart-btn {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Mejoras para loading states */
+.product-card[data-loading="true"] {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.product-card[data-loading="true"]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #3182ce;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === MEJORAS ESPECÍFICAS PARA "NUESTROS PRODUCTOS FRESCOS" === */
+
+/* Mejoras para la sección de productos en Home */
+.productos-frescos-section,
+.products-preview-section,
+.home-products-section {
+  padding: 20px 15px;
+  margin: 20px 0;
+}
+
+.productos-frescos-section h2,
+.products-preview-section h2,
+.home-products-section h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Grid específico para la preview en Home */
+.productos-preview-grid,
+.home-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* === MEDIA QUERIES PARA PRODUCTOS FRESCOS === */
+
+/* Tablets grandes */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .productos-frescos-section h2,
+  .products-preview-section h2,
+  .home-products-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  .productos-preview-grid,
+  .home-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+  }
+}
+
+/* Tablets pequeños */
+@media (min-width: 481px) and (max-width: 768px) {
+  .productos-frescos-section,
+  .products-preview-section,
+  .home-products-section {
+    padding: 18px 12px;
+    margin: 15px 0;
+  }
+  
+  .productos-frescos-section h2,
+  .products-preview-section h2,
+  .home-products-section h2 {
+    font-size: 1.6rem;
+    margin-bottom: 18px;
+  }
+  
+  .productos-preview-grid,
+  .home-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .productos-frescos-section,
+  .products-preview-section,
+  .home-products-section {
+    padding: 15px 10px;
+    margin: 12px 0;
+  }
+  
+  .productos-frescos-section h2,
+  .products-preview-section h2,
+  .home-products-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    line-height: 1.2;
+  }
+  
+  .productos-preview-grid,
+  .home-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+  .productos-frescos-section,
+  .products-preview-section,
+  .home-products-section {
+    padding: 12px 8px;
+    margin: 10px 0;
+  }
+  
+  .productos-frescos-section h2,
+  .products-preview-section h2,
+  .home-products-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+  
+  .productos-preview-grid,
+  .home-products-grid {
+    gap: 8px;
+  }
+}
+
+/* === MEJORAS PARA CARDS EN TODAS LAS SECCIONES === */
+
+/* Optimizaciones globales para product cards */
+@media (max-width: 768px) {
+  .product-card,
+  .card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .product-card img,
+  .card img,
+  .product-image {
+    border-radius: 6px;
+  }
+  
+  /* Mejorar legibilidad en pantallas pequeñas */
+  .product-card h3,
+  .card h3,
+  .product-name {
+    line-height: 1.3;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .product-card p,
+  .card p,
+  .product-description {
+    line-height: 1.4;
+  }
+}
+
+/* Optimización para botones en touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .add-to-cart,
+  .add-to-cart-btn,
+  .quantity-controls button {
+    /* Área táctil mínima recomendada */
+    min-height: 44px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    touch-action: manipulation;
+  }
+  
+  /* En pantallas pequeñas, mantener botones accesibles pero compactos */
+  @media (max-width: 480px) {
+    .add-to-cart,
+    .add-to-cart-btn {
+      min-height: 40px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+    }
+    
+    .quantity-controls button {
+      min-height: 36px;
+      min-width: 36px;
+    }
+  }
+}
+
+/* === MEJORAS DE PERFORMANCE Y UX === */
+
+/* Optimizar animaciones para dispositivos de gama baja */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .card,
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mejorar contraste en pantallas con poco brillo */
+@media (prefers-contrast: high) {
+  .product-card,
+  .card {
+    border: 2px solid #333;
+  }
+  
+  .product-card h3,
+  .card h3,
+  .product-name {
+    color: #000;
+    font-weight: 700;
+  }
+  
+  .product-price {
+    color: #1a5d1a;
+    font-weight: 800;
+  }
+}

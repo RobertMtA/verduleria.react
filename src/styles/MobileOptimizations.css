@@ -1,0 +1,365 @@
+/* MobileOptimizations.css - Mejoras específicas para dispositivos móviles */
+
+/* ===== OPTIMIZACIONES PARA TOUCH Y MOBILE ===== */
+
+/* Prevenir zoom en inputs en iOS */
+@supports (-webkit-touch-callout: none) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Mejorar el tap highlight */
+* {
+  -webkit-tap-highlight-color: rgba(76, 175, 80, 0.2);
+  -webkit-touch-callout: none;
+}
+
+/* Optimizaciones específicas para product cards en móviles */
+@media (max-width: 768px) {
+  /* Mejorar la legibilidad en pantallas pequeñas */
+  .product-card,
+  .card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  /* Asegurar que las imágenes se vean bien */
+  .product-image,
+  .product-card img,
+  .card img {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+    object-fit: contain;
+    width: 100%;
+    transition: transform 0.2s ease;
+  }
+  
+  /* Mejorar la tipografía para lectura en móvil */
+  .product-card h3,
+  .card h3,
+  .product-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.3;
+    margin: 8px 0;
+    text-align: center;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .product-card p,
+  .card p,
+  .product-description {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.4;
+    margin: 4px 0;
+    text-align: center;
+  }
+  
+  /* Precios más visibles */
+  .product-price,
+  .price {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: #27ae60 !important;
+    margin: 8px 0 !important;
+  }
+  
+  /* Stock info */
+  .stock {
+    font-size: 0.85rem;
+    color: #777;
+    margin: 4px 0 12px 0;
+  }
+}
+
+/* ===== OPTIMIZACIONES PARA BOTONES EN MÓVIL ===== */
+@media (max-width: 768px) {
+  .add-to-cart,
+  .add-to-cart-btn,
+  .add-cart-btn {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .add-to-cart:active,
+  .add-to-cart-btn:active,
+  .add-cart-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .add-to-cart:disabled,
+  .add-to-cart-btn:disabled,
+  .add-cart-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* ===== CONTROLES DE CANTIDAD OPTIMIZADOS ===== */
+@media (max-width: 768px) {
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 12px 0;
+  }
+  
+  .quantity-controls button {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    background: #f5f5f5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+  }
+  
+  .quantity-controls button:active {
+    background: #e0e0e0;
+    transform: scale(0.95);
+  }
+  
+  .quantity-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .quantity-controls span {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 30px;
+    text-align: center;
+  }
+}
+
+/* ===== OPTIMIZACIONES ESPECÍFICAS POR TAMAÑO ===== */
+
+/* Móviles pequeños (hasta 480px) */
+@media (max-width: 480px) {
+  .product-card,
+  .card {
+    margin: 8px auto;
+    padding: 12px;
+    border-radius: 10px;
+  }
+  
+  .product-image,
+  .product-card img,
+  .card img {
+    height: 140px;
+    padding: 6px;
+  }
+  
+  .product-card h3,
+  .card h3,
+  .product-name {
+    font-size: 1rem;
+    margin: 6px 0;
+  }
+  
+  .product-price,
+  .price {
+    font-size: 1.1rem !important;
+    margin: 6px 0 !important;
+  }
+  
+  .quantity-controls button {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .quantity-controls span {
+    font-size: 1rem;
+    min-width: 25px;
+  }
+  
+  .add-to-cart,
+  .add-to-cart-btn,
+  .add-cart-btn {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    min-height: 40px;
+  }
+}
+
+/* Móviles muy pequeños (hasta 360px) */
+@media (max-width: 360px) {
+  .product-card,
+  .card {
+    padding: 10px;
+    border-radius: 8px;
+    margin: 6px auto;
+  }
+  
+  .product-image,
+  .product-card img,
+  .card img {
+    height: 120px;
+    padding: 4px;
+  }
+  
+  .product-card h3,
+  .card h3,
+  .product-name {
+    font-size: 0.95rem;
+    margin: 4px 0;
+  }
+  
+  .product-card p,
+  .card p,
+  .product-description {
+    font-size: 0.8rem;
+  }
+  
+  .product-price,
+  .price {
+    font-size: 1rem !important;
+  }
+  
+  .quantity-controls {
+    gap: 8px;
+    margin: 8px 0;
+  }
+  
+  .quantity-controls button {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .quantity-controls span {
+    font-size: 0.9rem;
+    min-width: 20px;
+  }
+  
+  .add-to-cart,
+  .add-to-cart-btn,
+  .add-cart-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    min-height: 36px;
+  }
+}
+
+/* ===== MEJORAS PARA LA SECCIÓN DE PRODUCTOS FRESCOS ===== */
+@media (max-width: 768px) {
+  .productos-frescos-section,
+  .products-section {
+    padding: 16px 12px;
+    margin: 16px 0;
+  }
+  
+  .productos-frescos-section h2,
+  .products-section h2,
+  .section-title {
+    font-size: 1.6rem;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 480px) {
+  .productos-frescos-section,
+  .products-section {
+    padding: 12px 8px;
+    margin: 12px 0;
+  }
+  
+  .productos-frescos-section h2,
+  .products-section h2,
+  .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .productos-frescos-section h2,
+  .products-section h2,
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+}
+
+/* ===== MEJORAS DE PERFORMANCE ===== */
+
+/* Desactivar animaciones en dispositivos lentos */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .card,
+  .quantity-controls button,
+  .add-to-cart,
+  .add-to-cart-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Optimizar para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .product-card,
+  .card {
+    background: #2c3e50;
+    border-color: #34495e;
+    color: #ecf0f1;
+  }
+  
+  .product-card h3,
+  .card h3,
+  .product-name {
+    color: #ecf0f1;
+  }
+  
+  .product-card p,
+  .card p,
+  .product-description {
+    color: #bdc3c7;
+  }
+  
+  .product-image,
+  .product-card img,
+  .card img {
+    background: #34495e;
+  }
+}

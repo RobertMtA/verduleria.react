@@ -3,48 +3,81 @@ import "./Reseñas.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
-const Reseñas = () => {
+const Reseñas = ({ reseñas: reseñasProp = null, showHeader = true, maxReseñas = 6 }) => {
   const [reseñas, setReseñas] = useState([]);
   const [estadisticas, setEstadisticas] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Si se pasan reseñas como props, usarlas directamente
+    if (reseñasProp !== null) {
+      setReseñas(Array.isArray(reseñasProp) ? reseñasProp.slice(0, maxReseñas) : []);
+      setLoading(false);
+      return;
+    }
+
+    // Si no hay props, cargar desde la API o localStorage
     const fetchReseñas = async () => {
       try {
         setLoading(true);
-        
         // Obtener solo reseñas aprobadas
         const reseñasResponse = await fetch(`${API_URL}/resenas?aprobadas=true`);
         if (reseñasResponse.ok) {
           const reseñasData = await reseñasResponse.json();
-          console.log('📥 Reseñas públicas recibidas:', reseñasData);
           
           // El backend devuelve {success: true, reseñas: [...]}
           if (reseñasData.success && Array.isArray(reseñasData.reseñas)) {
-            setReseñas(reseñasData.reseñas.slice(0, 6)); // Solo las 6 más recientes
+            setReseñas(reseñasData.reseñas.slice(0, maxReseñas));
           } else {
             // Fallback para compatibilidad
-            setReseñas(Array.isArray(reseñasData) ? reseñasData.slice(0, 6) : []);
+            setReseñas(Array.isArray(reseñasData) ? reseñasData.slice(0, maxReseñas) : []);
           }
-        }
-        
-        // Obtener estadísticas
-        const statsResponse = await fetch(`${API_URL}/resenas/estadisticas`);
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          if (statsData.success) {
-            setEstadisticas(statsData.estadisticas);
+          
+          // Obtener estadísticas
+          try {
+            const statsResponse = await fetch(`${API_URL}/resenas/estadisticas`);
+            if (statsResponse.ok) {
+              const statsData = await statsResponse.json();
+              if (statsData.success) {
+                setEstadisticas(statsData.estadisticas);
+              }
+            }
+          } catch (statsErr) {
+            // No mostrar error por estadísticas
           }
+          
+          return; // Salir si el backend funciona
+        } else {
+          throw new Error(`Backend response: ${reseñasResponse.status}`);
         }
       } catch (err) {
-        console.error("Error al cargar reseñas:", err);
+        // Fallback a localStorage
+        try {
+          const storedReseñas = JSON.parse(localStorage.getItem('reseñas_local') || '[]');
+          const reseñasAprobadas = storedReseñas.filter(r => r.aprobada === true);
+          
+          setReseñas(reseñasAprobadas.slice(0, maxReseñas));
+          
+          // Calcular estadísticas locales
+          if (reseñasAprobadas.length > 0) {
+            const promedio = reseñasAprobadas.reduce((sum, r) => sum + r.calificacion, 0) / reseñasAprobadas.length;
+            setEstadisticas({
+              promedio: Math.round(promedio * 10) / 10,
+              aprobadas: reseñasAprobadas.length,
+              total: storedReseñas.length
+            });
+          }
+        } catch (localErr) {
+          setReseñas([]);
+          setEstadisticas(null);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchReseñas();
-  }, []);
+  }, [reseñasProp, maxReseñas]);
 
   // Renderizar estrellas
   const renderEstrellas = (calificacion) => {
@@ -84,45 +117,55 @@ const Reseñas = () => {
     );
   }
 
-  if (reseñas.length === 0) {
-    return null; // No mostrar la sección si no hay reseñas
+  if (reseñas.length === 0 && !loading) {
+    return (
+      <section className="reseñas-section">
+        <div className="container">
+          <div className="no-reseñas">
+            <p>No hay reseñas disponibles en este momento.</p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
     <section className="reseñas-section">
       <div className="container">
-        <div className="reseñas-header">
-          <h2>Lo que dicen nuestros clientes</h2>
-          {estadisticas && (
-            <div className="promedio-general">
-              <div className="estrellas-promedio">
-                {renderEstrellas(Math.round(estadisticas.promedio))}
+        {showHeader && (
+          <div className="reseñas-header">
+            <h2>Lo que dicen nuestros clientes</h2>
+            {estadisticas && (
+              <div className="promedio-general">
+                <div className="estrellas-promedio">
+                  {renderEstrellas(Math.round(estadisticas.promedio))}
+                </div>
+                <span className="numero-promedio">{estadisticas.promedio}/5</span>
+                <span className="total-reseñas">({estadisticas.aprobadas} reseñas)</span>
               </div>
-              <span className="numero-promedio">{estadisticas.promedio}/5</span>
-              <span className="total-reseñas">({estadisticas.aprobadas} reseñas)</span>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
         
         <div className="reseñas-grid">
           {reseñas.map((reseña, index) => (
             <div 
-              key={reseña._id} 
+              key={reseña._id || reseña.id || index} 
               className="reseña-card"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="reseña-header">
                 <div className="avatar">
-                  {reseña.usuario.nombre.charAt(0).toUpperCase()}
+                  {(reseña.usuario?.nombre || reseña.nombre || 'Usuario').charAt(0).toUpperCase()}
                 </div>
                 <div className="usuario-info">
-                  <h4>{reseña.usuario.nombre}</h4>
+                  <h4>{reseña.usuario?.nombre || reseña.nombre || 'Usuario Anónimo'}</h4>
                   <div className="calificacion">
                     {renderEstrellas(reseña.calificacion)}
                   </div>
                 </div>
                 <div className="fecha">
-                  {formatearFecha(reseña.fecha_reseña)}
+                  {formatearFecha(reseña.fecha_reseña || reseña.fecha)}
                 </div>
               </div>
               
@@ -130,7 +173,7 @@ const Reseñas = () => {
                 <p>"{reseña.comentario}"</p>
               </div>
               
-              {reseña.producto !== 'general' && (
+              {reseña.producto && reseña.producto !== 'general' && (
                 <div className="producto-tag">
                   📦 {reseña.producto}
                 </div>
@@ -139,7 +182,7 @@ const Reseñas = () => {
           ))}
         </div>
         
-        {reseñas.length >= 6 && (
+        {reseñas.length >= maxReseñas && (
           <div className="ver-mas">
             <p>¿Quieres compartir tu experiencia?</p>
             <button className="btn-escribir-reseña">

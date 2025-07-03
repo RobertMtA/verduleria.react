@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Productos - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e7d32;
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 10px;
+        }
+        .button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .product {
+            background: #f9f9f9;
+            border-left: 4px solid #4caf50;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .link {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Test de Productos - Debug localStorage</h1>
+        
+        <div class="status" id="status">
+            Cargando...
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button class="button" onclick="initializeProducts()">🔄 Inicializar Productos por Defecto</button>
+            <button class="button" onclick="clearProducts()">🗑️ Limpiar Productos</button>
+            <button class="button" onclick="checkStatus()">📊 Actualizar Estado</button>
+            <button class="button" onclick="openApp()">🌐 Abrir Panel Admin</button>
+        </div>
+        
+        <div id="products-list">
+            <!-- Los productos se mostrarán aquí -->
+        </div>
+    </div>
+
+    <script>
+        const PRODUCTS_KEY = 'verduleria_mock_productos';
+        
+        function initializeProducts() {
+            const defaultProducts = [
+                {
+                    id: "mock_001",
+                    _id: "mock_001", 
+                    nombre: "Banana TEST",
+                    descripcion: "Bananas frescas TEST (Por kilo)",
+                    precio: 5000,
+                    stock: 88000,
+                    imagen: "/images/img-banana1.jpg",
+                    categoria: "Frutas",
+                    activo: true
+                },
+                {
+                    id: "mock_002",
+                    _id: "mock_002",
+                    nombre: "Cebolla TEST",
+                    descripcion: "Cebollas frescas TEST (Por kilo)",
+                    precio: 3300,
+                    stock: 4500,
+                    imagen: "/images/img-cebollas1.jpg",
+                    categoria: "Verduras",
+                    activo: true
+                }
+            ];
+            
+            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
+            checkStatus();
+            alert('✅ Productos inicializados en localStorage');
+        }
+
+        function clearProducts() {
+            localStorage.removeItem(PRODUCTS_KEY);
+            checkStatus();
+            alert('🗑️ Productos eliminados del localStorage');
+        }
+
+        function checkStatus() {
+            const products = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || '[]');
+            
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `
+                <h3>📊 Estado del localStorage</h3>
+                <p><strong>Clave:</strong> "${PRODUCTS_KEY}"</p>
+                <p><strong>Total de productos:</strong> ${products.length}</p>
+                <p><strong>Activos:</strong> ${products.filter(p => p.activo).length}</p>
+                <p><strong>Inactivos:</strong> ${products.filter(p => !p.activo).length}</p>
+            `;
+            
+            const productsList = document.getElementById('products-list');
+            if (products.length === 0) {
+                productsList.innerHTML = '<p>❌ No hay productos en localStorage</p>';
+            } else {
+                productsList.innerHTML = `
+                    <h3>📦 Productos en localStorage:</h3>
+                    ${products.map(product => `
+                        <div class="product">
+                            <strong>ID:</strong> ${product._id || product.id}<br>
+                            <strong>Nombre:</strong> ${product.nombre}<br>
+                            <strong>Precio:</strong> $${product.precio}<br>
+                            <strong>Stock:</strong> ${product.stock}<br>
+                            <strong>Categoría:</strong> ${product.categoria}<br>
+                            <strong>Estado:</strong> ${product.activo ? '✅ Activo' : '❌ Inactivo'}<br>
+                            <strong>Imagen:</strong> ${product.imagen || 'Sin imagen'}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function openApp() {
+            window.open('http://localhost:5174/admin/productos', '_blank');
+        }
+
+        // Cargar estado al iniciar
+        checkStatus();
+    </script>
+</body>
+</html>

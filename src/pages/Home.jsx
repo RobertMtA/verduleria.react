@@ -255,7 +255,7 @@ const Home = () => {
       ) : null}
 
       {/* Resultados de Búsqueda/Todos los Productos */}
-      <section className="products-section" aria-label="Listado de productos">
+      <section className="products-section productos-frescos-section" aria-label="Listado de productos">
         <div className="container">
           <h2 className="section-title">
             {searchTerm.trim()

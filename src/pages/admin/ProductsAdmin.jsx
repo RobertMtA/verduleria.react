@@ -55,22 +55,17 @@ const ProductsAdmin = () => {
     
     try {
       setFormLoading(true);
-      console.log("Eliminando producto con ID:", productId);
       
-      const result = await corsProxyService.fetchWithProxy(`/productos/${productId}`, {
-        method: "DELETE"
-      });
-      
-      console.log("Resultado:", result);
+      const result = await corsProxyService.deleteProduct(productId);
       
       if (!result.success) {
         throw new Error(result.error || "Error al eliminar producto");
       }
       
       enqueueSnackbar(result.message || "Producto eliminado correctamente", { variant: "success" });
-      fetchProducts(pagination.page, itemsPerPage);
+      await fetchProducts(pagination.page, itemsPerPage);
     } catch (err) {
-      console.error("Error completo:", err);
+      console.error("Error al eliminar producto:", err);
       enqueueSnackbar(err.message, { variant: "error" });
     } finally {
       setFormLoading(false);
@@ -80,24 +75,17 @@ const ProductsAdmin = () => {
   const handleSaveProduct = async (productData) => {
     try {
       setFormLoading(true);
-      let endpoint = "/productos";
-      let method = "POST";
+      let result;
 
       // Para actualizar un producto existente
       if (selectedProduct) {
-        endpoint = `/productos/${selectedProduct._id || selectedProduct.id}`;
-        method = "PUT";
+        result = await corsProxyService.updateProduct(
+          selectedProduct._id || selectedProduct.id,
+          productData
+        );
+      } else {
+        result = await corsProxyService.createProduct(productData);
       }
-
-      console.log("Enviando datos:", { method, endpoint, productData }); // Para debug
-
-      const result = await corsProxyService.fetchWithProxy(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData)
-      });
-
-      console.log("Respuesta del servidor:", result); // Para debug
 
       if (!result.success) {
         throw new Error(result.error || "Error al guardar producto");
@@ -110,7 +98,8 @@ const ProductsAdmin = () => {
         { variant: "success" }
       );
 
-      fetchProducts(pagination.page, itemsPerPage);
+      // Actualizar la lista de productos
+      await fetchProducts(pagination.page, itemsPerPage);
     } catch (err) {
       console.error("Error al guardar producto:", err);
       enqueueSnackbar(`Error al guardar producto: ${err.message}`, { variant: "error" });

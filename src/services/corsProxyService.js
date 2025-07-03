@@ -1,81 +1,308 @@
-// Servicio temporal para evitar problemas de CORS
-// Usa allorigins.win como proxy
-
-const ORIGINAL_API_URL = "https://verduleria-backend-m19n.onrender.com/api";
+// Servicio para manejo de productos con backend local y remoto
+const LOCAL_API_URL = "http://localhost:4001/api";
+const REMOTE_API_URL = "https://verduleria-backend-m19n.onrender.com/api";
 const PROXY_URL = "https://api.allorigins.win/get?url=";
 
-// Sistema de reseñas local para persistir datos mientras el backend está inactivo
-const RESENAS_STORAGE_KEY = 'verduleria_resenas_local';
+// Sistema de persistencia local para datos mock
+const MOCK_STORAGE_KEY = 'verduleria_mock_productos';
+const RESENAS_STORAGE_KEY = 'reseñas_local';
 
-// Cargar reseñas desde localStorage
-function getLocalResenas() {
+function getStoredMockProducts() {
   try {
-    console.log('📂 Cargando reseñas desde localStorage...');
-    const stored = localStorage.getItem(RESENAS_STORAGE_KEY);
-    const resenas = stored ? JSON.parse(stored) : getInitialMockResenas();
-    console.log(`📋 Reseñas cargadas: ${resenas.length} total`);
-    return resenas;
+    const stored = localStorage.getItem(MOCK_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
   } catch (error) {
-    console.warn('⚠️ Error cargando reseñas locales:', error);
-    return getInitialMockResenas();
+    console.error('Error al cargar productos mock desde localStorage:', error);
+    return null;
   }
 }
 
-// Guardar reseñas en localStorage
-function saveLocalResenas(resenas) {
+function storeMockProducts(productos) {
   try {
-    console.log(`💾 Guardando ${resenas.length} reseñas en localStorage...`);
-    localStorage.setItem(RESENAS_STORAGE_KEY, JSON.stringify(resenas));
-    console.log('✅ Reseñas guardadas exitosamente');
+    localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(productos));
   } catch (error) {
-    console.warn('⚠️ Error guardando reseñas locales:', error);
+    console.error('Error al guardar productos mock en localStorage:', error);
   }
 }
 
-// Datos iniciales de reseñas mock
-function getInitialMockResenas() {
+function getDefaultMockProducts() {
   return [
     {
-      _id: "mock_resena_001",
-      usuario: "maria.garcia@email.com",
-      nombreUsuario: "María García",
-      mensaje: "Excelente calidad de productos y entrega rápida. Las frutas llegaron muy frescas.",
-      calificacion: 5,
-      fecha: new Date('2024-01-15').toISOString(),
-      aprobada: true,
-      visible: true
+      id: "mock_001",
+      _id: "mock_001", 
+      nombre: "Banana",
+      descripcion: "Bananas frescas (Por kilo)",
+      precio: 5000,
+      stock: 88000,
+      imagen: "/images/img-banana1.jpg",
+      categoria: "Frutas",
+      activo: true
     },
     {
-      _id: "mock_resena_002", 
-      usuario: "juan.perez@email.com",
-      nombreUsuario: "Juan Pérez",
-      mensaje: "Buenos precios y variedad. El servicio al cliente es muy atento.",
-      calificacion: 4,
-      fecha: new Date('2024-01-20').toISOString(),
-      aprobada: true,
-      visible: true
+      id: "mock_002",
+      _id: "mock_002",
+      nombre: "Cebolla",
+      descripcion: "Cebollas frescas (Por kilo)",
+      precio: 3300,
+      stock: 4500,
+      imagen: "/images/img-cebollas1.jpg",
+      categoria: "Verduras",
+      activo: true
     },
     {
-      _id: "mock_resena_003",
-      usuario: "ana.lopez@email.com", 
-      nombreUsuario: "Ana López",
-      mensaje: "Las verduras siempre están frescas. Recomiendo especialmente las zanahorias.",
-      calificacion: 5,
-      fecha: new Date('2024-01-25').toISOString(),
-      aprobada: false,
-      visible: false
+      id: "mock_003",
+      _id: "mock_003",
+      nombre: "Espinaca",
+      descripcion: "Espinaca fresca (Por manojo)",
+      precio: 2000,
+      stock: 25,
+      imagen: "/images/img-espinaca1.jpg",
+      categoria: "Verduras",
+      activo: true
+    },
+    {
+      id: "mock_004",
+      _id: "mock_004",
+      nombre: "Lechuga",
+      descripcion: "Lechuga fresca (Por kilo)",
+      precio: 2500,
+      stock: 50,
+      imagen: "/images/img-lechuga1.jpg",
+      categoria: "Verduras",
+      activo: true
+    },
+    {
+      id: "mock_005",
+      _id: "mock_005",
+      nombre: "Morrón Rojo",
+      descripcion: "Morrón rojo fresco (Por kilo)",
+      precio: 5000,
+      stock: 1000,
+      imagen: "/images/img-morron-rojo1.jpg",
+      categoria: "Verduras",
+      activo: true
     }
   ];
 }
 
-async function fetchWithProxy(endpoint, options = {}) {
+// Intentar conectar con backend (local primero, remoto después)
+async function fetchAdminOperation(endpoint, options = {}) {
+  // Intentar primero con el backend local
   try {
-    // Si es una operación que no es GET (POST, PUT, DELETE), usar función admin directa
-    if (options.method && options.method !== 'GET') {
-      return await fetchAdminOperation(endpoint, options);
+    console.log(`🔄 Intentando operación ${options.method || 'GET'} en backend local: ${LOCAL_API_URL}${endpoint}`);
+    
+    const response = await fetch(`${LOCAL_API_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`✅ Operación exitosa en backend local`);
+      
+      return {
+        success: true,
+        source: 'local-backend',
+        ...result
+      };
+    } else {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
     }
     
-    const encodedUrl = encodeURIComponent(`${ORIGINAL_API_URL}${endpoint}`);
+  } catch (localError) {
+    console.log(`❌ Error en backend local: ${localError.message}`);
+    
+    // Si el backend local falla, intentar con el backend remoto
+    try {
+      console.log(`🔄 Intentando operación ${options.method || 'GET'} en backend remoto: ${REMOTE_API_URL}${endpoint}`);
+      
+      const response = await fetch(`${REMOTE_API_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`✅ Operación exitosa en backend remoto`);
+        
+        return {
+          success: true,
+          source: 'remote-backend',
+          ...result
+        };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
+      
+    } catch (remoteError) {
+      console.log(`❌ Error en backend remoto: ${remoteError.message}`);
+      
+      // Si ambos backends fallan, lanzar error
+      throw new Error(`Backends no disponibles. Local: ${localError.message}, Remoto: ${remoteError.message}`);
+    }
+  }
+}
+
+// Funciones CRUD para productos
+export async function createProduct(productData) {
+  try {
+    // Intentar crear en backend (local o remoto)
+    const result = await fetchAdminOperation('/productos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
+    });
+    
+    if (result && result.success) {
+      console.log(`✅ Producto creado exitosamente en ${result.source}`);
+      return result;
+    } else {
+      throw new Error('Respuesta inválida del backend');
+    }
+  } catch (error) {
+    console.log(`⚠️  Backends no disponibles, usando localStorage: ${error.message}`);
+    
+    // Fallback a localStorage
+    const productos = getStoredMockProducts() || getDefaultMockProducts();
+    const newProduct = {
+      ...productData,
+      _id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    productos.push(newProduct);
+    storeMockProducts(productos);
+    
+    return {
+      success: true,
+      message: 'Producto creado en almacenamiento local',
+      producto: newProduct,
+      source: 'local-storage'
+    };
+  }
+}
+
+export async function updateProduct(id, productData) {
+  try {
+    // Intentar actualizar en backend (local o remoto)
+    const result = await fetchAdminOperation(`/productos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
+    });
+    
+    if (result && result.success) {
+      console.log(`✅ Producto actualizado exitosamente en ${result.source}`);
+      return result;
+    } else {
+      throw new Error('Respuesta inválida del backend');
+    }
+  } catch (error) {
+    console.log(`⚠️  Backends no disponibles, usando localStorage: ${error.message}`);
+    
+    // Fallback a localStorage
+    const productos = getStoredMockProducts() || getDefaultMockProducts();
+    const index = productos.findIndex(p => p._id === id || p.id === id);
+    
+    if (index === -1) {
+      throw new Error('Producto no encontrado');
+    }
+    
+    productos[index] = {
+      ...productos[index],
+      ...productData,
+      updated_at: new Date().toISOString()
+    };
+    
+    storeMockProducts(productos);
+    
+    return {
+      success: true,
+      message: 'Producto actualizado en almacenamiento local',
+      producto: productos[index],
+      source: 'local-storage'
+    };
+  }
+}
+
+export async function deleteProduct(id) {
+  try {
+    // Intentar eliminar en backend (local o remoto)
+    const result = await fetchAdminOperation(`/productos/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if (result && result.success) {
+      console.log(`✅ Producto eliminado exitosamente en ${result.source}`);
+      return result;
+    } else {
+      throw new Error('Respuesta inválida del backend');
+    }
+  } catch (error) {
+    console.log(`⚠️  Backends no disponibles, usando localStorage: ${error.message}`);
+    
+    // Fallback a localStorage
+    const productos = getStoredMockProducts() || getDefaultMockProducts();
+    const index = productos.findIndex(p => p._id === id || p.id === id);
+    
+    if (index === -1) {
+      throw new Error('Producto no encontrado');
+    }
+    
+    productos.splice(index, 1);
+    storeMockProducts(productos);
+    
+    return {
+      success: true,
+      message: 'Producto eliminado de almacenamiento local',
+      source: 'local-storage'
+    };
+  }
+}
+
+// Función para obtener productos (GET)
+export async function getProductos() {
+  try {
+    // Intentar primero con el backend local
+    console.log(`🔄 Intentando obtener productos del backend local: ${LOCAL_API_URL}/productos`);
+    
+    const localResponse = await fetch(`${LOCAL_API_URL}/productos`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (localResponse.ok) {
+      const localData = await localResponse.json();
+      console.log(`✅ Productos obtenidos del backend local`);
+      
+      return {
+        success: true,
+        source: 'local-backend',
+        productos: localData.productos || localData,
+        total: (localData.productos || localData).length
+      };
+    }
+  } catch (localError) {
+    console.log(`❌ Backend local no disponible: ${localError.message}`);
+  }
+
+  // Si el backend local falla, intentar con el remoto via proxy
+  try {
+    console.log(`🔄 Intentando con backend remoto via proxy...`);
+    
+    const encodedUrl = encodeURIComponent(`${REMOTE_API_URL}/productos`);
     const proxyRequestUrl = `${PROXY_URL}${encodedUrl}`;
     
     const response = await fetch(proxyRequestUrl, {
@@ -85,335 +312,80 @@ async function fetchWithProxy(endpoint, options = {}) {
       }
     });
     
-    if (!response.ok) {
-      return getMockData(endpoint);
-    }
-    
-    const proxyData = await response.json();
-    
-    // allorigins.win devuelve la respuesta en la propiedad 'contents'
-    if (proxyData.contents) {
-      try {
-        const actualData = JSON.parse(proxyData.contents);
-        
-        // Si recibimos un array directo (como productos), convertir a formato esperado
-        if (Array.isArray(actualData)) {
-          const result = {
-            success: true,
-            total: actualData.length,
-            source: 'proxy'
-          };
+    if (response.ok) {
+      const proxyData = await response.json();
+      
+      if (proxyData.contents) {
+        try {
+          const actualData = JSON.parse(proxyData.contents);
+          console.log(`✅ Productos obtenidos del backend remoto via proxy`);
           
-          // Determinar el tipo de datos basado en el endpoint
-          if (endpoint === '/productos') {
-            result.productos = actualData;
-          } else if (endpoint.includes('/ofertas')) {
-            result.ofertas = actualData;
-          } else {
-            result.data = actualData;
-          }
-          
-          return result;
-        }
-        
-        // Si ya tiene el formato correcto, asegurar que tenga success: true
-        if (actualData && typeof actualData === 'object') {
           return {
             success: true,
-            source: 'proxy',
-            ...actualData
+            source: 'remote-backend',
+            productos: actualData.productos || actualData,
+            total: (actualData.productos || actualData).length
           };
+        } catch (parseError) {
+          throw new Error(`Error parsing remote backend data: ${parseError.message}`);
         }
-        
-        return getMockData(endpoint);
-        
-      } catch (parseError) {
-        return getMockData(endpoint);
+      } else {
+        throw new Error('No data in proxy response');
       }
-    } else {
-      return getMockData(endpoint);
     }
   } catch (error) {
-    return getMockData(endpoint);
+    console.log(`❌ Backend remoto no disponible: ${error.message}`);
   }
-}
 
-function getMockData(endpoint) {
-  if (endpoint === '/productos') {
-    return {
-      success: true,
-      productos: [
-        {
-          id: "mock_001",
-          _id: "mock_001", 
-          nombre: "Banana",
-          descripcion: "Bananas frescas (Por kilo)",
-          precio: 5000,
-          stock: 88000,
-          imagen: "/images/img-banana1.jpg",
-          categoria: "Frutas",
-          activo: true
-        },
-        {
-          id: "mock_002",
-          _id: "mock_002",
-          nombre: "Cebolla",
-          descripcion: "Cebollas frescas (Por kilo)",
-          precio: 3300,
-          stock: 4500,
-          imagen: "/images/img-cebollas1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_003",
-          _id: "mock_003",
-          nombre: "Espinaca",
-          descripcion: "Espinaca fresca (Por manojo)",
-          precio: 2000,
-          stock: 25,
-          imagen: "/images/img-espinaca1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_004",
-          _id: "mock_004",
-          nombre: "Lechuga",
-          descripcion: "Lechuga fresca (Por kilo)",
-          precio: 2500,
-          stock: 50,
-          imagen: "/images/img-lechuga1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_005",
-          _id: "mock_005",
-          nombre: "Morrón Rojo",
-          descripcion: "Morrón rojo fresco (Por kilo)",
-          precio: 5000,
-          stock: 1000,
-          imagen: "/images/img-morron-rojo1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_006",
-          _id: "mock_006",
-          nombre: "Naranja",
-          descripcion: "Naranja fresca y jugosa (Por kilo)",
-          precio: 2500,
-          stock: 1000,
-          imagen: "/images/img-naranja1.jpg",
-          categoria: "Frutas",
-          activo: true
-        },
-        {
-          id: "mock_007",
-          _id: "mock_007",
-          nombre: "Papa",
-          descripcion: "Papas frescas (Por kilo)",
-          precio: 2700,
-          stock: 1000,
-          imagen: "/images/img-papa1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_008",
-          _id: "mock_008",
-          nombre: "Pera",
-          descripcion: "Peras frescas (Por kilo)",
-          precio: 6000,
-          stock: 1000,
-          imagen: "/images/img-pera1.jpg",
-          categoria: "Frutas",
-          activo: true
-        },
-        {
-          id: "mock_009",
-          _id: "mock_009",
-          nombre: "Zanahoria",
-          descripcion: "Zanahorias frescas (Por kilo)",
-          precio: 2000,
-          stock: 1000,
-          imagen: "/images/img-zanahoria1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_010",
-          _id: "mock_010",
-          nombre: "Zapallo",
-          descripcion: "Zapallo fresco (Por unidad)",
-          precio: 2000,
-          stock: 11,
-          imagen: "/images/img-zapallo-verde1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_011",
-          _id: "mock_011",
-          nombre: "Perejil",
-          descripcion: "Perejil fresco (por kilo)",
-          precio: 3000,
-          stock: 34,
-          imagen: "/images/img-perejil1.jpg",
-          categoria: "Verduras",
-          activo: true
-        },
-        {
-          id: "mock_012",
-          _id: "mock_012",
-          nombre: "Manzana",
-          descripcion: "Manzana roja y fresca (por kilo)",
-          precio: 2500,
-          stock: 5000,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-pera1.jpg" // Usar pera como similar hasta tener la imagen de manzana
-        },
-        {
-          id: "mock_013",
-          _id: "mock_013",
-          nombre: "Frutillas",
-          descripcion: "Frutillas frescas y dulces (Por kilo)",
-          precio: 10000,
-          stock: 1000,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-banana1.jpg" // Usar imagen de fruta que existe
-        },
-        {
-          id: "mock_014",
-          _id: "mock_014",
-          nombre: "Melón",
-          descripcion: "Melón fresco y bien dulce (Por kilo)",
-          precio: 4600,
-          stock: 20,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-pera1.jpg" // Usar imagen de fruta que existe
-        },
-        {
-          id: "mock_015",
-          _id: "mock_015",
-          nombre: "Repollo",
-          descripcion: "Repollo fresco para tu ensalada (Por kilo)",
-          precio: 2000,
-          stock: 20,
-          categoria: "Verduras",
-          activo: true,
-          imagen: "/images/img-lechuga1.jpg" // Usar imagen que existe
-        },
-        {
-          id: "mock_016",
-          _id: "mock_016",
-          nombre: "Mandarina",
-          descripcion: "Mandarinas ricas y jugosas (Por kilo)",
-          precio: 3500,
-          stock: 5000,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-naranja1.jpg" // Usar imagen similar que existe
-        },
-        {
-          id: "mock_017",
-          _id: "mock_017",
-          nombre: "Brócoli",
-          descripcion: "Brócoli fresco y nutritivo (Por kilo)",
-          precio: 4500,
-          stock: 30,
-          categoria: "Verduras",
-          activo: true,
-          imagen: "/images/img-espinaca1.jpg" // Usar imagen similar verde
-        },
-        {
-          id: "mock_018",
-          _id: "mock_018",
-          nombre: "Apio",
-          descripcion: "Apio fresco y crujiente (Por manojo)",
-          precio: 1800,
-          stock: 25,
-          categoria: "Verduras",
-          activo: true,
-          imagen: "/images/img-perejil1.jpg" // Usar imagen similar de hoja verde
-        },
-        {
-          id: "mock_019",
-          _id: "mock_019",
-          nombre: "Kiwi",
-          descripcion: "Kiwi importado, rico en vitamina C (Por kilo)",
-          precio: 8000,
-          stock: 15,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-pera1.jpg" // Usar imagen de fruta similar
-        },
-        {
-          id: "mock_020",
-          _id: "mock_020",
-          nombre: "Acelga",
-          descripcion: "Acelga fresca para guisos (Por manojo)",
-          precio: 2200,
-          stock: 40,
-          categoria: "Verduras",
-          activo: true,
-          imagen: "/images/img-espinaca1.jpg" // Usar imagen de hoja verde
-        },
-        {
-          id: "mock_021",
-          _id: "mock_021",
-          nombre: "Limón",
-          descripcion: "Limones jugosos, perfectos para condimentar (Por kilo)",
-          precio: 2800,
-          stock: 100,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-naranja1.jpg" // Usar imagen de cítrico similar
-        },
-        {
-          id: "mock_022",
-          _id: "mock_022",
-          nombre: "Remolacha",
-          descripcion: "Remolacha fresca, rica en nutrientes (Por kilo)",
-          precio: 3200,
-          stock: 25,
-          categoria: "Verduras",
-          activo: true,
-          imagen: "/images/img-tomate1.jpg" // Usar imagen de color similar
-        },
-        {
-          id: "mock_023",
-          _id: "mock_023",
-          nombre: "Durazno",
-          descripcion: "Duraznos dulces y jugosos (Por kilo)",
-          precio: 7500,
-          stock: 35,
-          categoria: "Frutas",
-          activo: true,
-          imagen: "/images/img-pera1.jpg" // Usar imagen de fruta similar
-        },
-        {
-          id: "mock_024",
-          _id: "mock_024",
-          nombre: "Coliflor",
-          descripcion: "Coliflor fresca y blanca (Por unidad)",
-          precio: 3800,
-          stock: 20,
-          categoria: "Verduras",
-          activo: true,
-          imagen: "/images/img-zapallo-verde1.jpg" // Usar imagen de verdura similar
-        }
-      ],
-      total: 24,
-      source: 'mock'
-    };
+  // Usar datos locales como fallback
+  console.log(`🔄 Usando datos locales como fallback...`);
+  let stored = getStoredMockProducts();
+  if (!stored) {
+    const defaultProducts = getDefaultMockProducts();
+    storeMockProducts(defaultProducts);
+    stored = defaultProducts;
   }
   
-  if (endpoint.includes('/ofertas')) {
+  return {
+    success: true,
+    productos: stored,
+    total: stored.length,
+    source: 'local-storage'
+  };
+}
+
+// Función para obtener ofertas
+export async function getOfertas(activasSolo = false) {
+  try {
+    const endpoint = activasSolo ? '/ofertas?activas_solo=true' : '/ofertas';
+    
+    // Intentar primero con el backend local
+    try {
+      console.log(`🔄 Intentando obtener ofertas del backend local: ${LOCAL_API_URL}${endpoint}`);
+      
+      const localResponse = await fetch(`${LOCAL_API_URL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (localResponse.ok) {
+        const localData = await localResponse.json();
+        console.log(`✅ Ofertas obtenidas del backend local`);
+        
+        return {
+          success: true,
+          source: 'local-backend',
+          ofertas: localData.ofertas || localData,
+          total: (localData.ofertas || localData).length
+        };
+      }
+    } catch (localError) {
+      console.log(`❌ Backend local no disponible: ${localError.message}`);
+    }
+
+    // Fallback con datos mock
     return {
       success: true,
       ofertas: [
@@ -424,251 +396,326 @@ function getMockData(endpoint) {
           precio_original: 6000,
           precio_oferta: 4200,
           descuento_porcentaje: 30,
-          imagen: 'https://verduleria-react.vercel.app/images/img-banana1.jpg',
-          activa: true,
-          vigente: true,
-          categoria: 'Frutas'
-        },
-        {
-          _id: 'mock_002',
-          nombre: 'Oferta Especial Naranjas',
-          descripcion: 'Naranjas jugosas con 25% de descuento',
-          precio_original: 2500,
-          precio_oferta: 1875,
-          descuento_porcentaje: 25,
-          imagen: 'https://verduleria-react.vercel.app/images/img-naranja1.jpg',
+          imagen: '/images/img-banana1.jpg',
           activa: true,
           vigente: true,
           categoria: 'Frutas'
         }
       ],
-      total: 2,
+      total: 1,
       source: 'mock'
     };
-  }
-
-  if (endpoint.includes('/resenas')) {
-    if (endpoint.includes('/estadisticas')) {
-      const resenas = getLocalResenas();
-      const aprobadas = resenas.filter(r => r.aprobada).length;
-      const pendientes = resenas.filter(r => !r.aprobada && r.visible !== false).length;
-      const promedio = resenas.filter(r => r.aprobada).reduce((acc, r) => acc + r.calificacion, 0) / aprobadas || 0;
-      
-      return {
-        success: true,
-        estadisticas: {
-          total: resenas.length,
-          aprobadas,
-          pendientes,
-          rechazadas: resenas.filter(r => r.visible === false).length,
-          promedio_rating: Math.round(promedio * 10) / 10
-        },
-        source: 'local'
-      };
-    }
-    
-    const resenas = getLocalResenas();
+  } catch (error) {
+    console.error('Error en getOfertas:', error);
     return {
-      success: true,
-      reseñas: resenas,
-      total: resenas.length,
-      source: 'local'
+      success: false,
+      error: error.message,
+      ofertas: [],
+      total: 0
     };
   }
+}
 
-  if (endpoint.includes('/pedidos')) {
-    // Si es pedidos por usuario específico, usar proxy para obtener datos reales
-    if (endpoint.includes('/usuario/')) {
-      // Este endpoint necesita usar el proxy ya que el backend tiene datos reales
-      // Retornar un formato que indique que debe usar el proxy
-      return {
-        success: false,
-        useProxy: true,
-        message: 'Usar proxy para obtener pedidos reales'
-      };
+// === FUNCIONES DE RESEÑAS MEJORADAS ===
+
+// Datos mock para reseñas
+function getDefaultMockResenas() {
+  return [
+    {
+      _id: "resena_001",
+      id: "resena_001",
+      usuario: {
+        nombre: "María González",
+        email: "maria.gonzalez@example.com"
+      },
+      rating: 5,
+      comentario: "Excelente calidad de productos! Las verduras siempre están frescas y el servicio es muy rápido. Definitivamente recomendado.",
+      fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+      aprobada: true,
+      productos: ["Lechuga", "Tomate"]
+    },
+    {
+      _id: "resena_002", 
+      id: "resena_002",
+      usuario: {
+        nombre: "Carlos Rodríguez",
+        email: "carlos.rodriguez@example.com"
+      },
+      rating: 4,
+      comentario: "Muy buena variedad de productos frescos. Los precios son competitivos y la entrega fue puntual.",
+      fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+      aprobada: true,
+      productos: ["Banana", "Manzana"]
+    },
+    {
+      _id: "resena_003",
+      id: "resena_003", 
+      usuario: {
+        nombre: "Ana Martínez",
+        email: "ana.martinez@example.com"
+      },
+      rating: 5,
+      comentario: "La mejor verdulería online que he encontrado. Todo llega en perfecto estado y muy fresco.",
+      fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8).toISOString(),
+      aprobada: true,
+      productos: ["Zanahoria", "Cebolla"]
+    },
+    {
+      _id: "resena_004",
+      id: "resena_004",
+      usuario: {
+        nombre: "Luis Herrera",
+        email: "luis.herrera@example.com"
+      },
+      rating: 4,
+      comentario: "Buen servicio en general. Solo me gustaría que tuvieran más variedad de frutas orgánicas.",
+      fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
+      aprobada: false,
+      productos: ["Espinaca"]
+    },
+    {
+      _id: "resena_005",
+      id: "resena_005",
+      usuario: {
+        nombre: "Carmen Silva",
+        email: "carmen.silva@example.com"
+      },
+      rating: 5,
+      comentario: "Servicio excepcional! Los productos son de primera calidad y la atención al cliente es excelente.",
+      fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
+      aprobada: true,
+      productos: ["Papa", "Morron Rojo"]
+    },
+    {
+      _id: "resena_006",
+      id: "resena_006",
+      usuario: {
+        nombre: "Diego Fernández",
+        email: "diego.fernandez@example.com"
+      },
+      rating: 3,
+      comentario: "El producto estaba bien pero la entrega se retrasó un poco. Espero mejore en el futuro.",
+      fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 18).toISOString(),
+      aprobada: false,
+      productos: ["Naranja"]
     }
-    
-    return {
-      success: true,
-      pedidos: [],
-      total: 0,
-      source: 'mock',
-      message: 'No hay pedidos disponibles'
-    };
+  ];
+}
+
+function getStoredMockResenas() {
+  try {
+    const stored = localStorage.getItem(RESENAS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    // Si no hay datos almacenados, usar los datos por defecto
+    const defaultResenas = getDefaultMockResenas();
+    storeMockResenas(defaultResenas);
+    return defaultResenas;
+  } catch (error) {
+    console.error('Error al cargar reseñas mock desde localStorage:', error);
+    return getDefaultMockResenas();
   }
-  
-  // Para otros endpoints, retornar estructura básica
-  return {
-    success: true,
-    data: [],
-    total: 0,
-    source: 'mock',
-    message: 'Datos temporales - Servicio en mantenimiento'
-  };
 }
 
-// Funciones específicas para cada endpoint
-export async function getProductos() {
-  return await fetchWithProxy('/productos');
-}
-
-export async function getOfertas(activasSolo = false) {
-  const endpoint = activasSolo ? '/ofertas?activas_solo=true' : '/ofertas';
-  return await fetchWithProxy(endpoint);
+function storeMockResenas(resenas) {
+  try {
+    localStorage.setItem(RESENAS_STORAGE_KEY, JSON.stringify(resenas));
+  } catch (error) {
+    console.error('Error al guardar reseñas mock en localStorage:', error);
+  }
 }
 
 export async function getResenas(publicas = false) {
-  const endpoint = publicas ? '/resenas?aprobadas=true' : '/resenas';
-  
   try {
-    console.log('🔄 Intentando obtener reseñas del backend...');
+    const endpoint = publicas ? '/resenas?aprobadas=true' : '/resenas';
     
-    // Intentar directamente con fetch (sin proxy primero)
+    // Intentar primero con el backend local
     try {
-      const directResponse = await fetch(`${ORIGINAL_API_URL}${endpoint}`, {
+      smartLog('getResenas_local', `🔄 Intentando obtener reseñas del backend local: ${LOCAL_API_URL}${endpoint}`);
+      
+      const localResponse = await fetch(`${LOCAL_API_URL}${endpoint}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       });
       
-      if (directResponse.ok) {
-        const directData = await directResponse.json();
-        console.log('✅ Reseñas obtenidas directamente del backend:', directData);
+      if (localResponse.ok) {
+        const localData = await localResponse.json();
+        smartLog('getResenas_local_success', `✅ Reseñas obtenidas del backend local`, true);
+        
         return {
-          ...directData,
-          source: 'backend'
+          success: true,
+          source: 'local-backend',
+          reseñas: localData.reseñas || localData,
+          total: (localData.reseñas || localData).length
         };
       }
-    } catch (directError) {
-      console.log('⚠️ Conexión directa falló, intentando con proxy:', directError.message);
+    } catch (localError) {
+      smartLog('getResenas_local_error', `❌ Backend local no disponible: ${localError.message}`);
     }
+
+    // Fallback con datos mock
+    const mockResenas = getStoredMockResenas();
+    const filteredResenas = publicas 
+      ? mockResenas.filter(resena => resena.aprobada) 
+      : mockResenas;
     
-    // Si la conexión directa falla, usar proxy
-    const result = await fetchWithProxy(endpoint);
-    
-    if (result && result.success && result.source !== 'mock' && result.source !== 'local') {
-      console.log('✅ Reseñas obtenidas del backend via proxy:', result);
-      return {
-        ...result,
-        source: 'backend'
-      };
-    } else {
-      console.log('⚠️ Backend no disponible, usando datos locales');
-      throw new Error('Backend no disponible');
-    }
-  } catch (error) {
-    console.log('📱 Usando sistema local de reseñas');
-    // Usar sistema local como fallback
-    const resenas = getLocalResenas();
-    const reseñasFiltradas = publicas ? resenas.filter(r => r.aprobada === true) : resenas;
+    smartLog('getResenas_mock', `📋 Usando datos mock de reseñas: ${filteredResenas.length} reseñas`);
     
     return {
       success: true,
-      reseñas: reseñasFiltradas,
-      total: reseñasFiltradas.length,
-      source: 'local'
+      reseñas: filteredResenas,
+      total: filteredResenas.length,
+      source: 'mock'
+    };
+  } catch (error) {
+    console.error('Error en getResenas:', error);
+    return {
+      success: false,
+      error: error.message,
+      reseñas: [],
+      total: 0
     };
   }
 }
 
+// Función para estadísticas de reseñas
 export async function getEstadisticasResenas() {
   try {
-    console.log('📊 Intentando obtener estadísticas del backend...');
-    const result = await fetchWithProxy('/resenas/estadisticas');
-    
-    if (result && result.success && result.source !== 'mock' && result.source !== 'local') {
-      console.log('✅ Estadísticas obtenidas del backend:', result);
-      return result;
-    } else {
-      throw new Error('Backend no disponible');
+    // Intentar con backend local
+    try {
+      const localResponse = await fetch(`${LOCAL_API_URL}/resenas/estadisticas`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (localResponse.ok) {
+        const localData = await localResponse.json();
+        return {
+          success: true,
+          source: 'local-backend',
+          estadisticas: localData.estadisticas || localData
+        };
+      }
+    } catch (localError) {
+      smartLog('getEstadisticas_local_error', `❌ Backend local no disponible: ${localError.message}`);
     }
-  } catch (error) {
-    console.log('📱 Calculando estadísticas locales');
-    // Calcular estadísticas locales como fallback
-    const resenas = getLocalResenas();
-    const aprobadas = resenas.filter(r => r.aprobada).length;
-    const pendientes = resenas.filter(r => !r.aprobada && r.visible !== false).length;
-    const promedio = resenas.filter(r => r.aprobada).reduce((acc, r) => acc + r.calificacion, 0) / aprobadas || 0;
+
+    // Fallback con datos mock calculados
+    const mockResenas = getStoredMockResenas();
+    const aprobadas = mockResenas.filter(r => r.aprobada);
+    const pendientes = mockResenas.filter(r => !r.aprobada);
+    const totalRatings = aprobadas.reduce((sum, r) => sum + r.rating, 0);
+    const promedioRating = aprobadas.length > 0 ? (totalRatings / aprobadas.length).toFixed(1) : 0;
+    
+    const estadisticas = {
+      total: mockResenas.length,
+      aprobadas: aprobadas.length,
+      pendientes: pendientes.length,
+      rechazadas: 0,
+      promedio_rating: parseFloat(promedioRating)
+    };
+    
+    smartLog('getEstadisticas_mock', `📊 Estadísticas mock calculadas: ${JSON.stringify(estadisticas)}`);
     
     return {
       success: true,
+      estadisticas,
+      source: 'mock'
+    };
+  } catch (error) {
+    console.error('Error en getEstadisticasResenas:', error);
+    return {
+      success: false,
+      error: error.message,
       estadisticas: {
-        total: resenas.length,
-        aprobadas,
-        pendientes,
-        rechazadas: resenas.filter(r => r.visible === false).length,
-        promedio_rating: Math.round(promedio * 10) / 10
-      },
-      source: 'local'
+        total: 0,
+        aprobadas: 0,
+        pendientes: 0,
+        rechazadas: 0,
+        promedio_rating: 0
+      }
     };
   }
 }
 
-export async function getPedidosUsuario(emailUsuario) {
-  const endpoint = `/pedidos/usuario/${encodeURIComponent(emailUsuario)}`;
-  return await fetchWithProxy(endpoint);
-}
-
-export async function aprobarResena(id) {
-  try {
-    // Intentar usar la versión local primero
-    return await aprobarResenaLocal(id);
-  } catch (error) {
-    // Fallback al método original si es necesario
-    return await fetchWithProxy(`/resenas/${id}/aprobar`, { method: 'PUT' });
+// Función genérica fetchWithProxy para compatibilidad
+export async function fetchWithProxy(endpoint, options = {}) {
+  if (options.method && options.method !== 'GET') {
+    return await fetchAdminOperation(endpoint, options);
   }
-}
-
-export async function rechazarResena(id) {
-  try {
-    // Intentar usar la versión local primero
-    return await rechazarResenaLocal(id);
-  } catch (error) {
-    // Fallback al método original si es necesario
-    return await fetchWithProxy(`/resenas/${id}/rechazar`, { method: 'PUT' });
+  
+  // Para operaciones GET, usar las funciones específicas
+  if (endpoint === '/productos') {
+    return await getProductos();
+  } else if (endpoint.includes('/ofertas')) {
+    return await getOfertas(endpoint.includes('activas_solo=true'));
+  } else if (endpoint.includes('/resenas')) {
+    return await getResenas(endpoint.includes('aprobadas=true'));
   }
-}
-
-// Para operaciones de administración (POST, PUT, DELETE) usamos el backend directo
-// ya que allorigins.win solo soporta GET
-async function fetchAdminOperation(endpoint, options = {}) {
+  
+  // Para otros endpoints, intentar llamada directa
   try {
-    console.log(`🔧 Operación admin directa: ${endpoint}`);
-    
-    const response = await fetch(`${ORIGINAL_API_URL}${endpoint}`, {
-      ...options,
+    const response = await fetch(`${LOCAL_API_URL}${endpoint}`, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
+        'Content-Type': 'application/json'
       }
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`❌ Error ${response.status}:`, errorData);
-      throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log(`✅ Operación admin completada:`, result);
-    return result;
     
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        success: true,
+        source: 'local-backend',
+        ...data
+      };
+    }
   } catch (error) {
-    console.error(`❌ Error en operación admin:`, error);
-    throw error;
+    console.log(`Error en fetchWithProxy: ${error.message}`);
+  }
+  
+  return {
+    success: false,
+    error: 'Endpoint no disponible',
+    data: []
+  };
+}
+
+// Sistema de logs optimizado para evitar spam
+let lastLogTime = {};
+let logCount = {};
+
+function smartLog(key, message, forceLog = false) {
+  const now = Date.now();
+  const lastTime = lastLogTime[key] || 0;
+  const count = logCount[key] || 0;
+  
+  // Solo log si ha pasado más de 5 segundos desde el último log del mismo tipo
+  // O si es un log forzado
+  if (forceLog || (now - lastTime) > 5000) {
+    if (count > 1) {
+      console.log(`${message} (ocurrió ${count} veces más)`);
+      logCount[key] = 0;
+    } else {
+      console.log(message);
+    }
+    lastLogTime[key] = now;
+  } else {
+    logCount[key] = count + 1;
   }
 }
 
-// Funciones para manejar reseñas localmente
+// Funciones stub para reseñas (compatibilidad)
 export async function enviarResenaLocal(resenaData) {
   try {
-    console.log('🔄 Enviando reseña local...', resenaData);
-    
-    // Primero intentar enviar al backend real
-    try {
-      console.log('🌐 Intentando enviar al backend...');
-      const backendData = {
+    const result = await fetchAdminOperation('/resenas', {
+      method: 'POST',
+      body: JSON.stringify({
         usuario: {
           nombre: resenaData.nombreUsuario,
           email: resenaData.usuario
@@ -676,118 +723,212 @@ export async function enviarResenaLocal(resenaData) {
         calificacion: resenaData.calificacion,
         comentario: resenaData.mensaje,
         producto: resenaData.producto || 'general'
-      };
-      
-      const backendResult = await fetchAdminOperation('/resenas', {
-        method: 'POST',
-        body: JSON.stringify(backendData)
+      })
+    });
+    
+    return {
+      success: true,
+      message: 'Reseña enviada correctamente',
+      ...result
+    };
+  } catch (error) {
+    console.error('Error enviando reseña a backends:', error);
+    
+    // Si los backends fallan, simular envío con datos mock
+    console.log('⚠️ Backends no disponibles, simulando envío con datos mock...');
+    
+    const nuevaReseña = {
+      _id: Date.now().toString(),
+      usuario: {
+        nombre: resenaData.nombreUsuario,
+        email: resenaData.usuario
+      },
+      nombreUsuario: resenaData.nombreUsuario,
+      calificacion: resenaData.calificacion,
+      comentario: resenaData.mensaje,
+      producto: resenaData.producto || 'general',
+      fecha_reseña: new Date().toISOString(),
+      aprobada: false
+    };
+    
+    // Agregar a localStorage para persistencia
+    const reseñasExistentes = JSON.parse(localStorage.getItem(RESENAS_STORAGE_KEY) || '[]');
+    reseñasExistentes.push(nuevaReseña);
+    localStorage.setItem(RESENAS_STORAGE_KEY, JSON.stringify(reseñasExistentes));
+    
+    console.log('✅ Reseña agregada al sistema mock local');
+    
+    return {
+      success: true,
+      message: '¡Reseña enviada correctamente! Será revisada por nuestro equipo antes de publicarse.',
+      reseña: nuevaReseña,
+      source: 'mock'
+    };
+  }
+}
+
+export async function aprobarResena(id) {
+  try {
+    console.log(`🔄 Intentando aprobar reseña ${id}...`);
+    
+    // Intentar con backend local primero
+    try {
+      const result = await fetchAdminOperation(`/resenas/${id}/aprobar`, {
+        method: 'PUT'
       });
       
-      if (backendResult && backendResult.success) {
-        console.log('✅ Reseña enviada al backend exitosamente');
-        return {
-          success: true,
-          message: 'Reseña enviada correctamente. Será revisada por un administrador.',
-          source: 'backend'
-        };
+      if (result.success) {
+        console.log(`✅ Reseña ${id} aprobada en backend`);
+        return result;
       }
     } catch (backendError) {
-      console.log('⚠️ Backend no disponible, usando sistema local:', backendError.message);
+      console.log(`❌ Backend no disponible para aprobar reseña: ${backendError.message}`);
     }
     
-    // Si el backend falla, usar el sistema local
-    const resenas = getLocalResenas();
-    console.log('📋 Reseñas existentes:', resenas.length);
+    // Fallback con datos mock
+    console.log(`🔄 Usando mock data para aprobar reseña ${id}`);
+    const mockResenas = getStoredMockResenas();
+    const resenaIndex = mockResenas.findIndex(r => r._id === id || r.id === id);
     
-    const nuevaResena = {
-      _id: `local_${Date.now()}`,
-      ...resenaData,
-      fecha: new Date().toISOString(),
-      aprobada: false, // Las nuevas reseñas necesitan aprobación
-      visible: true
-    };
+    if (resenaIndex !== -1) {
+      mockResenas[resenaIndex].aprobada = true;
+      storeMockResenas(mockResenas);
+      
+      console.log(`✅ Reseña ${id} aprobada en mock data`);
+      return {
+        success: true,
+        message: 'Reseña aprobada correctamente',
+        source: 'mock',
+        resena: mockResenas[resenaIndex]
+      };
+    }
     
-    console.log('🆕 Nueva reseña creada:', nuevaResena);
-    
-    resenas.push(nuevaResena);
-    saveLocalResenas(resenas);
-    
-    console.log('💾 Total de reseñas guardadas:', resenas.length);
-    
+    console.log(`❌ Reseña ${id} no encontrada en mock data`);
     return {
-      success: true,
-      message: 'Reseña enviada correctamente. Será revisada por un administrador.',
-      resena: nuevaResena,
-      source: 'local'
+      success: false,
+      error: 'Reseña no encontrada'
     };
   } catch (error) {
-    console.error('❌ Error enviando reseña local:', error);
-    throw error;
+    console.error('Error aprobando reseña:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 }
 
-export async function aprobarResenaLocal(id) {
+export async function rechazarResena(id) {
   try {
-    const resenas = getLocalResenas();
-    const index = resenas.findIndex(r => r._id === id);
+    console.log(`🔄 Intentando rechazar reseña ${id}...`);
     
-    if (index === -1) {
-      throw new Error('Reseña no encontrada');
+    // Intentar con backend local primero
+    try {
+      const result = await fetchAdminOperation(`/resenas/${id}/rechazar`, {
+        method: 'PUT'
+      });
+      
+      if (result.success) {
+        console.log(`✅ Reseña ${id} rechazada en backend`);
+        return result;
+      }
+    } catch (backendError) {
+      console.log(`❌ Backend no disponible para rechazar reseña: ${backendError.message}`);
     }
     
-    resenas[index].aprobada = true;
-    resenas[index].visible = true;
-    saveLocalResenas(resenas);
+    // Fallback con datos mock
+    console.log(`🔄 Usando mock data para rechazar reseña ${id}`);
+    const mockResenas = getStoredMockResenas();
+    const resenaIndex = mockResenas.findIndex(r => r._id === id || r.id === id);
     
+    if (resenaIndex !== -1) {
+      mockResenas[resenaIndex].aprobada = false;
+      storeMockResenas(mockResenas);
+      
+      console.log(`❌ Reseña ${id} rechazada en mock data`);
+      return {
+        success: true,
+        message: 'Reseña rechazada correctamente', 
+        source: 'mock',
+        resena: mockResenas[resenaIndex]
+      };
+    }
+    
+    console.log(`❌ Reseña ${id} no encontrada en mock data`);
     return {
-      success: true,
-      message: 'Reseña aprobada correctamente',
-      resena: resenas[index]
+      success: false,
+      error: 'Reseña no encontrada'
     };
   } catch (error) {
-    console.error('Error aprobando reseña local:', error);
-    throw error;
+    console.error('Error rechazando reseña:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 }
 
-export async function rechazarResenaLocal(id) {
+export async function eliminarResena(id) {
   try {
-    const resenas = getLocalResenas();
-    const index = resenas.findIndex(r => r._id === id);
+    console.log(`🔄 Intentando eliminar reseña ${id}...`);
     
-    if (index === -1) {
-      throw new Error('Reseña no encontrada');
+    // Intentar con backend local primero
+    try {
+      const result = await fetchAdminOperation(`/resenas/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (result.success) {
+        console.log(`🗑️ Reseña ${id} eliminada en backend`);
+        return result;
+      }
+    } catch (backendError) {
+      console.log(`❌ Backend no disponible para eliminar reseña: ${backendError.message}`);
     }
     
-    resenas[index].aprobada = false;
-    resenas[index].visible = false;
-    saveLocalResenas(resenas);
+    // Fallback con datos mock
+    console.log(`🔄 Usando mock data para eliminar reseña ${id}`);
+    const mockResenas = getStoredMockResenas();
+    const resenaIndex = mockResenas.findIndex(r => r._id === id || r.id === id);
     
+    if (resenaIndex !== -1) {
+      const resenaEliminada = mockResenas.splice(resenaIndex, 1)[0];
+      storeMockResenas(mockResenas);
+      
+      console.log(`🗑️ Reseña ${id} eliminada de mock data`);
+      return {
+        success: true,
+        message: 'Reseña eliminada correctamente',
+        source: 'mock',
+        resena: resenaEliminada
+      };
+    }
+    
+    console.log(`❌ Reseña ${id} no encontrada en mock data`);
     return {
-      success: true,
-      message: 'Reseña rechazada correctamente',
-      resena: resenas[index]
+      success: false,
+      error: 'Reseña no encontrada'
     };
   } catch (error) {
-    console.error('Error rechazando reseña local:', error);
-    throw error;
+    console.error('Error eliminando reseña:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 }
 
-// Función genérica para cualquier endpoint
-export { fetchWithProxy, fetchAdminOperation };
-
+// Exportación por defecto completa
 export default {
   getProductos,
   getOfertas,
   getResenas,
   getEstadisticasResenas,
-  getPedidosUsuario,
+  fetchWithProxy,
+  enviarResenaLocal,
   aprobarResena,
   rechazarResena,
-  fetchWithProxy,
-  fetchAdminOperation,
-  enviarResenaLocal,
-  aprobarResenaLocal,
-  rechazarResenaLocal
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  eliminarResena
 };

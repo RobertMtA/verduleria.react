@@ -170,114 +170,117 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
         {product ? "Editar Producto" : "Nuevo Producto"}
       </DialogTitle>
       <DialogContent>
-        <Grid container spacing={2} sx={{ pt: 2 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              id="product-name"
-              label="Nombre"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="category-label">Categoría</InputLabel>
-              <Select
-                labelId="category-label"
-                id="product-category"
-                name="categoria"
-                value={formData.categoria}
+        <Box sx={{ pt: 2 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                id="product-name"
+                label="Nombre"
+                name="nombre"
+                value={formData.nombre}
                 onChange={handleChange}
-                label="Categoría"
+                margin="normal"
                 required
-              >
-                {categoriasDisponibles.map(cat => (
-                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              id="product-price"
-              label="Precio"
-              name="precio"
-              type="number"
-              value={formData.precio}
-              onChange={handleChange}
-              margin="normal"
-              inputProps={{ min: 0, step: 0.01 }}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              id="product-stock"
-              label="Stock"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              margin="normal"
-              inputProps={{ min: 0 }}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              id="product-description"
-              label="Descripción"
-              name="descripcion"
-              value={formData.descripcion}
-              onChange={handleChange}
-              margin="normal"
-              multiline
-              rows={4}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="activo"
-                  checked={!!formData.activo}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="category-label">Categoría</InputLabel>
+                <Select
+                  labelId="category-label"
+                  id="product-category"
+                  name="categoria"
+                  value={formData.categoria}
                   onChange={handleChange}
+                  label="Categoría"
+                  required
+                >
+                  {categoriasDisponibles.map(cat => (
+                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                id="product-price"
+                label="Precio"
+                name="precio"
+                type="number"
+                value={formData.precio}
+                onChange={handleChange}
+                margin="normal"
+                inputProps={{ min: 0, step: 0.01 }}
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                id="product-stock"
+                label="Stock"
+                name="stock"
+                type="number"
+                value={formData.stock}
+                onChange={handleChange}
+                margin="normal"
+                inputProps={{ min: 0 }}
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                id="product-description"
+                label="Descripción"
+                name="descripcion"
+                value={formData.descripcion}
+                onChange={handleChange}
+                margin="normal"
+                multiline
+                rows={4}
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="product-active"
+                    name="activo"
+                    checked={!!formData.activo}
+                    onChange={handleChange}
+                    color="primary"
+                  />
+                }
+                label="Producto activo"
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                Imagen del Producto
+              </Typography>
+              <input
+                accept="image/*"
+                id="image-upload"
+                name="imagen"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={handleImageChange}
+              />
+              <label htmlFor="image-upload">
+                <Button 
+                  variant="contained" 
+                  component="span"
                   color="primary"
-                />
-              }
-              label="Producto activo"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" gutterBottom>
-              Imagen del Producto
-            </Typography>
-            <input
-              accept="image/*"
-              id="image-upload"
-              type="file"
-              style={{ display: 'none' }}
-              onChange={handleImageChange}
-            />
-            <label htmlFor="image-upload">
-              <Button 
-                variant="contained" 
-                component="span"
-                color="primary"
-                disabled={uploadingImage}
-                sx={{ mr: 2 }}
-              >
-                {uploadingImage ? "Subiendo..." : (selectedImage ? "Cambiar Imagen" : "Subir Imagen")}
-              </Button>
-            </label>
-            {selectedImage && (
+                  disabled={uploadingImage}
+                  sx={{ mr: 2 }}
+                >
+                  {uploadingImage ? "Subiendo..." : (selectedImage ? "Cambiar Imagen" : "Subir Imagen")}
+                </Button>
+              </label>
+              {selectedImage && (
               <Typography variant="caption" color="text.secondary">
                 {selectedImage.name}
               </Typography>
@@ -345,8 +348,9 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
                 {imageError}
               </Typography>
             )}
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>

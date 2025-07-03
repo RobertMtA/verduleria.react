@@ -56,14 +56,16 @@ const ReseñasAdmin = () => {
 
     fetchData();
     
-    // Configurar actualización automática cada 10 segundos
+    // Actualización automática deshabilitada temporalmente para mejorar performance
+    // Se puede reactivar cuando el backend esté estable
+    /* 
     const interval = setInterval(() => {
       console.log('🔄 Actualizando reseñas automáticamente...');
       fetchData();
-    }, 10000);
+    }, 30000); // Cambiado a 30 segundos para reducir carga
     
-    // Limpiar interval al desmontar el componente
     return () => clearInterval(interval);
+    */
   }, []);
 
   // Aprobar/Desaprobar reseña
@@ -96,6 +98,31 @@ const ReseñasAdmin = () => {
       
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  // Función para probar reseñas públicas (mismo método que usa el frontend)
+  const probarResenasPublicas = async () => {
+    try {
+      setLoading(true);
+      console.log('📋 Probando carga de reseñas públicas...');
+      
+      // Usar la misma función que usa la página pública
+      const data = await corsProxyService.getResenas(true); // aprobadas=true
+      
+      console.log('📋 Datos de reseñas públicas:', data);
+      
+      if (data && data.success && data.reseñas) {
+        setSuccess(`✅ Reseñas públicas cargadas: ${data.reseñas.length} encontradas`);
+        console.log('📋 Reseñas públicas:', data.reseñas.map(r => `${r.nombreUsuario || r.usuario?.nombre}: ${r.aprobada ? 'Aprobada' : 'Pendiente'}`));
+      } else {
+        setError('❌ No se encontraron reseñas públicas');
+      }
+    } catch (error) {
+      console.error('❌ Error probando reseñas públicas:', error);
+      setError(`❌ Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -241,23 +268,33 @@ const ReseñasAdmin = () => {
 
       {/* Panel de diagnóstico */}
       <div style={{
-        backgroundColor: dataSource === 'backend' ? '#d4edda' : dataSource === 'local' ? '#fff3cd' : '#f8d7da',
-        border: `1px solid ${dataSource === 'backend' ? '#c3e6cb' : dataSource === 'local' ? '#ffeaa7' : '#f5c6cb'}`,
-        borderRadius: '4px',
-        padding: '12px',
+        backgroundColor: dataSource === 'backend' ? '#e8f5e8' : dataSource === 'local' ? '#fff8e1' : '#ffeaea',
+        border: `1px solid ${dataSource === 'backend' ? '#4caf50' : dataSource === 'local' ? '#ff9800' : '#f44336'}`,
+        borderRadius: '8px',
+        padding: '10px 16px',
         marginBottom: '20px',
-        fontSize: '14px'
+        fontSize: '13px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
       }}>
-        <strong>📊 Estado del sistema:</strong> 
-        {dataSource === 'backend' && ' Conectado al backend (datos en tiempo real)'}
-        {dataSource === 'local' && ' Usando almacenamiento local (datos temporales)'}
-        {dataSource === 'unknown' && ' Fuente de datos desconocida'}
-        {dataSource === 'empty' && ' Sin datos disponibles'}
-        <br />
-        <small>
-          {dataSource === 'local' && 'Las reseñas se guardan en el navegador. Para persistencia real, el backend debe estar activo.'}
-          {dataSource === 'backend' && 'Todas las operaciones se sincronizan con la base de datos.'}
-        </small>
+        <span style={{ fontSize: '16px' }}>
+          {dataSource === 'backend' ? '✅' : dataSource === 'local' ? '💾' : '⚠️'}
+        </span>
+        <div>
+          <strong>
+            {dataSource === 'backend' && 'Backend Conectado'}
+            {dataSource === 'local' && 'Modo Desarrollo (Mock Data)'}
+            {dataSource === 'unknown' && 'Estado Desconocido'}
+            {dataSource === 'empty' && 'Sin Datos'}
+          </strong>
+          <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>
+            {dataSource === 'local' && 'Los cambios se guardan localmente para testing'}
+            {dataSource === 'backend' && 'Operaciones sincronizadas con MongoDB'}
+            {dataSource === 'unknown' && 'Verificar conectividad del backend'}
+            {dataSource === 'empty' && 'No hay reseñas disponibles'}
+          </div>
+        </div>
       </div>
 
       {/* Estadísticas */}
@@ -325,6 +362,22 @@ const ReseñasAdmin = () => {
         >
           {loading ? '🔄 Probando...' : '🌐 Probar Backend'}
         </button>
+        <button 
+          className="test-public-btn" 
+          onClick={probarResenasPublicas}
+          disabled={loading}
+          style={{
+            marginLeft: '10px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: loading ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {loading ? '🔄 Probando...' : '📋 Probar Públicas'}
+        </button>
       </div>
 
       {loading ? (
@@ -390,6 +443,43 @@ const ReseñasAdmin = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Mostrar estado del sistema solo en desarrollo */}
+      {(import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.port === '5173') && (
+        <div className="estado-sistema">
+          <h2>Estado del Sistema</h2>
+          <div style={{ 
+            fontSize: '12px', 
+            color: '#666', 
+            marginBottom: '10px',
+            fontStyle: 'italic'
+          }}>
+            ℹ️ Esta información solo es visible en modo desarrollo
+          </div>
+          <pre style={{
+            backgroundColor: '#f8f9fa',
+            border: '1px solid #e9ecef',
+            borderRadius: '4px',
+            padding: '12px',
+            fontSize: '12px',
+            overflow: 'auto',
+            maxHeight: '200px'
+          }}>
+            {JSON.stringify({
+              modo: import.meta.env.DEV ? 'desarrollo' : 'producción',
+              hostname: window.location.hostname,
+              puerto: window.location.port,
+              error,
+              success,
+              loading,
+              filter,
+              dataSource,
+              reseñas: reseñas.length,
+              estadisticas
+            }, null, 2)}
+          </pre>
         </div>
       )}
     </div>
