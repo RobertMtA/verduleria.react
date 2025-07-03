@@ -2021,3 +2021,12 @@ app.get('/debug/images', (req, res) => {
   }
 });
 
+// Simple test endpoint
+app.get('/test-timestamp', (req, res) => {
+  res.json({
+    message: 'Servidor actualizado correctamente',
+    timestamp: new Date().toISOString(),
+    version: '2.0.0-fix-images'
+  });
+});
+
