@@ -20,7 +20,7 @@ const DemoBanner = () => {
           </p>
           <div className="demo-banner-contact">
             <a 
-              href="mailto:roberto@verduleria-demo.com" 
+              href="mailto:robertogaona1985@gmail.com" 
               className="contact-btn"
               target="_blank"
               rel="noopener noreferrer"
@@ -28,7 +28,7 @@ const DemoBanner = () => {
               📧 Contáctame
             </a>
             <a 
-              href="https://wa.me/5491234567890?text=Hola,%20me%20interesa%20el%20sistema%20de%20verdulería%20online"
+              href="https://wa.me/541141766377?text=Hola,%20me%20interesa%20el%20sistema%20de%20verdulería%20online"
               className="contact-btn whatsapp"
               target="_blank"
               rel="noopener noreferrer"
