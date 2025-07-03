@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import corsProxyService from "../services/corsProxyService.js";
 
 const useProducts = () => {
   const [products, setProducts] = useState([]);
@@ -16,18 +17,25 @@ const useProducts = () => {
       setLoading(true);
       setError(null);
 
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
-      // Si tu backend implementa paginación, puedes agregar ?page=...&limit=...
-      const response = await fetch(`${apiUrl}/productos`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
+      console.log('🔄 Cargando productos con corsProxyService...');
+      
+      // Usar el servicio proxy temporal
+      const data = await corsProxyService.getProductos();
+      
+      console.log('✅ Productos recibidos:', data);
+      
+      if (data.success && data.productos) {
+        setProducts(data.productos);
+        setPagination(prev => ({
+          ...prev,
+          total: data.total || data.productos.length,
+          page: page,
+          limit: limit,
+          totalPages: Math.ceil((data.total || data.productos.length) / limit)
+        }));
+      } else {
+        throw new Error('Formato de respuesta inválido');
+      }
       }
 
       const data = await response.json();

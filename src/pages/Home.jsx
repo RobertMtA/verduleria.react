@@ -35,19 +35,22 @@ const Home = () => {
   const cargarOfertas = async () => {
     try {
       setOfertasLoading(true);
-      console.log('Cargando ofertas...');
-      const response = await fetch(`${API_URL}/ofertas?activas_solo=true`);
-      const data = await response.json();
-      console.log('Respuesta de ofertas:', data);
+      console.log('🔄 Cargando ofertas con corsProxyService...');
+      
+      // Importar dinámicamente el servicio proxy
+      const corsProxyService = await import('../services/corsProxyService.js');
+      const data = await corsProxyService.default.getOfertas(true); // activas_solo = true
+      
+      console.log('✅ Respuesta de ofertas:', data);
       
       if (data.success && data.ofertas) {
         setOfertas(data.ofertas.slice(0, 3)); // Solo las primeras 3 ofertas
-        console.log('Ofertas cargadas:', data.ofertas.slice(0, 3));
+        console.log('✅ Ofertas cargadas:', data.ofertas.slice(0, 3));
       } else {
-        console.log('No se encontraron ofertas o error en respuesta');
+        console.log('⚠️ No se encontraron ofertas o error en respuesta');
       }
     } catch (error) {
-      console.error('Error cargando ofertas:', error);
+      console.error('❌ Error cargando ofertas:', error);
     } finally {
       setOfertasLoading(false);
     }
