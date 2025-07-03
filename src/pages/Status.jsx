@@ -9,7 +9,8 @@ const Status = () => {
     productos: 'Verificando...',
     ofertas: 'Verificando...',
     perfil: 'Verificando...',
-    login: 'Verificando...'
+    login: 'Verificando...',
+    resenas: 'Verificando...'
   });
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const Status = () => {
     console.log('🔍 Verificando estado del sistema...');
     
     // Estado del frontend
-    setStatus(prev => ({ ...prev, frontend: 'Frontend cargado - v2.3.0 (correcciones URLs + login)' }));
+    setStatus(prev => ({ ...prev, frontend: 'Frontend cargado - v2.4.0 (soporte reseñas + proxy)' }));
     
     // Verificar backend directo
     try {
@@ -101,6 +102,21 @@ const Status = () => {
     } catch (error) {
       setStatus(prev => ({ ...prev, login: `Login error: ${error.message}` }));
     }
+    
+    // Verificar reseñas
+    try {
+      const resenas = await corsProxyService.getResenas();
+      if (resenas && resenas.reseñas && resenas.reseñas.length > 0) {
+        setStatus(prev => ({ 
+          ...prev, 
+          resenas: `${resenas.reseñas.length} reseñas (${resenas.source})`
+        }));
+      } else {
+        setStatus(prev => ({ ...prev, resenas: 'Sin reseñas disponibles' }));
+      }
+    } catch (error) {
+      setStatus(prev => ({ ...prev, resenas: `Error: ${error.message}` }));
+    }
   };
 
   return (
@@ -116,6 +132,7 @@ const Status = () => {
           <div><strong>Ofertas:</strong> {status.ofertas}</div>
           <div><strong>Perfil de Usuario:</strong> {status.perfil}</div>
           <div><strong>Login/Autenticación:</strong> {status.login}</div>
+          <div><strong>Reseñas:</strong> {status.resenas}</div>
         </div>
         
         <h3 style={{ marginTop: '20px' }}>Información de Versión</h3>
