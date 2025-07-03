@@ -936,43 +936,71 @@ const Profile = () => {
       // obtenemos todos los pedidos y filtramos por email
       const response = await corsProxyService.fetchWithProxy('/pedidos');
       
-      if (response && Array.isArray(response)) {
-        // Filtrar pedidos del usuario actual
-        const pedidosUsuario = response.filter(pedido => 
-          pedido.usuario && 
-          pedido.usuario.email && 
-          pedido.usuario.email.toLowerCase() === emailUsuario.toLowerCase()
-        );
-        
-        console.log(`✅ ${pedidosUsuario.length} pedidos encontrados para ${emailUsuario} (de ${response.length} total)`);
-        
-        setProfileData(prevData => ({
-          ...prevData,
-          orders: pedidosUsuario
-        }));
+      console.log('📋 Respuesta completa de pedidos:', response);
+      console.log('📋 Tipo de respuesta:', typeof response);
+      console.log('📋 Es array?:', Array.isArray(response));
+      
+      let pedidosArray = [];
+      
+      // Determinar el formato de la respuesta
+      if (Array.isArray(response)) {
+        pedidosArray = response;
+        console.log('✅ Formato: Array directo con', response.length, 'pedidos');
       } else if (response && response.success && Array.isArray(response.pedidos)) {
-        // Si viene en formato {success: true, pedidos: [...]}
-        const pedidosUsuario = response.pedidos.filter(pedido => 
-          pedido.usuario && 
-          pedido.usuario.email && 
-          pedido.usuario.email.toLowerCase() === emailUsuario.toLowerCase()
-        );
-        
-        console.log(`✅ ${pedidosUsuario.length} pedidos encontrados para ${emailUsuario} (${response.source})`);
-        
-        setProfileData(prevData => ({
-          ...prevData,
-          orders: pedidosUsuario
-        }));
+        pedidosArray = response.pedidos;
+        console.log('✅ Formato: {success: true, pedidos: [...]} con', response.pedidos.length, 'pedidos');
+      } else if (response && response.data && Array.isArray(response.data)) {
+        pedidosArray = response.data;
+        console.log('✅ Formato: {data: [...]} con', response.data.length, 'pedidos');
       } else {
-        console.log('⚠️ No se encontraron pedidos o formato inesperado:', response);
-        setProfileData(prevData => ({
-          ...prevData,
-          orders: []
-        }));
+        console.log('⚠️ Formato no reconocido, usando array vacío:', response);
+        pedidosArray = [];
       }
+      
+      // Filtrar pedidos del usuario actual
+      const pedidosUsuario = pedidosArray.filter(pedido => {
+        const emailPedido = pedido.usuario?.email?.toLowerCase();
+        const emailBuscado = emailUsuario.toLowerCase();
+        const match = emailPedido === emailBuscado;
+        
+        if (match) {
+          console.log(`✅ Pedido coincidente encontrado:`, {
+            id: pedido._id,
+            fecha: pedido.fecha_pedido,
+            total: pedido.total,
+            estado: pedido.estado,
+            productos: pedido.productos?.length || 0
+          });
+        }
+        
+        return match;
+      });
+      
+      console.log(`✅ ${pedidosUsuario.length} pedidos encontrados para ${emailUsuario} (de ${pedidosArray.length} total)`);
+      
+      // Procesar las URLs de las imágenes de los productos
+      const pedidosConImagenes = pedidosUsuario.map(pedido => ({
+        ...pedido,
+        productos: pedido.productos?.map(producto => ({
+          ...producto,
+          image: producto.image ? 
+            (producto.image.startsWith('http') ? 
+              producto.image : 
+              `https://verduleria-backend-m19n.onrender.com${producto.image}`
+            ) : 
+            '/images/default-product.svg'
+        })) || []
+      }));
+      
+      console.log('📦 Pedidos procesados con imágenes:', pedidosConImagenes.length);
+      
+      setProfileData(prevData => ({
+        ...prevData,
+        orders: pedidosConImagenes
+      }));
+      
     } catch (error) {
-      console.warn('⚠️ Error cargando pedidos, usando array vacío:', error.message);
+      console.error('❌ Error cargando pedidos:', error);
       setProfileData(prevData => ({
         ...prevData,
         orders: []

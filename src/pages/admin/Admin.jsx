@@ -225,19 +225,30 @@ const Admin = () => {
                     </button>
 
                     <ul className="admin-product-list">
-                        {productos.map((product) => (
-                            <li key={product._id} className="admin-product-item">
-                                <img
-                                    src={product.image || "/images/no-image.jpg"}
-                                    alt={product.nombre}
-                                    className="admin-product-image"
-                                    onError={e => { e.target.src = "/images/no-image.jpg"; }}
-                                />
-                                <div className="admin-product-info">
-                                    <span className="admin-product-name">{product.nombre}</span>
-                                    <span className="admin-product-price">${Number(product.precio).toFixed(2)}</span>
-                                </div>
-                                <div className="admin-product-actions">
+                        {productos.map((product) => {
+                            // Procesar URL de imagen correctamente
+                            const getImageUrl = (imagePath) => {
+                                if (!imagePath) return "/images/no-image.jpg";
+                                if (imagePath.startsWith('http')) return imagePath;
+                                if (imagePath.startsWith('/images/')) {
+                                    return `https://verduleria-backend-m19n.onrender.com${imagePath}`;
+                                }
+                                return `https://verduleria-backend-m19n.onrender.com/images/${imagePath}`;
+                            };
+
+                            return (
+                                <li key={product._id} className="admin-product-item">
+                                    <img
+                                        src={getImageUrl(product.image)}
+                                        alt={product.nombre}
+                                        className="admin-product-image"
+                                        onError={e => { e.target.src = "/images/no-image.jpg"; }}
+                                    />
+                                    <div className="admin-product-info">
+                                        <span className="admin-product-name">{product.nombre}</span>
+                                        <span className="admin-product-price">${Number(product.precio).toFixed(2)}</span>
+                                    </div>
+                                    <div className="admin-product-actions">
                                     <button 
                                         onClick={() => handleEditClick(product)}
                                         className="admin-edit-button"
@@ -252,7 +263,8 @@ const Admin = () => {
                                     </button>
                                 </div>
                             </li>
-                        ))}
+                        );
+                        })}
                     </ul>
                 </>
             )}
