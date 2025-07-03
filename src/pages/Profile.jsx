@@ -311,18 +311,18 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                       return field;
                     }
                     
-                    // Si ya incluye /images/, usar tal como está
+                    // Si ya incluye /images/, usar desde el frontend
                     if (field.startsWith('/images/')) {
-                      return `https://verduleria-backend-m19n.onrender.com${field}`;
+                      return `https://verduleria-react.vercel.app${field}`;
                     }
                     
-                    // Si no empieza con /, agregar /images/
+                    // Si no empieza con /, agregar /images/ y usar frontend
                     if (!field.startsWith('/')) {
-                      return `https://verduleria-backend-m19n.onrender.com/images/${field}`;
+                      return `https://verduleria-react.vercel.app/images/${field}`;
                     }
                     
-                    // Para cualquier otro caso con /
-                    return `https://verduleria-backend-m19n.onrender.com${field}`;
+                    // Para cualquier otro caso con /, usar frontend
+                    return `https://verduleria-react.vercel.app${field}`;
                   }
                 }
                 
@@ -368,7 +368,7 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                   
                   // Buscar coincidencia exacta
                   if (imageMap[nombreLimpio]) {
-                    const imageUrl = `https://verduleria-backend-m19n.onrender.com/images/${imageMap[nombreLimpio]}`;
+                    const imageUrl = `https://verduleria-react.vercel.app/images/${imageMap[nombreLimpio]}`;
                     console.log(`🎯 Imagen encontrada por nombre exacto: ${imageUrl}`);
                     return imageUrl;
                   }
@@ -376,7 +376,7 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                   // Buscar coincidencia parcial (nombre del producto contiene una palabra clave)
                   for (const [key, value] of Object.entries(imageMap)) {
                     if (nombreLimpio.includes(key)) {
-                      const imageUrl = `https://verduleria-backend-m19n.onrender.com/images/${value}`;
+                      const imageUrl = `https://verduleria-react.vercel.app/images/${value}`;
                       console.log(`🎯 Imagen encontrada por coincidencia parcial (${nombreLimpio} contiene "${key}"): ${imageUrl}`);
                       return imageUrl;
                     }
@@ -385,7 +385,7 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                   // Buscar coincidencia inversa (palabra clave contiene el nombre del producto)
                   for (const [key, value] of Object.entries(imageMap)) {
                     if (key.includes(nombreLimpio) && nombreLimpio.length > 3) {
-                      const imageUrl = `https://verduleria-backend-m19n.onrender.com/images/${value}`;
+                      const imageUrl = `https://verduleria-react.vercel.app/images/${value}`;
                       console.log(`🎯 Imagen encontrada por coincidencia inversa ("${key}" contiene ${nombreLimpio}): ${imageUrl}`);
                       return imageUrl;
                     }
@@ -986,7 +986,7 @@ const Profile = () => {
           image: producto.image ? 
             (producto.image.startsWith('http') ? 
               producto.image : 
-              `https://verduleria-backend-m19n.onrender.com${producto.image}`
+              `https://verduleria-react.vercel.app${producto.image}`
             ) : 
             '/images/default-product.svg'
         })) || []

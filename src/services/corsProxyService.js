@@ -99,7 +99,7 @@ function getMockData(endpoint) {
           descripcion: "Bananas frescas (Por kilo)",
           precio: 6000,
           stock: 77000,
-          imagen: "https://verduleria-backend-m19n.onrender.com/images/img-banana1.jpg",
+          imagen: "https://verduleria-react.vercel.app/images/img-banana1.jpg",
           categoria: "Frutas",
           activo: true
         },
@@ -109,7 +109,7 @@ function getMockData(endpoint) {
           descripcion: "Naranja fresca y jugosa (Por kilo)",
           precio: 2500,
           stock: 1000,
-          imagen: "https://verduleria-backend-m19n.onrender.com/images/img-naranja1.jpg",
+          imagen: "https://verduleria-react.vercel.app/images/img-naranja1.jpg",
           categoria: "Frutas",
           activo: true
         },
@@ -119,7 +119,7 @@ function getMockData(endpoint) {
           descripcion: "Lechuga fresca (Por kilo)",
           precio: 2500,
           stock: 50,
-          imagen: "https://verduleria-backend-m19n.onrender.com/images/img-lechuga1.jpg",
+          imagen: "https://verduleria-react.vercel.app/images/img-lechuga1.jpg",
           categoria: "Verduras",
           activo: true
         },
@@ -129,7 +129,7 @@ function getMockData(endpoint) {
           descripcion: "Papas frescas (Por kilo)",
           precio: 2700,
           stock: 1000,
-          imagen: "https://verduleria-backend-m19n.onrender.com/images/img-papa1.jpg",
+          imagen: "https://verduleria-react.vercel.app/images/img-papa1.jpg",
           categoria: "Verduras",
           activo: true
         }
@@ -150,7 +150,7 @@ function getMockData(endpoint) {
           precio_original: 6000,
           precio_oferta: 4200,
           descuento_porcentaje: 30,
-          imagen: 'https://verduleria-backend-m19n.onrender.com/images/img-banana1.jpg',
+          imagen: 'https://verduleria-react.vercel.app/images/img-banana1.jpg',
           activa: true,
           vigente: true,
           categoria: 'Frutas'
@@ -162,7 +162,7 @@ function getMockData(endpoint) {
           precio_original: 2500,
           precio_oferta: 1875,
           descuento_porcentaje: 25,
-          imagen: 'https://verduleria-backend-m19n.onrender.com/images/img-naranja1.jpg',
+          imagen: 'https://verduleria-react.vercel.app/images/img-naranja1.jpg',
           activa: true,
           vigente: true,
           categoria: 'Frutas'

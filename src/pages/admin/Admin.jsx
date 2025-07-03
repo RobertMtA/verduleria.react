@@ -231,9 +231,9 @@ const Admin = () => {
                                 if (!imagePath) return "/images/no-image.jpg";
                                 if (imagePath.startsWith('http')) return imagePath;
                                 if (imagePath.startsWith('/images/')) {
-                                    return `https://verduleria-backend-m19n.onrender.com${imagePath}`;
+                                    return `https://verduleria-react.vercel.app${imagePath}`;
                                 }
-                                return `https://verduleria-backend-m19n.onrender.com/images/${imagePath}`;
+                                return `https://verduleria-react.vercel.app/images/${imagePath}`;
                             };
 
                             return (
