@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import corsProxyService from '../services/corsProxyService';
 import './FormularioReseña.css';
-
-const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
   const { user, isAuthenticated } = useAuth();
@@ -56,7 +55,7 @@ const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
       console.log('👤 Usuario actual:', user);
       console.log('📤 Enviando reseña:', dataToSend);
       
-      const response = await fetch(`${API_URL}/resenas`, {
+      const data = await corsProxyService.fetchWithProxy('/resenas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,8 +64,6 @@ const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
         body: JSON.stringify(dataToSend)
       });
 
-      console.log('📥 Respuesta del servidor:', response.status);
-      const data = await response.json();
       console.log('📥 Datos de respuesta:', data);
 
       if (data.success) {

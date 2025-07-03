@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Reseñas from '../components/Reseñas';
 import FormularioReseña from '../components/FormularioReseña';
+import corsProxyService from '../services/corsProxyService';
 import './Resenas.css';
-
-const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const ResenasPage = () => {
   const { isAuthenticated, user } = useAuth();
@@ -15,17 +14,26 @@ const ResenasPage = () => {
   const cargarReseñas = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/resenas?publicas=true`);
-      const data = await response.json();
+      console.log('🔄 Cargando reseñas públicas con corsProxyService...');
       
-      if (data.success) {
-        setReseñas(data.reseñas || []);
+      const data = await corsProxyService.getResenas(true); // publicas=true
+      
+      console.log('📋 Respuesta de reseñas:', data);
+      
+      if (data && (Array.isArray(data) || (data.success && data.reseñas))) {
+        const reseñasArray = Array.isArray(data) ? data : (data.reseñas || []);
+        console.log(`✅ ${reseñasArray.length} reseñas públicas cargadas`);
+        setReseñas(reseñasArray);
+        setError(null);
       } else {
-        setError('Error al cargar las reseñas');
+        console.log('⚠️ No hay reseñas públicas disponibles');
+        setError('No hay reseñas disponibles en este momento');
+        setReseñas([]);
       }
     } catch (error) {
-      console.error('Error cargando reseñas:', error);
+      console.error('❌ Error cargando reseñas:', error);
       setError('Error de conexión al cargar las reseñas');
+      setReseñas([]);
     } finally {
       setLoading(false);
     }
