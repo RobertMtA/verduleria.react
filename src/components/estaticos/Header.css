@@ -467,3 +467,59 @@ button.navbar-toggler,
     margin-left: 4px;
   }
 }
+
+/* CORRECCIÓN ULTRA-AGRESIVA PARA MÓVILES */
+/* Importante: Estos estilos sobrescriben TODO, incluso estilos inline */
+.navbar-toggler,
+.navbar-toggler:hover,
+.navbar-toggler:focus,
+.navbar-toggler:active,
+.navbar-toggler.collapsed,
+.navbar-toggler:not(.collapsed) {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+/* FORZAR TRANSPARENCIA EN WEBKIT (Safari móvil) */
+.navbar-toggler::-webkit-any-link,
+.navbar-toggler::-webkit-search-decoration,
+.navbar-toggler::-webkit-search-cancel-button {
+  background: none !important;
+  border: none !important;
+}
+
+/* ELIMINAR ESTILOS DE FIREFOX MÓVIL */
+.navbar-toggler::-moz-focus-inner {
+  border: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+}
+
+/* CORRECCIÓN ESPECÍFICA PARA ANDROID CHROME */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .navbar-toggler {
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
+  }
+}
+
+/* CORRECCIÓN ESPECÍFICA PARA iOS SAFARI */
+@supports (-webkit-touch-callout: none) {
+  .navbar-toggler {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: none !important;
+    border: none !important;
+  }
+}
