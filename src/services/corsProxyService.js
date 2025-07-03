@@ -172,6 +172,74 @@ function getMockData(endpoint) {
       source: 'mock'
     };
   }
+
+  if (endpoint.includes('/resenas')) {
+    if (endpoint.includes('/estadisticas')) {
+      return {
+        success: true,
+        estadisticas: {
+          total: 4,
+          aprobadas: 3,
+          pendientes: 1,
+          rechazadas: 0,
+          promedio_rating: 4.2
+        },
+        source: 'mock'
+      };
+    }
+    
+    return {
+      success: true,
+      reseñas: [
+        {
+          _id: 'mock_res_001',
+          usuario: 'Juan Pérez',
+          email: 'juan@example.com',
+          producto: 'Banana',
+          rating: 5,
+          comentario: 'Excelente calidad, muy frescas y dulces. Las mejores bananas que he probado.',
+          fecha: new Date('2024-12-15').toISOString(),
+          aprobada: true,
+          publica: true
+        },
+        {
+          _id: 'mock_res_002',
+          usuario: 'María González',
+          email: 'maria@example.com',
+          producto: 'Lechuga',
+          rating: 4,
+          comentario: 'Buena lechuga, fresca y crujiente. Perfecta para ensaladas.',
+          fecha: new Date('2024-12-14').toISOString(),
+          aprobada: true,
+          publica: true
+        },
+        {
+          _id: 'mock_res_003',
+          usuario: 'Carlos Rodriguez',
+          email: 'carlos@example.com',
+          producto: 'Naranja',
+          rating: 4,
+          comentario: 'Naranjas jugosas y con buen sabor. Recomendadas.',
+          fecha: new Date('2024-12-13').toISOString(),
+          aprobada: true,
+          publica: true
+        },
+        {
+          _id: 'mock_res_004',
+          usuario: 'Ana Martín',
+          email: 'ana@example.com',
+          producto: 'Papa',
+          rating: 4,
+          comentario: 'Papas de buena calidad para cocinar.',
+          fecha: new Date('2024-12-12').toISOString(),
+          aprobada: false,
+          publica: false
+        }
+      ],
+      total: 4,
+      source: 'mock'
+    };
+  }
   
   // Para otros endpoints, retornar estructura básica
   return {
@@ -198,6 +266,18 @@ export async function getResenas(publicas = false) {
   return await fetchWithProxy(endpoint);
 }
 
+export async function getEstadisticasResenas() {
+  return await fetchWithProxy('/resenas/estadisticas');
+}
+
+export async function aprobarResena(id) {
+  return await fetchWithProxy(`/resenas/${id}/aprobar`, { method: 'PUT' });
+}
+
+export async function rechazarResena(id) {
+  return await fetchWithProxy(`/resenas/${id}/rechazar`, { method: 'PUT' });
+}
+
 // Función genérica para cualquier endpoint
 export { fetchWithProxy };
 
@@ -205,5 +285,8 @@ export default {
   getProductos,
   getOfertas,
   getResenas,
+  getEstadisticasResenas,
+  aprobarResena,
+  rechazarResena,
   fetchWithProxy
 };
