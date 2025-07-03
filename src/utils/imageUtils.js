@@ -1,5 +1,5 @@
 // utils/imageUtils.js
-const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:4001";
+const BASE_URL = import.meta.env.VITE_BASE_URL || "https://verduleria-backend-m19n.onrender.com";
 const DEFAULT_IMAGE = "/default-product.svg";
 
 /**

@@ -53,7 +53,7 @@ export const CartProvider = ({ children }) => {
         await fetch(
           import.meta.env.VITE_API_URL
             ? `${import.meta.env.VITE_API_URL}/productos/restar-stock`
-            : "http://localhost:4001/api/productos/restar-stock",
+            : "https://verduleria-backend-m19n.onrender.com/api/productos/restar-stock",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

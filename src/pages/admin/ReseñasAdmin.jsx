@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import "./ReseñasAdmin.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const ReseñasAdmin = () => {
   const { user, isAuthenticated } = useAuth();

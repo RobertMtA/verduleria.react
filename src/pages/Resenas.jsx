@@ -4,7 +4,7 @@ import Reseñas from '../components/Reseñas';
 import FormularioReseña from '../components/FormularioReseña';
 import './Resenas.css';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const ResenasPage = () => {
   const { isAuthenticated, user } = useAuth();

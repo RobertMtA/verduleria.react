@@ -8,7 +8,7 @@ const AdminChat = () => {
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://verduleria-backend-m19n.onrender.com/api';
 
   // Función para formatear el estado para mostrar
   const getEstadoTexto = (estado) => {

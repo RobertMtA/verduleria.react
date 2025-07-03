@@ -15,7 +15,7 @@ import PasswordStrengthBar from 'react-password-strength-bar';
 
 const API_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/reset_password`
-  : "http://localhost:4001/api/reset_password";
+  : "https://verduleria-backend-m19n.onrender.com/api/reset_password";
 
 const ResetPassword = () => {
   const { token } = useParams();

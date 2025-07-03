@@ -29,7 +29,7 @@ const TestModal = ({ isOpen, onClose }) => {
     console.log('Datos a enviar:', data);
 
     try {
-      const response = await fetch('http://localhost:4001/api/productos/test123', {
+      const response = await fetch('https://verduleria-backend-m19n.onrender.com/api/productos/test123', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

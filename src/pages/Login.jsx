@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const Login = () => {
   const { login, isAuthenticated, loading } = useAuth();

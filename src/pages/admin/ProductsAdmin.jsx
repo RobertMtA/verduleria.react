@@ -56,7 +56,7 @@ const ProductsAdmin = () => {
       setFormLoading(true);
       console.log("Eliminando producto con ID:", productId);
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4001/api"}/productos/${productId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api"}/productos/${productId}`, {
         method: "DELETE"
       });
       
@@ -88,7 +88,7 @@ const ProductsAdmin = () => {
   const handleSaveProduct = async (productData) => {
     try {
       setFormLoading(true);
-      let url = `${import.meta.env.VITE_API_URL || "http://localhost:4001/api"}/productos`;
+      let url = `${import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api"}/productos`;
       let method = "POST";
       let body = productData;
 

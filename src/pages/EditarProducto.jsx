@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./EditarProducto.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const EditarProducto = () => {
   const { id } = useParams();

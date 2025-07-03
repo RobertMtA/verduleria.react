@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getImageUrl } from "../../utils/imageUtils";
 import "./NuevoProducto.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4001/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
 
 const NuevoProducto = () => {
   const navigate = useNavigate();

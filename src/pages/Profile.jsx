@@ -313,16 +313,16 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                     
                     // Si ya incluye /images/, usar tal como está
                     if (field.startsWith('/images/')) {
-                      return `http://localhost:4001${field}`;
+                      return `https://verduleria-backend-m19n.onrender.com${field}`;
                     }
                     
                     // Si no empieza con /, agregar /images/
                     if (!field.startsWith('/')) {
-                      return `http://localhost:4001/images/${field}`;
+                      return `https://verduleria-backend-m19n.onrender.com/images/${field}`;
                     }
                     
                     // Para cualquier otro caso con /
-                    return `http://localhost:4001${field}`;
+                    return `https://verduleria-backend-m19n.onrender.com${field}`;
                   }
                 }
                 
@@ -368,7 +368,7 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                   
                   // Buscar coincidencia exacta
                   if (imageMap[nombreLimpio]) {
-                    const imageUrl = `http://localhost:4001/images/${imageMap[nombreLimpio]}`;
+                    const imageUrl = `https://verduleria-backend-m19n.onrender.com/images/${imageMap[nombreLimpio]}`;
                     console.log(`🎯 Imagen encontrada por nombre exacto: ${imageUrl}`);
                     return imageUrl;
                   }
@@ -376,7 +376,7 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                   // Buscar coincidencia parcial (nombre del producto contiene una palabra clave)
                   for (const [key, value] of Object.entries(imageMap)) {
                     if (nombreLimpio.includes(key)) {
-                      const imageUrl = `http://localhost:4001/images/${value}`;
+                      const imageUrl = `https://verduleria-backend-m19n.onrender.com/images/${value}`;
                       console.log(`🎯 Imagen encontrada por coincidencia parcial (${nombreLimpio} contiene "${key}"): ${imageUrl}`);
                       return imageUrl;
                     }
@@ -385,7 +385,7 @@ const PedidoItem = ({ pedido, onEstadoActualizado }) => {
                   // Buscar coincidencia inversa (palabra clave contiene el nombre del producto)
                   for (const [key, value] of Object.entries(imageMap)) {
                     if (key.includes(nombreLimpio) && nombreLimpio.length > 3) {
-                      const imageUrl = `http://localhost:4001/images/${value}`;
+                      const imageUrl = `https://verduleria-backend-m19n.onrender.com/images/${value}`;
                       console.log(`🎯 Imagen encontrada por coincidencia inversa ("${key}" contiene ${nombreLimpio}): ${imageUrl}`);
                       return imageUrl;
                     }
@@ -534,7 +534,7 @@ const ChatPedido = ({ pedidoId, estadoPedido }) => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://verduleria-backend-m19n.onrender.com/api';
 
   // Verificar si el chat debe estar activo
   // Verificar si el chat debe estar activo
@@ -926,7 +926,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://verduleria-backend-m19n.onrender.com/api';
 
   const fetchProfile = useCallback(async () => {
     try {
