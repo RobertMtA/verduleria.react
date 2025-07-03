@@ -7,7 +7,8 @@ const Status = () => {
     backend: 'Verificando...',
     proxy: 'Verificando...',
     productos: 'Verificando...',
-    ofertas: 'Verificando...'
+    ofertas: 'Verificando...',
+    perfil: 'Verificando...'
   });
 
   useEffect(() => {
@@ -18,7 +19,7 @@ const Status = () => {
     console.log('🔍 Verificando estado del sistema...');
     
     // Estado del frontend
-    setStatus(prev => ({ ...prev, frontend: 'Frontend cargado - v2.1.0 (correcciones proxy)' }));
+    setStatus(prev => ({ ...prev, frontend: 'Frontend cargado - v2.2.0 (correcciones perfil + proxy)' }));
     
     // Verificar backend directo
     try {
@@ -70,6 +71,18 @@ const Status = () => {
         ofertas: `Error: ${error.message}`
       }));
     }
+    
+    // Verificar endpoint de perfil
+    try {
+      const response = await fetch('https://verduleria-backend-m19n.onrender.com/api/perfil/test@example.com');
+      if (response.ok) {
+        setStatus(prev => ({ ...prev, perfil: 'Endpoint perfil disponible' }));
+      } else {
+        setStatus(prev => ({ ...prev, perfil: `Endpoint perfil no disponible (${response.status}) - usando modo temporal` }));
+      }
+    } catch (error) {
+      setStatus(prev => ({ ...prev, perfil: 'Endpoint perfil no disponible - usando modo temporal' }));
+    }
   };
 
   return (
@@ -83,6 +96,7 @@ const Status = () => {
           <div><strong>Proxy Service:</strong> {status.proxy}</div>
           <div><strong>Productos:</strong> {status.productos}</div>
           <div><strong>Ofertas:</strong> {status.ofertas}</div>
+          <div><strong>Perfil de Usuario:</strong> {status.perfil}</div>
         </div>
         
         <h3 style={{ marginTop: '20px' }}>Información de Versión</h3>
