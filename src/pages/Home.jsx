@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import Reseñas from '../components/Reseñas';
 import FormularioReseña from '../components/FormularioReseña';
 import ImageWithFallback from '../components/common/ImageWithFallback';
+import DemoBanner from '../components/DemoBanner';
 import './Home.css';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
@@ -121,6 +122,9 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      {/* Demo Banner */}
+      <DemoBanner />
+      
       {/* Hero Banner */}
       <section className="hero-banner" aria-label="Banner principal">
         <div className="container">
