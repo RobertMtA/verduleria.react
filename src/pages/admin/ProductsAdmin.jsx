@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import corsProxyService from "../../services/corsProxyService";
 import {
   Box,
   Typography,
@@ -56,19 +57,10 @@ const ProductsAdmin = () => {
       setFormLoading(true);
       console.log("Eliminando producto con ID:", productId);
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api"}/productos/${productId}`, {
+      const result = await corsProxyService.fetchWithProxy(`/productos/${productId}`, {
         method: "DELETE"
       });
       
-      console.log("Respuesta del servidor:", response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error del servidor:", errorData);
-        throw new Error(errorData.error || "Error al eliminar producto");
-      }
-      
-      const result = await response.json();
       console.log("Resultado:", result);
       
       if (!result.success) {
@@ -88,32 +80,23 @@ const ProductsAdmin = () => {
   const handleSaveProduct = async (productData) => {
     try {
       setFormLoading(true);
-      let url = `${import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api"}/productos`;
+      let endpoint = "/productos";
       let method = "POST";
-      let body = productData;
 
+      // Para actualizar un producto existente
       if (selectedProduct) {
-        url += `/${selectedProduct.id}`;
+        endpoint = `/productos/${selectedProduct._id || selectedProduct.id}`;
         method = "PUT";
-        // No incluir _id en el body para la actualización
-        body = productData;
       }
 
-      console.log("Enviando datos:", { method, url, body }); // Para debug
+      console.log("Enviando datos:", { method, endpoint, productData }); // Para debug
 
-      const response = await fetch(url, {
+      const result = await corsProxyService.fetchWithProxy(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        body: JSON.stringify(productData)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error del servidor:", errorData);
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
       console.log("Respuesta del servidor:", result); // Para debug
 
       if (!result.success) {

@@ -6,6 +6,11 @@ const PROXY_URL = "https://api.allorigins.win/get?url=";
 
 async function fetchWithProxy(endpoint, options = {}) {
   try {
+    // Si es una operación que no es GET (POST, PUT, DELETE), usar función admin directa
+    if (options.method && options.method !== 'GET') {
+      return await fetchAdminOperation(endpoint, options);
+    }
+    
     console.log(`🔄 Usando proxy para: ${endpoint}`);
     
     const encodedUrl = encodeURIComponent(`${ORIGINAL_API_URL}${endpoint}`);
@@ -304,8 +309,38 @@ export async function rechazarResena(id) {
   return await fetchWithProxy(`/resenas/${id}/rechazar`, { method: 'PUT' });
 }
 
+// Para operaciones de administración (POST, PUT, DELETE) usamos el backend directo
+// ya que allorigins.win solo soporta GET
+async function fetchAdminOperation(endpoint, options = {}) {
+  try {
+    console.log(`🔧 Operación admin directa: ${endpoint}`);
+    
+    const response = await fetch(`${ORIGINAL_API_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`❌ Error ${response.status}:`, errorData);
+      throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log(`✅ Operación admin completada:`, result);
+    return result;
+    
+  } catch (error) {
+    console.error(`❌ Error en operación admin:`, error);
+    throw error;
+  }
+}
+
 // Función genérica para cualquier endpoint
-export { fetchWithProxy };
+export { fetchWithProxy, fetchAdminOperation };
 
 export default {
   getProductos,
@@ -315,5 +350,6 @@ export default {
   getPedidosUsuario,
   aprobarResena,
   rechazarResena,
-  fetchWithProxy
+  fetchWithProxy,
+  fetchAdminOperation
 };
