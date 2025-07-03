@@ -128,6 +128,11 @@ const Reseña = model('Reseña', ReseñaSchema);
 
 const app = express();
 
+// 🚀 TIMESTAMP REDESPLIEGUE: 2025-07-03 03:50 UTC - FORZAR ACTUALIZACIÓN
+console.log('🚀 Backend iniciado - Timestamp:', new Date().toISOString());
+console.log('📂 Directory check:', __dirname);
+console.log('🖼️ Images directory exists:', fs.existsSync(path.join(__dirname, './public/images')));
+
 // 🚨 CORS ULTRA-AGRESIVO - SOLUCIÓN TEMPORAL 🚨
 app.use((req, res, next) => {
   console.log(`🌐 REQUEST: ${req.method} ${req.path} - Origin: ${req.get('Origin')}`);
@@ -1764,28 +1769,7 @@ app.use('*', (req, res) => {
   });
 });
 
-// Middleware de manejo de errores global con headers CORS
-app.use((error, req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  console.error('Error en servidor:', error);
-  
-  res.status(500).json({
-    success: false,
-    error: 'Error interno del servidor',
-    message: error.message || 'Ha ocurrido un error inesperado'
-  });
-});
-
-const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => {
-  console.log(`Servidor backend escuchando en puerto ${PORT}`);
-});
-
-// RESEÑAS
+// RESEÑAS - Rutas definidas antes de app.listen()
 // Obtener todas las reseñas (para admin y display público)
 app.get('/api/resenas', async (req, res) => {
   try {
@@ -1986,42 +1970,6 @@ app.get('/api/resenas/estadisticas', async (req, res) => {
 });
 
 // Endpoint de debug para verificar imágenes
-app.get('/debug/images', (req, res) => {
-  try {
-    const imagesPath = path.join(__dirname, './public/images');
-    console.log('📁 Verificando directorio de imágenes:', imagesPath);
-    
-    if (!fs.existsSync(imagesPath)) {
-      return res.json({
-        status: 'error',
-        message: 'Directorio de imágenes no existe',
-        path: imagesPath,
-        __dirname: __dirname
-      });
-    }
-    
-    const files = fs.readdirSync(imagesPath);
-    
-    res.json({
-      status: 'success',
-      message: 'Directorio de imágenes encontrado',
-      path: imagesPath,
-      __dirname: __dirname,
-      files: files,
-      totalFiles: files.length
-    });
-    
-  } catch (error) {
-    console.error('❌ Error verificando imágenes:', error);
-    res.status(500).json({
-      status: 'error',
-      error: error.message,
-      __dirname: __dirname
-    });
-  }
-});
-
-// Simple test endpoint
 app.get('/test-timestamp', (req, res) => {
   res.json({
     message: 'Servidor actualizado correctamente',
@@ -2030,3 +1978,57 @@ app.get('/test-timestamp', (req, res) => {
   });
 });
 
+// Endpoint de diagnóstico para imágenes
+app.get('/api/debug/images', (req, res) => {
+  const uploadsPath = path.join(__dirname, './public/images');
+  console.log('📁 Debug: Checking images directory:', uploadsPath);
+  
+  try {
+    if (!fs.existsSync(uploadsPath)) {
+      console.log('❌ Directory does not exist');
+      return res.json({
+        exists: false,
+        path: uploadsPath,
+        error: 'Directory does not exist'
+      });
+    }
+    
+    const files = fs.readdirSync(uploadsPath);
+    console.log('📂 Found files:', files.length);
+    
+    res.json({
+      exists: true,
+      path: uploadsPath,
+      files: files,
+      count: files.length,
+      sampleFiles: files.slice(0, 5)
+    });
+  } catch (error) {
+    console.error('❌ Error reading directory:', error);
+    res.status(500).json({
+      error: error.message,
+      path: uploadsPath
+    });
+  }
+});
+
+// Middleware de manejo de errores global con headers CORS
+app.use((error, req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  console.error('Error en servidor:', error);
+  
+  res.status(500).json({
+    success: false,
+    error: 'Error interno del servidor',
+    message: error.message || 'Ha ocurrido un error inesperado'
+  });
+});
+
+const PORT = process.env.PORT || 4001;
+app.listen(PORT, () => {
+  console.log(`Servidor backend escuchando en puerto ${PORT}`);
+});
