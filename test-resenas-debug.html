@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Reseñas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico del Sistema de Reseñas</h1>
+    
+    <div class="section">
+        <h2>Estado actual del localStorage</h2>
+        <button onclick="verificarLocalStorage()">🔍 Verificar localStorage</button>
+        <button onclick="limpiarLocalStorage()">🗑️ Limpiar localStorage</button>
+        <button onclick="agregarResenaPrueba()">➕ Agregar reseña de prueba</button>
+        <div id="localStorage-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Prueba de conectividad backend</h2>
+        <button onclick="probarBackend()">🌐 Probar conexión backend</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Log de eventos</h2>
+        <button onclick="limpiarLog()">🧹 Limpiar log</button>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        const RESENAS_STORAGE_KEY = 'verduleria_resenas_local';
+        const logElement = document.getElementById('log');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function limpiarLog() {
+            logElement.textContent = '';
+        }
+
+        function verificarLocalStorage() {
+            log('🔍 Verificando localStorage...');
+            try {
+                const stored = localStorage.getItem(RESENAS_STORAGE_KEY);
+                if (stored) {
+                    const resenas = JSON.parse(stored);
+                    log(`✅ Encontradas ${resenas.length} reseñas en localStorage`);
+                    document.getElementById('localStorage-result').innerHTML = `
+                        <div class="success">
+                            <strong>✅ localStorage activo</strong><br>
+                            Reseñas almacenadas: ${resenas.length}<br>
+                            <details>
+                                <summary>Ver detalles</summary>
+                                <pre>${JSON.stringify(resenas, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    log('⚠️ No hay reseñas en localStorage');
+                    document.getElementById('localStorage-result').innerHTML = `
+                        <div class="warning">
+                            <strong>⚠️ localStorage vacío</strong><br>
+                            No hay reseñas almacenadas localmente
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                log(`❌ Error accediendo localStorage: ${error.message}`);
+                document.getElementById('localStorage-result').innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error en localStorage</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function limpiarLocalStorage() {
+            log('🗑️ Limpiando localStorage...');
+            localStorage.removeItem(RESENAS_STORAGE_KEY);
+            log('✅ localStorage limpiado');
+            verificarLocalStorage();
+        }
+
+        function agregarResenaPrueba() {
+            log('➕ Agregando reseña de prueba...');
+            try {
+                const stored = localStorage.getItem(RESENAS_STORAGE_KEY);
+                const resenas = stored ? JSON.parse(stored) : [];
+                
+                const nuevaResena = {
+                    _id: `test_${Date.now()}`,
+                    usuario: 'test@verduleria.com',
+                    nombreUsuario: 'Usuario de Prueba',
+                    mensaje: 'Esta es una reseña de prueba para verificar el funcionamiento del sistema.',
+                    calificacion: 5,
+                    producto: 'Test Product',
+                    fecha: new Date().toISOString(),
+                    aprobada: false,
+                    visible: true
+                };
+                
+                resenas.push(nuevaResena);
+                localStorage.setItem(RESENAS_STORAGE_KEY, JSON.stringify(resenas));
+                
+                log(`✅ Reseña de prueba agregada. Total: ${resenas.length}`);
+                verificarLocalStorage();
+            } catch (error) {
+                log(`❌ Error agregando reseña de prueba: ${error.message}`);
+            }
+        }
+
+        async function probarBackend() {
+            log('🌐 Probando conectividad con backend...');
+            document.getElementById('backend-result').innerHTML = '<div>⏳ Probando conexión...</div>';
+            
+            try {
+                // Probar productos primero (sabemos que funciona)
+                const productosResponse = await fetch('https://verduleria-backend-m19n.onrender.com/api/productos');
+                if (productosResponse.ok) {
+                    log('✅ Backend respondiendo - endpoint productos OK');
+                    
+                    // Ahora probar reseñas
+                    const resenasResponse = await fetch('https://verduleria-backend-m19n.onrender.com/api/resenas');
+                    if (resenasResponse.ok) {
+                        const data = await resenasResponse.json();
+                        log(`✅ Endpoint reseñas OK - ${data.reseñas?.length || 0} reseñas`);
+                        document.getElementById('backend-result').innerHTML = `
+                            <div class="success">
+                                <strong>✅ Backend conectado</strong><br>
+                                Reseñas en backend: ${data.reseñas?.length || 0}<br>
+                                <details>
+                                    <summary>Ver respuesta</summary>
+                                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                                </details>
+                            </div>
+                        `;
+                    } else {
+                        log(`❌ Endpoint reseñas falló: ${resenasResponse.status}`);
+                        const errorText = await resenasResponse.text();
+                        document.getElementById('backend-result').innerHTML = `
+                            <div class="error">
+                                <strong>❌ Error en endpoint reseñas</strong><br>
+                                Status: ${resenasResponse.status}<br>
+                                Error: ${errorText}
+                            </div>
+                        `;
+                    }
+                } else {
+                    log(`❌ Backend no responde: ${productosResponse.status}`);
+                    document.getElementById('backend-result').innerHTML = `
+                        <div class="error">
+                            <strong>❌ Backend no disponible</strong><br>
+                            Status: ${productosResponse.status}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                log(`❌ Error de conectividad: ${error.message}`);
+                document.getElementById('backend-result').innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error de conexión</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Verificar localStorage al cargar la página
+        window.addEventListener('load', verificarLocalStorage);
+    </script>
+</body>
+</html>

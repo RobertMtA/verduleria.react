@@ -6,42 +6,32 @@ const useProducts = () => {
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
-    limit: 10,
+    limit: 100, // Cambiar a 100 para cargar todos los productos
     totalPages: 1,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchProducts = async (page = 1, limit = 10) => {
+  const fetchProducts = async (page = 1, limit = 100) => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Cargando productos con corsProxyService...');
-      
-      // Usar el servicio proxy temporal
       const data = await corsProxyService.getProductos();
-      
-      console.log('✅ Productos recibidos:', data);
       
       let productos = [];
       
       // Manejar diferentes formatos de respuesta
       if (data && data.success && data.productos && Array.isArray(data.productos)) {
-        // Formato: {success: true, productos: [...]}
         productos = data.productos;
       } else if (Array.isArray(data)) {
-        // Formato: array directo [...]
         productos = data;
       } else if (data && data.productos && Array.isArray(data.productos)) {
-        // Formato: {productos: [...]} sin success
         productos = data.productos;
       } else if (data && data.data && Array.isArray(data.data)) {
-        // Formato: {data: [...]}
         productos = data.data;
       } else {
-        console.warn('⚠️ Formato de respuesta no esperado, usando array vacío:', data);
-        productos = []; // No lanzar error, simplemente usar array vacío
+        productos = [];
       }
       
       // Asegurar que los productos tengan formato numérico correcto
@@ -49,7 +39,6 @@ const useProducts = () => {
         ...p,
         precio: Number(p.precio),
         stock: Number(p.stock),
-        // Mantener tanto _id como id para compatibilidad
         _id: p._id,
         id: p.id || p._id
       }));
@@ -63,11 +52,9 @@ const useProducts = () => {
         totalPages: Math.ceil((data.total || productos.length) / limit)
       }));
       
-      console.log(`✅ ${productosNumericos.length} productos cargados exitosamente`);
-      
     } catch (err) {
       setError(err.message || "Error de conexión");
-      console.error("❌ Error fetching products:", err);
+      console.error("Error cargando productos:", err);
     } finally {
       setLoading(false);
     }

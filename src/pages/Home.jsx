@@ -8,6 +8,7 @@ import EmptyState from '../components/common/EmptyState';
 import { useAuth } from "../context/AuthContext";
 import Reseñas from '../components/Reseñas';
 import FormularioReseña from '../components/FormularioReseña';
+import ImageWithFallback from '../components/common/ImageWithFallback';
 import './Home.css';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://verduleria-backend-m19n.onrender.com/api";
@@ -35,34 +36,26 @@ const Home = () => {
   const cargarOfertas = async () => {
     try {
       setOfertasLoading(true);
-      console.log('🔄 Cargando ofertas con corsProxyService...');
       
       // Importar dinámicamente el servicio proxy
       const corsProxyService = await import('../services/corsProxyService.js');
       const data = await corsProxyService.default.getOfertas(true); // activas_solo = true
       
-      console.log('✅ Respuesta de ofertas:', data);
-      
       if (data && data.success && data.ofertas && Array.isArray(data.ofertas)) {
         const ofertasLimitadas = data.ofertas.slice(0, 3); // Solo las primeras 3 ofertas
         setOfertas(ofertasLimitadas);
-        console.log(`✅ ${ofertasLimitadas.length} ofertas cargadas`);
       } else if (data && data.ofertas && Array.isArray(data.ofertas)) {
         // Formato sin success flag
         const ofertasLimitadas = data.ofertas.slice(0, 3);
         setOfertas(ofertasLimitadas);
-        console.log(`✅ ${ofertasLimitadas.length} ofertas cargadas (formato alternativo)`);
       } else if (Array.isArray(data)) {
         // Array directo
         const ofertasLimitadas = data.slice(0, 3);
         setOfertas(ofertasLimitadas);
-        console.log(`✅ ${ofertasLimitadas.length} ofertas cargadas (array directo)`);
       } else {
-        console.log('⚠️ No se encontraron ofertas en la respuesta:', data);
         setOfertas([]); // Establecer array vacío en lugar de mantener undefined
       }
     } catch (error) {
-      console.warn('⚠️ Error cargando ofertas, usando mock:', error.message);
       setOfertas([]); // Array vacío en caso de error
     } finally {
       setOfertasLoading(false);
@@ -134,7 +127,7 @@ const Home = () => {
           <div className="hero-content">
             <h1>Frescura Natural en Cada Pedido</h1>
             {/* Imagen del banner */}
-            <img
+            <ImageWithFallback
               src="/img-banner.jpg"
               alt="Banner de Verdulería"
               className="banner-image"
@@ -203,7 +196,7 @@ const Home = () => {
                   
                   <div className="oferta-imagen-container">
                     {oferta.imagen ? (
-                      <img
+                      <ImageWithFallback
                         src={oferta.imagen.startsWith('/') ? oferta.imagen : `/${oferta.imagen}`}
                         alt={oferta.nombre}
                         className="oferta-img"

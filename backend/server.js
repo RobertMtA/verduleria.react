@@ -2030,5 +2030,5 @@ app.use((error, req, res, next) => {
 
 const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
-  console.log(`Servidor backend escuchando en puerto ${PORT}`);
+  console.log(`🚀 Servidor backend v2.1 escuchando en puerto ${PORT} - Reseñas habilitadas`);
 });

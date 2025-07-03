@@ -14,24 +14,20 @@ const ResenasPage = () => {
   const cargarReseñas = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Cargando reseñas públicas con corsProxyService...');
       
       const data = await corsProxyService.getResenas(true); // publicas=true
       
-      console.log('📋 Respuesta de reseñas:', data);
-      
       if (data && (Array.isArray(data) || (data.success && data.reseñas))) {
         const reseñasArray = Array.isArray(data) ? data : (data.reseñas || []);
-        console.log(`✅ ${reseñasArray.length} reseñas públicas cargadas`);
-        setReseñas(reseñasArray);
+        // Filtrar solo las reseñas aprobadas para mostrar al público
+        const reseñasAprobadas = reseñasArray.filter(r => r.aprobada === true);
+        setReseñas(reseñasAprobadas);
         setError(null);
       } else {
-        console.log('⚠️ No hay reseñas públicas disponibles');
         setError('No hay reseñas disponibles en este momento');
         setReseñas([]);
       }
     } catch (error) {
-      console.error('❌ Error cargando reseñas:', error);
       setError('Error de conexión al cargar las reseñas');
       setReseñas([]);
     } finally {

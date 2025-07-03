@@ -16,27 +16,45 @@ const ImageWithFallback = ({
 }) => {
   const [currentSrc, setCurrentSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
+  const [fallbackAttempts, setFallbackAttempts] = useState(0);
 
   const handleError = () => {
-    if (!hasError) {
-      setHasError(true);
-      
-      // Intentar con GitHub si la imagen original falló
+    if (fallbackAttempts === 0) {
+      // Primer intento fallido - probar con GitHub
       if (src?.includes(BACKEND_URL)) {
         const githubUrl = src.replace(BACKEND_URL, GITHUB_FALLBACK);
         setCurrentSrc(githubUrl);
+        setFallbackAttempts(1);
         return;
       }
       
-      // Usar fallback personalizado si se proporcionó
-      if (fallbackSrc) {
-        setCurrentSrc(fallbackSrc);
+      // Si es una imagen relativa, construir URL de GitHub
+      if (src?.startsWith('/images/')) {
+        const githubUrl = `${GITHUB_FALLBACK}${src}`;
+        setCurrentSrc(githubUrl);
+        setFallbackAttempts(1);
         return;
       }
-      
-      // Imagen por defecto
-      setCurrentSrc('/default-product.svg');
     }
+    
+    if (fallbackAttempts === 1) {
+      // Si falla GitHub, intentar con imagen local
+      const localImagePath = `/images/default-product.svg`;
+      setCurrentSrc(localImagePath);
+      setFallbackAttempts(2);
+      return;
+    }
+    
+    if (fallbackAttempts === 2 && fallbackSrc) {
+      // Tercer intento - usar fallback personalizado
+      setCurrentSrc(fallbackSrc);
+      setFallbackAttempts(3);
+      return;
+    }
+    
+    // Último recurso - imagen por defecto del public
+    setCurrentSrc('/default-product.svg');
+    setHasError(true);
   };
 
   return (

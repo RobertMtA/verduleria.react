@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from "../context/CartContext.jsx";
 import useProducts from '../hooks/useProducts';
-import { getProductImageUrl, handleImageError } from '../utils/imageUtils';
+import { getProductImageUrl } from '../utils/imageUtils';
+import ImageWithFallback from '../components/common/ImageWithFallback';
+import ImageDiagnostic from '../components/common/ImageDiagnostic';
 import './Products.css';
 
 const Products = () => {
@@ -78,18 +80,11 @@ const Products = () => {
     .filter(p => p.activo)
     .filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Debug: verificar si hay IDs duplicados (se puede remover después)
+  // Debug: verificar si hay IDs duplicados
   const productIds = filteredProducts.map(p => p.id);
   const uniqueIds = [...new Set(productIds)];
   if (productIds.length !== uniqueIds.length) {
-    console.warn('⚠️ Productos con IDs duplicados detectados después de corrección del backend');
-    const duplicatedProducts = filteredProducts.filter((p, index, arr) => 
-      arr.findIndex(item => item.id === p.id) !== index
-    );
-    console.log('Productos duplicados:', duplicatedProducts);
-    console.log('Todos los productos filtrados:', filteredProducts);
-  } else {
-    console.log('✅ No se detectaron productos duplicados');
+    console.warn('⚠️ Productos con IDs duplicados detectados');
   }
 
   if (loading) {
@@ -116,6 +111,7 @@ const Products = () => {
     <div className="products-page">
       <div className="products-header">
         <h1>Nuestros Productos</h1>
+        
         <form
           className="products-search-form"
           onSubmit={e => e.preventDefault()}
@@ -150,10 +146,9 @@ const Products = () => {
               <div className='card' key={producto.id}>
                 <Link to={`/productos/${producto.id}`} className="product-link">
                   <div className="product-image-container">
-                    <img 
+                    <ImageWithFallback 
                       src={getProductImageUrl(producto)} 
-                      alt={producto.nombre} 
-                      onError={handleImageError}
+                      alt={producto.nombre}
                     />
                     {producto.stock === 0 && (
                       <div className="out-of-stock-badge">Agotado</div>

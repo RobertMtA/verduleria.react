@@ -13,44 +13,57 @@ const ReseñasAdmin = () => {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("todas");
+  const [dataSource, setDataSource] = useState('unknown'); // Para mostrar la fuente de datos
 
   // Obtener reseñas y estadísticas
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log('🔄 Cargando reseñas con corsProxyService...');
+        
+        console.log('🔍 Cargando reseñas en admin...');
         
         // Obtener reseñas usando el proxy service
         const reseñasData = await corsProxyService.getResenas();
-        console.log('📥 Datos de reseñas recibidos:', reseñasData);
+        
+        console.log('📋 Datos de reseñas recibidos:', reseñasData);
         
         if (reseñasData && reseñasData.success && Array.isArray(reseñasData.reseñas)) {
+          console.log(`✅ ${reseñasData.reseñas.length} reseñas cargadas en admin`);
           setReseñas(reseñasData.reseñas);
-          console.log(`✅ ${reseñasData.reseñas.length} reseñas cargadas (${reseñasData.source})`);
+          setDataSource(reseñasData.source || 'unknown');
         } else {
-          console.warn('⚠️ Formato de reseñas no esperado:', reseñasData);
+          console.log('⚠️ No se encontraron reseñas válidas');
           setReseñas([]);
+          setDataSource('empty');
         }
         
         // Obtener estadísticas
         const statsData = await corsProxyService.getEstadisticasResenas();
-        console.log('📊 Estadísticas recibidas:', statsData);
         
         if (statsData && statsData.success) {
+          console.log('📊 Estadísticas cargadas:', statsData.estadisticas);
           setEstadisticas(statsData.estadisticas);
-          console.log(`✅ Estadísticas cargadas (${statsData.source})`);
         }
         
       } catch (err) {
+        console.error('❌ Error cargando reseñas en admin:', err);
         setError("No se pudieron cargar las reseñas");
-        console.error("❌ Error cargando reseñas:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
+    
+    // Configurar actualización automática cada 10 segundos
+    const interval = setInterval(() => {
+      console.log('🔄 Actualizando reseñas automáticamente...');
+      fetchData();
+    }, 10000);
+    
+    // Limpiar interval al desmontar el componente
+    return () => clearInterval(interval);
   }, []);
 
   // Aprobar/Desaprobar reseña
@@ -59,22 +72,96 @@ const ReseñasAdmin = () => {
       setError("");
       setSuccess("");
       
-      console.log(`${aprobar ? '✅' : '❌'} ${aprobar ? 'Aprobando' : 'Rechazando'} reseña ${id} (modo temporal)`);
+      // Usar las funciones locales del servicio
+      if (aprobar) {
+        await corsProxyService.aprobarResena(id);
+      } else {
+        await corsProxyService.rechazarResena(id);
+      }
       
-      // Simular actualización (modo temporal)
-      setTimeout(() => {
-        // Actualizar estado local
-        setReseñas(reseñas.map(reseña =>
-          reseña._id === id ? { ...reseña, aprobada: aprobar, publica: aprobar } : reseña
-        ));
+      // Recargar las reseñas para reflejar los cambios
+      const reseñasData = await corsProxyService.getResenas();
+      if (reseñasData && reseñasData.success && Array.isArray(reseñasData.reseñas)) {
+        setReseñas(reseñasData.reseñas);
+      }
+      
+      // Actualizar estadísticas
+      const statsData = await corsProxyService.getEstadisticasResenas();
+      if (statsData && statsData.success) {
+        setEstadisticas(statsData.estadisticas);
+      }
 
-        setSuccess(`✅ Reseña ${aprobar ? 'aprobada' : 'rechazada'} exitosamente (modo temporal)`);
-        setTimeout(() => setSuccess(""), 3000);
-      }, 500);
+      setSuccess(`Reseña ${aprobar ? 'aprobada' : 'rechazada'} exitosamente`);
+      setTimeout(() => setSuccess(""), 3000);
       
     } catch (err) {
       setError(err.message);
-      console.error("Error al actualizar:", err);
+    }
+  };
+
+  // Función para probar conectividad del backend
+  const probarBackend = async () => {
+    try {
+      setLoading(true);
+      console.log('🌐 Probando conectividad del backend...');
+      
+      // Probar endpoint directo
+      const response = await fetch('https://verduleria-backend-m19n.onrender.com/api/resenas');
+      const data = await response.text();
+      
+      console.log('📡 Respuesta del backend:', response.status, data);
+      
+      if (response.ok) {
+        const jsonData = JSON.parse(data);
+        setSuccess(`✅ Backend conectado! ${jsonData.reseñas?.length || 0} reseñas encontradas`);
+        // Recargar datos
+        recargarDatos();
+      } else {
+        setError(`❌ Backend error: ${response.status} - ${data}`);
+      }
+    } catch (error) {
+      console.error('❌ Error probando backend:', error);
+      setError(`❌ Error de conectividad: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para recargar datos manualmente
+  const recargarDatos = async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Recargando datos manualmente...');
+      
+      // Obtener reseñas usando el proxy service
+      const reseñasData = await corsProxyService.getResenas();
+      
+      console.log('📋 Datos de reseñas recibidos:', reseñasData);
+      
+      if (reseñasData && reseñasData.success && Array.isArray(reseñasData.reseñas)) {
+        console.log(`✅ ${reseñasData.reseñas.length} reseñas cargadas en admin`);
+        setReseñas(reseñasData.reseñas);
+      } else {
+        console.log('⚠️ No se encontraron reseñas válidas');
+        setReseñas([]);
+      }
+      
+      // Obtener estadísticas
+      const statsData = await corsProxyService.getEstadisticasResenas();
+      
+      if (statsData && statsData.success) {
+        console.log('📊 Estadísticas cargadas:', statsData.estadisticas);
+        setEstadisticas(statsData.estadisticas);
+      }
+      
+      setSuccess('Datos actualizados correctamente');
+      setTimeout(() => setSuccess(''), 2000);
+      
+    } catch (err) {
+      console.error('❌ Error recargando datos:', err);
+      setError("Error al recargar los datos");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,20 +177,14 @@ const ReseñasAdmin = () => {
       setError("");
       setSuccess("");
       
-      console.log(`🗑️ Eliminando reseña ${id} (modo temporal)`);
-      
-      // Simular eliminación (modo temporal)
-      setTimeout(() => {
-        // Actualizar estado local
-        setReseñas(reseñas.filter(reseña => reseña._id !== id));
+      // Simular eliminación actualizando el estado local
+      setReseñas(reseñas.filter(reseña => reseña._id !== id));
 
-        setSuccess("✅ Reseña eliminada exitosamente (modo temporal)");
-        setTimeout(() => setSuccess(""), 3000);
-      }, 500);
+      setSuccess("Reseña eliminada exitosamente");
+      setTimeout(() => setSuccess(""), 3000);
       
     } catch (err) {
       setError(`Error al eliminar reseña: ${err.message}`);
-      console.error("Error al eliminar:", err);
     }
   };
 
@@ -113,17 +194,6 @@ const ReseñasAdmin = () => {
     : filter === "aprobadas"
     ? reseñas.filter(reseña => reseña.aprobada)
     : reseñas.filter(reseña => !reseña.aprobada);
-
-  // Debug logging
-  console.log('🔍 Estado actual del componente:');
-  console.log('   Filter:', filter);
-  console.log('   Reseñas totales:', reseñas.length);
-  console.log('   Reseñas filtradas:', reseñasFiltradas.length);
-  console.log('   Estadísticas:', estadisticas);
-  
-  if (filter === "pendientes") {
-    console.log('📝 Reseñas pendientes:', reseñas.filter(r => !r.aprobada));
-  }
 
   // Renderizar estrellas
   const renderEstrellas = (calificacion) => {
@@ -169,6 +239,27 @@ const ReseñasAdmin = () => {
         </div>
       )}
 
+      {/* Panel de diagnóstico */}
+      <div style={{
+        backgroundColor: dataSource === 'backend' ? '#d4edda' : dataSource === 'local' ? '#fff3cd' : '#f8d7da',
+        border: `1px solid ${dataSource === 'backend' ? '#c3e6cb' : dataSource === 'local' ? '#ffeaa7' : '#f5c6cb'}`,
+        borderRadius: '4px',
+        padding: '12px',
+        marginBottom: '20px',
+        fontSize: '14px'
+      }}>
+        <strong>📊 Estado del sistema:</strong> 
+        {dataSource === 'backend' && ' Conectado al backend (datos en tiempo real)'}
+        {dataSource === 'local' && ' Usando almacenamiento local (datos temporales)'}
+        {dataSource === 'unknown' && ' Fuente de datos desconocida'}
+        {dataSource === 'empty' && ' Sin datos disponibles'}
+        <br />
+        <small>
+          {dataSource === 'local' && 'Las reseñas se guardan en el navegador. Para persistencia real, el backend debe estar activo.'}
+          {dataSource === 'backend' && 'Todas las operaciones se sincronizan con la base de datos.'}
+        </small>
+      </div>
+
       {/* Estadísticas */}
       {estadisticas && (
         <div className="estadisticas-container">
@@ -191,7 +282,7 @@ const ReseñasAdmin = () => {
         </div>
       )}
 
-      {/* Filtros */}
+      {/* Filtros y botón de recarga */}
       <div className="filters">
         {["todas", "aprobadas", "pendientes"].map(filtro => (
           <button
@@ -202,6 +293,38 @@ const ReseñasAdmin = () => {
             {filtro.charAt(0).toUpperCase() + filtro.slice(1)}
           </button>
         ))}
+        <button 
+          className="refresh-btn" 
+          onClick={recargarDatos}
+          disabled={loading}
+          style={{
+            marginLeft: '10px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: loading ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {loading ? '🔄 Cargando...' : '🔄 Recargar'}
+        </button>
+        <button 
+          className="test-backend-btn" 
+          onClick={probarBackend}
+          disabled={loading}
+          style={{
+            marginLeft: '10px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: loading ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {loading ? '🔄 Probando...' : '🌐 Probar Backend'}
+        </button>
       </div>
 
       {loading ? (

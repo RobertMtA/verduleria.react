@@ -45,31 +45,24 @@ const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
 
     try {
       const dataToSend = {
-        ...formData,
-        usuario: {
-          nombre: user.nombre || user.name || user.email || 'Usuario',
-          email: user.email || user.correo || 'usuario@verduleria.com'
-        }
+        usuario: user.email || user.correo || 'usuario@verduleria.com',
+        nombreUsuario: user.nombre || user.name || user.email || 'Usuario',
+        mensaje: formData.comentario,
+        calificacion: parseInt(formData.calificacion),
+        producto: formData.producto || 'Producto general'
       };
       
-      console.log('👤 Usuario actual:', user);
       console.log('📤 Enviando reseña:', dataToSend);
       
-      const data = await corsProxyService.fetchWithProxy('/resenas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(dataToSend)
-      });
-
-      console.log('📥 Datos de respuesta:', data);
+      const data = await corsProxyService.enviarResenaLocal(dataToSend);
+      
+      console.log('📥 Respuesta del envío:', data);
 
       if (data.success) {
+        console.log('✅ Reseña enviada exitosamente');
         setMessage({
           type: 'success',
-          text: '¡Reseña enviada! Será revisada por nuestro equipo antes de publicarse.'
+          text: data.message || '¡Reseña enviada! Será revisada por nuestro equipo antes de publicarse.'
         });
         
         // Limpiar formulario
@@ -84,13 +77,14 @@ const FormularioReseña = ({ onReseñaEnviada = null, className = "" }) => {
           onReseñaEnviada();
         }
       } else {
+        console.log('❌ Error en el envío:', data);
         setMessage({
           type: 'error',
           text: data.message || 'Error al enviar la reseña'
         });
       }
     } catch (error) {
-      console.error('Error enviando reseña:', error);
+      console.error('❌ Error enviando reseña:', error);
       setMessage({
         type: 'error',
         text: 'Error de conexión. Inténtalo de nuevo.'
