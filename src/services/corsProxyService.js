@@ -240,6 +240,27 @@ function getMockData(endpoint) {
       source: 'mock'
     };
   }
+
+  if (endpoint.includes('/pedidos')) {
+    // Si es pedidos por usuario específico, usar proxy para obtener datos reales
+    if (endpoint.includes('/usuario/')) {
+      // Este endpoint necesita usar el proxy ya que el backend tiene datos reales
+      // Retornar un formato que indique que debe usar el proxy
+      return {
+        success: false,
+        useProxy: true,
+        message: 'Usar proxy para obtener pedidos reales'
+      };
+    }
+    
+    return {
+      success: true,
+      pedidos: [],
+      total: 0,
+      source: 'mock',
+      message: 'No hay pedidos disponibles'
+    };
+  }
   
   // Para otros endpoints, retornar estructura básica
   return {
@@ -270,6 +291,11 @@ export async function getEstadisticasResenas() {
   return await fetchWithProxy('/resenas/estadisticas');
 }
 
+export async function getPedidosUsuario(emailUsuario) {
+  const endpoint = `/pedidos/usuario/${encodeURIComponent(emailUsuario)}`;
+  return await fetchWithProxy(endpoint);
+}
+
 export async function aprobarResena(id) {
   return await fetchWithProxy(`/resenas/${id}/aprobar`, { method: 'PUT' });
 }
@@ -286,6 +312,7 @@ export default {
   getOfertas,
   getResenas,
   getEstadisticasResenas,
+  getPedidosUsuario,
   aprobarResena,
   rechazarResena,
   fetchWithProxy

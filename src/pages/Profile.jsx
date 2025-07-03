@@ -928,6 +928,58 @@ const Profile = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://verduleria-backend-m19n.onrender.com/api';
 
+  const cargarPedidosUsuario = async (emailUsuario) => {
+    try {
+      console.log('🔄 Cargando pedidos del usuario con corsProxyService...');
+      
+      // Como el backend no tiene endpoint específico para pedidos por usuario,
+      // obtenemos todos los pedidos y filtramos por email
+      const response = await corsProxyService.fetchWithProxy('/pedidos');
+      
+      if (response && Array.isArray(response)) {
+        // Filtrar pedidos del usuario actual
+        const pedidosUsuario = response.filter(pedido => 
+          pedido.usuario && 
+          pedido.usuario.email && 
+          pedido.usuario.email.toLowerCase() === emailUsuario.toLowerCase()
+        );
+        
+        console.log(`✅ ${pedidosUsuario.length} pedidos encontrados para ${emailUsuario} (de ${response.length} total)`);
+        
+        setProfileData(prevData => ({
+          ...prevData,
+          orders: pedidosUsuario
+        }));
+      } else if (response && response.success && Array.isArray(response.pedidos)) {
+        // Si viene en formato {success: true, pedidos: [...]}
+        const pedidosUsuario = response.pedidos.filter(pedido => 
+          pedido.usuario && 
+          pedido.usuario.email && 
+          pedido.usuario.email.toLowerCase() === emailUsuario.toLowerCase()
+        );
+        
+        console.log(`✅ ${pedidosUsuario.length} pedidos encontrados para ${emailUsuario} (${response.source})`);
+        
+        setProfileData(prevData => ({
+          ...prevData,
+          orders: pedidosUsuario
+        }));
+      } else {
+        console.log('⚠️ No se encontraron pedidos o formato inesperado:', response);
+        setProfileData(prevData => ({
+          ...prevData,
+          orders: []
+        }));
+      }
+    } catch (error) {
+      console.warn('⚠️ Error cargando pedidos, usando array vacío:', error.message);
+      setProfileData(prevData => ({
+        ...prevData,
+        orders: []
+      }));
+    }
+  };
+
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -964,10 +1016,13 @@ const Profile = () => {
           direccion: mockProfileData.data.direccion,
           role: mockProfileData.data.role
         },
-        orders: Array.isArray(mockProfileData.pedidos) ? mockProfileData.pedidos : []
+        orders: [] // Se cargarán por separado
       });
 
       console.log('✅ Perfil cargado con datos temporales');
+      
+      // Cargar pedidos del usuario
+      await cargarPedidosUsuario(userEmail);
 
     } catch (err) {
       setError(err.message);
