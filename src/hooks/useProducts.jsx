@@ -47,9 +47,11 @@ const useProducts = () => {
       // Asegurar que los productos tengan formato numérico correcto
       const productosNumericos = productos.map((p) => ({
         ...p,
-        id: p.id || p._id, // Asegurar que siempre haya un ID
         precio: Number(p.precio),
         stock: Number(p.stock),
+        // Mantener tanto _id como id para compatibilidad
+        _id: p._id,
+        id: p.id || p._id
       }));
 
       setProducts(productosNumericos);

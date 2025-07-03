@@ -178,42 +178,49 @@ const ProductsAdmin = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {products
-                    .map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>{product.id}</TableCell>
-                        <TableCell>{product.nombre}</TableCell>
-                        <TableCell>{product.categoria || "Sin categoría"}</TableCell>
-                        <TableCell>${Number(product.precio).toFixed(2)}</TableCell>
-                        <TableCell>{product.stock}</TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={product.activo ? "Activo" : "Inactivo"} 
-                            color={product.activo ? "success" : "error"} 
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <IconButton 
-                            color="primary" 
-                            onClick={() => navigate(`/productos/${product.id}`)}
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
-                          <IconButton 
-                            color="secondary" 
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton 
-                            color="error" 
-                            onClick={() => handleDeleteProduct(product.id)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                  {(() => {
+                    console.log('🐛 DEBUG: Productos para renderizar:', products);
+                    console.log('🐛 DEBUG: Número de productos:', products.length);
+                    return products
+                      .map((product, index) => {
+                        console.log(`🐛 DEBUG: Producto ${index}:`, product);
+                        return (
+                          <TableRow key={product._id || product.id}>
+                            <TableCell>{product._id || product.id}</TableCell>
+                            <TableCell>{product.nombre}</TableCell>
+                            <TableCell>{product.categoria || "Sin categoría"}</TableCell>
+                            <TableCell>${Number(product.precio).toFixed(2)}</TableCell>
+                            <TableCell>{product.stock}</TableCell>
+                            <TableCell>
+                              <Chip 
+                                label={product.activo ? "Activo" : "Inactivo"} 
+                                color={product.activo ? "success" : "error"} 
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <IconButton 
+                                color="primary" 
+                                onClick={() => navigate(`/productos/${product._id || product.id}`)}
+                              >
+                                <VisibilityIcon />
+                              </IconButton>
+                              <IconButton 
+                                color="secondary" 
+                                onClick={() => handleEditProduct(product)}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton 
+                                color="error" 
+                                onClick={() => handleDeleteProduct(product._id || product.id)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      });
+                  })()}
                 </TableBody>
               </Table>
             </TableContainer>
