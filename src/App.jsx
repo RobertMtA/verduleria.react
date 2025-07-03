@@ -37,7 +37,8 @@ const PublicPages = {
   ResetPassword: lazy(() => import('./pages/ResetPassword')),
   ConfirmacionPedido: lazy(() => import('./pages/ConfirmacionPedido')),
   HistorialPedidos: lazy(() => import('./pages/HistorialPedidos')),
-  SeguimientoEntrega: lazy(() => import('./pages/SeguimientoEntrega'))
+  SeguimientoEntrega: lazy(() => import('./pages/SeguimientoEntrega')),
+  Status: lazy(() => import('./pages/Status'))
 };
 
 // Páginas protegidas
@@ -139,6 +140,7 @@ function App() {
               <Route path="ofertas" element={<PublicPages.Ofertas />} />
               <Route path="resenas" element={<PublicPages.Resenas />} />
               <Route path="/about" element={<PublicPages.About />} />
+              <Route path="status" element={<PublicPages.Status />} />
               <Route path="confirmacion-pedido" element={<PublicPages.ConfirmacionPedido />} />
               <Route path="/forgot-password" element={<PublicPages.ForgotPassword />} />
               <Route path="/reset-password/:token" element={<PublicPages.ResetPassword />} />
