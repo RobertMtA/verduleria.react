@@ -174,6 +174,7 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
+              id="product-name"
               label="Nombre"
               name="nombre"
               value={formData.nombre}
@@ -184,8 +185,10 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
           </Grid>
           <Grid item xs={12} md={6}>
             <FormControl fullWidth margin="normal">
-              <InputLabel>Categoría</InputLabel>
+              <InputLabel id="category-label">Categoría</InputLabel>
               <Select
+                labelId="category-label"
+                id="product-category"
                 name="categoria"
                 value={formData.categoria}
                 onChange={handleChange}
@@ -201,6 +204,7 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
+              id="product-price"
               label="Precio"
               name="precio"
               type="number"
@@ -214,6 +218,7 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
+              id="product-stock"
               label="Stock"
               name="stock"
               type="number"
@@ -227,6 +232,7 @@ const ProductFormDialog = ({ open, onClose, product, onSave, loading }) => {
           <Grid item xs={12}>
             <TextField
               fullWidth
+              id="product-description"
               label="Descripción"
               name="descripcion"
               value={formData.descripcion}
