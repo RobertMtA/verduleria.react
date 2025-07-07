@@ -7,7 +7,8 @@
 
 ## 🌟 **Demo en Vivo**
 
-- **🌐 Frontend:** [https://verduleria-online-frontend.netlify.app](https://verduleria-online-frontend.netlify.app)
+- **🌐 Frontend:** [https://verduleria-react.vercel.app](https://verduleria-react.vercel.app)
+- **⚙️ Backend API:** [https://verduleria-backend-m19n.onrender.com](https://verduleria-backend-m19n.onrender.com)
 - **🔧 API Backend:** [https://verduleria-backend-m19n.onrender.com](https://verduleria-backend-m19n.onrender.com)
 
 ## 📋 **Descripción**
